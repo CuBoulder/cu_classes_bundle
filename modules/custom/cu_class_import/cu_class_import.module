@@ -1,0 +1,236 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function cu_class_import_menu() {
+  $items['class/import'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('cu_class_import_form'), 
+    'access callback' => 'cu_class_import_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['class/import/process'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'cu_class_import_process',
+    'access callback' => 'cu_class_import_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for ??
+ */
+function cu_class_import_access() {
+  // switch to a custom permission?
+  return TRUE;
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form() {
+  // @TODO: Save imports a something... ctool exportable?
+  
+  $form['subject'] = array(
+    '#type' => 'textfield', //you can find a list of available types in the form api
+    '#title' => 'Subject',
+    '#size' => 10,
+    '#maxlength' => 10,
+  );
+  
+  $form['course_id'] = array(
+    '#type' => 'textfield', //you can find a list of available types in the form api
+    '#title' => 'Course ID',
+    '#size' => 10,
+    '#maxlength' => 10,
+  );
+  
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+  
+  return $form;
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form_submit($form, &$form_state) {
+  //dsm($form);
+  $term = '2161';
+  $institution = 'CUBLD';
+  
+  $subject = $form['subject']['#value'];
+  $course_id = $form['course_id']['#value'];
+  
+  // ADD FORM
+  // CREATE CLASS ENTITIES
+  // LOOP BACK THROUGH FOR DETAILS
+  
+  //$file = drupal_get_path('module', 'cu_class_import') . '/example.xml';
+  //dsm($file);
+  //if (file_exists($file)) {
+  //  $xml = simplexml_load_file($file);
+  //} else {
+  //  return('Failed to open example.xml.');
+  //}
+  
+  if (!$subject) {
+    // only used for testing
+    $subject = 'HIST';
+    //$course_id = '108161';
+  }
+  
+  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  //dsm($response);
+  $xml = simplexml_load_string($response);
+    
+  if (is_object($xml)) {
+    
+    //ser namspce only exists in detail
+    if ($course_id) {
+      $namespaces = $xml->getNameSpaces(true);
+      $ser = $xml->children($namespaces['ser']);
+      //dsm('ser');
+      //dsm($ser);
+      $course_id = (string) $ser->SEARCH_RESULT->SUBJECTS->SUBJECT->CRSE_ID;
+      //dsm($course_id);
+    }
+    else {
+      //dsm(xml2array_parse($xml)); 
+      
+      foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
+        //dsm($subject); 
+        $course_id = (string) $subject->CRSE_ID;
+        $catalog_number = (string) $subject->CATALOG_NBR;
+        //$subject->ACAD_CAREER;
+        $title = (string) $subject->COURSE_TITLE_LONG;
+        //$subject->CRSE_OFFER_NBR;
+        
+        $output .= $title . '<br />';
+        
+        // create entity with entity_save
+  
+        $values = array(
+          'crse_id' => (string) $subject->CRSE_ID,
+          'title' => (string) $subject->COURSE_TITLE_LONG,
+          'type' => 'class',
+        );
+        
+        $values['field_class_course_title_long']['value'] = $title;
+        
+        //array('type' => 'class')
+        dsm($values);
+        drupal_set_message('Created local copy of ' . $title);
+        //$class = entity_create('class', $values);
+        $class = entity_create('cu_class', $values);
+        dsm($class);
+        // field_class_course_title_long
+        
+        // field_class_subject
+        // field_class_institution
+        // field_class_strm
+        // field_class_class_section
+        // field_class_ssr_component
+        // field_class_enrl_cap
+        // field_class_enrl_tot
+        // field_class_wait_tot 
+        // field_class_enrl_stat 
+        // field_class_crse_attr
+        // field_class_crse_attr_value
+        // field_class_meeting_time_start
+        // field_class_meeting_time_end
+        // field_class_end_dt
+        // field_class_start_dt
+        
+        // field_class_scc_latitude
+        // field_class_scc_longitude
+        
+        // field_class_ssr_mtg_sched_long 
+        // field_class_ssr_instr_long
+        
+        // field_class_last_updated
+        // 
+        entity_save('cu_class', $class);
+        
+      }
+    }
+  }
+  
+
+  
+  return $ouput;
+}
+
+/**
+ * Setup the cURL, run it, and write the result to a _latest file.
+ * If there is an error it will be logged to the normal php error log.
+ */
+function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
+  
+  //
+  if (!$course_id) {
+    $type = 'mobile';
+  } 
+  else {
+    $type = 'cu_detail';
+  }
+  // Setup our cURL parameters
+  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=' . $type . '&languageCd=en';
+  //dsm($request_path);
+  // Got credentials from Matthew Arveson at CU-SIS
+  $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
+  $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
+  $request_auth_string = $request_user . ':' . $request_pass;
+ 
+  // Setup the cURL
+  $curl = curl_init();
+  // Empty out the error message.
+  $error_message = NULL;
+
+  // Set path
+  curl_setopt($curl, CURLOPT_URL, $request_path);
+  // Use a POST rather than a GET
+  curl_setopt($curl, CURLOPT_POST, true);
+  // This allows us to access the endpoint without verifying the SSL cert.
+  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+  // Use Basic Auth
+  curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+  curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+  // Additional data that the API takes
+  $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><CRSE_ID>' . $course_id .'</CRSE_ID><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+  //dsm($curl_request_body);
+  //INSTRUCTION_MODE OL
+  curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$curl_response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+  // Close the curl to free resources
+  curl_close($curl);
+  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+}
+
+function xml2array_parse($xml){ 
+     foreach ($xml->children() as $parent => $child){ 
+         $return["$parent"] = xml2array_parse($child)?xml2array_parse($child):"$child"; 
+     } 
+     return $return; 
+}
+
+// cron

@@ -1,0 +1,257 @@
+<?php
+/**
+ * @file
+ * Code for the CU Block Layout feature.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function cu_class_entity_info() {
+  $info = array();
+
+  $info['cu_class'] = array(
+    'label' => t('Class'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'cu_class',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'class_id',
+      'title' => 'title',
+      'bundle' => 'type',
+    ),
+    'module' => 'cu_class',
+    // Attach bundles - i.e. alternative configurations of fields associated with a main entity.
+    'bundles' => array(
+      'class' => array(
+        'label' => 'Class',
+         // Information below is used by the Field UI - they "attach" themselves here and lets us
+         // do the standard field management that all the core entities enjoy.
+         'admin' => array(
+           'path' => 'admin/structure/class/manage',
+            'access arguments' => array('administer class content'),
+          ),
+        ),
+      ),
+      'uri callback' => 'entity_class_uri',
+      'load hook' => 'cu_class_load',
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Default'),
+          'custom settings' => FALSE,
+        ),
+      ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function cu_class_flush_caches() {
+  return array('cache_class');
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function cu_class_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "context" && $api == "context") {
+    return array("version" => "3");
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function cu_class_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function cu_class_menu() {
+  // Edit layout
+  $items['class/add'] = array(
+    'title' => 'Add Class',
+    'page callback' => 'cu_class_add',
+    'access callback' => 'cu_class_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+  
+  $class_uri = 'class/%cu_class';
+  $class_uri_argument_position = 1;
+
+  $items[$class_uri] = array(
+    'title callback' => 'entity_label',
+    'title arguments' => array('cu_class', $class_uri_argument_position),
+    'page callback' => 'cu_class_view',
+    'page arguments' => array($class_uri_argument_position),
+    'access callback' => 'cu_class_access',
+    'file' => 'cu_class.pages.inc',
+  );
+
+  $items[$class_uri . '/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+
+  // Layout settings
+  $items['admin/config/content/class'] = array(
+    'title' => 'Classes Import Settings',
+    'description' => 'Configure Class settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_settings_form'),
+    'access arguments' => array('administer classes'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'cu_class.admin.inc',
+  );
+  
+   // This provides a place for Field API to hang its own
+  // interface and has to be the same as what was defined
+  // in airing_entity_info() above.
+  $items['admin/structure/class/manage'] = array(
+    'title' => 'Class',
+    'description' => 'Manage Class Entity Structure',
+    'page callback' => 'cu_class_admin_page',
+    'access arguments' => array('administer class content'),
+    'weight' => -50,
+  );  
+
+  return $items;
+}
+
+/**
+ * Access callback for ???
+ */
+function cu_class_access() {
+  // switch to a custom permission?
+  return TRUE;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function cu_class_permission() {
+  return array(
+    'administer class content' => array(
+      'title' => 'Administer Class Content',
+      'description' => 'Configure import settings',
+    ),
+    'import classes' => array(
+      'title' => 'Import Class Content',
+      'description' => 'Allows user to find a specific class or group of classes to import',
+    ),
+    'override class fields' => array(
+      'title' => 'Override Class Fields',
+      'description' => 'Modify fields added to Class entity',
+    ),
+    'view unpublished classes' => array(
+      'title' => 'View Unpublished Class Content',
+      'description' => '',
+    ),
+  );
+}
+
+
+
+/**
+ * Implements hook_entity_view().
+ */
+function cu_class_entity_view($entity, $type, $view_mode) {
+  if ($type == 'cu_class') {
+    // alter it here
+  }
+}
+
+
+/**
+ * Creates an class entity for us - simply intializing the main variables and
+ * sending us to a form to add in the rest.
+ */
+function cu_class_add() {
+
+  $class = entity_create('cu_class', array('type' => 'class'));
+
+  return drupal_get_form('cu_class_form', $class);
+}
+
+/**
+ * Class Form.
+ */
+function cu_class_form($form, &$form_state, $class) {
+  
+  $form_state['class'] = $class;
+
+  field_attach_form('cu_class', $class, $form, $form_state);
+
+  $submit = array();
+  if (!empty($form['#submit'])) {
+    $submit += $form['#submit'];
+  }
+
+  $form['actions'] = array(
+    '#weight' => 100,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save class'),
+    '#submit' => $submit + array('cu_class_form_submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Class submit handler.
+ */
+function cu_class_form_submit($form, &$form_state) {
+  $class = $form_state['class'];
+
+  entity_form_submit_build_entity('cu_class', $class, $form, $form_state);
+
+  entity_save('cu_class', $class);
+  
+  $class_uri = entity_uri('cu_class', $class);
+
+  $form_state['redirect'] = $class_uri['path'];
+
+  drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $airing))));
+}
+
+/**
+ * Just provide some airing info for the entity administration page.
+ * This can be expanded to add more information / a list of all created entites, etc.
+ */
+function cu_class_admin_page() {
+  //$output = 'Welcome to the administration page for your Airing Entities.<br/>';
+  //$output .= '<ul class="action-links"><li><a href="/airing/add">Add Airing</a></li></ul>';
+  //return $output;
+  
+  // Not sure why we'd need an admin landing page, so I'm redirecting to field
+  
+  drupal_goto('admin/structure/class/manage/fields');
+}
+
+/**
+ * Load a airing.
+ */
+function cu_class_load($class_id, $reset = FALSE) {
+  $classes = cu_class_load_multiple(array($class_id), array(), $reset);
+  return reset($classes);
+}
+
+/**
+ * Load multiple airings based on certain conditions.
+ */
+function cu_class_load_multiple($class_ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('cu_class', $class_ids, $conditions, $reset);
+}

@@ -1,0 +1,500 @@
+<?php
+/**
+ * @file
+ * cu_class_fields.features.field_base.inc
+ */
+
+/**
+ * Implements hook_field_default_field_bases().
+ */
+function cu_class_fields_field_default_field_bases() {
+  $field_bases = array();
+
+  // Exported field_base: 'field_class_catalog_nbr'.
+  $field_bases['field_class_catalog_nbr'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_catalog_nbr',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_class_nbr'.
+  $field_bases['field_class_class_nbr'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_class_nbr',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_class_section'.
+  $field_bases['field_class_class_section'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_class_section',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_course_title_long'.
+  $field_bases['field_class_course_title_long'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_course_title_long',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_crse_attr'.
+  $field_bases['field_class_crse_attr'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_crse_attr',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_crse_attr_value'.
+  $field_bases['field_class_crse_attr_value'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_crse_attr_value',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_crse_id'.
+  $field_bases['field_class_crse_id'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_crse_id',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_end_dt'.
+  $field_bases['field_class_end_dt'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_end_dt',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'date',
+    'settings' => array(
+      'cache_count' => 4,
+      'cache_enabled' => 0,
+      'granularity' => array(
+        'day' => 'day',
+        'hour' => 0,
+        'minute' => 0,
+        'month' => 'month',
+        'second' => 0,
+        'year' => 'year',
+      ),
+      'timezone_db' => '',
+      'todate' => '',
+      'tz_handling' => 'none',
+    ),
+    'translatable' => 0,
+    'type' => 'datetime',
+  );
+
+  // Exported field_base: 'field_class_enrl_cap'.
+  $field_bases['field_class_enrl_cap'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_enrl_cap',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_enrl_stat'.
+  $field_bases['field_class_enrl_stat'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_enrl_stat',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_enrl_tot'.
+  $field_bases['field_class_enrl_tot'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_enrl_tot',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_institution'.
+  $field_bases['field_class_institution'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_institution',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_last_updated'.
+  $field_bases['field_class_last_updated'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_last_updated',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'date',
+    'settings' => array(
+      'cache_count' => 4,
+      'cache_enabled' => 0,
+      'granularity' => array(
+        'day' => 'day',
+        'hour' => 'hour',
+        'minute' => 'minute',
+        'month' => 'month',
+        'second' => 'second',
+        'year' => 'year',
+      ),
+      'timezone_db' => 'UTC',
+      'todate' => '',
+      'tz_handling' => 'site',
+    ),
+    'translatable' => 0,
+    'type' => 'datetime',
+  );
+
+  // Exported field_base: 'field_class_meeting_time_end'.
+  $field_bases['field_class_meeting_time_end'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_meeting_time_end',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_meeting_time_start'.
+  $field_bases['field_class_meeting_time_start'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_meeting_time_start',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_scc_latitude'.
+  $field_bases['field_class_scc_latitude'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_scc_latitude',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_scc_longitude'.
+  $field_bases['field_class_scc_longitude'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_scc_longitude',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_ssr_component'.
+  $field_bases['field_class_ssr_component'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_ssr_component',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_ssr_instr_long'.
+  $field_bases['field_class_ssr_instr_long'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_ssr_instr_long',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_ssr_mtg_sched_long'.
+  $field_bases['field_class_ssr_mtg_sched_long'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_ssr_mtg_sched_long',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_start_dt'.
+  $field_bases['field_class_start_dt'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_start_dt',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'date',
+    'settings' => array(
+      'cache_count' => 4,
+      'cache_enabled' => 0,
+      'granularity' => array(
+        'day' => 'day',
+        'hour' => 0,
+        'minute' => 0,
+        'month' => 'month',
+        'second' => 0,
+        'year' => 'year',
+      ),
+      'timezone_db' => '',
+      'todate' => '',
+      'tz_handling' => 'none',
+    ),
+    'translatable' => 0,
+    'type' => 'datetime',
+  );
+
+  // Exported field_base: 'field_class_strm'.
+  $field_bases['field_class_strm'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_strm',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_class_subject'.
+  $field_bases['field_class_subject'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_subject',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'field_class_wait_tot'.
+  $field_bases['field_class_wait_tot'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_class_wait_tot',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  return $field_bases;
+}
