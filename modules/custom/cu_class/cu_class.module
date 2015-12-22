@@ -101,7 +101,26 @@ function cu_class_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  
+  $items[$class_uri . '/delete'] = array(
+    'title' => 'Delete',
+    'title callback' => 'cu_class_label',
+    'title arguments' => array($class_uri_argument_position),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_delete_form', $class_uri_argument_position),
+    'access callback' => cu_class_access,
+    'file' => 'cu_class.admin.inc',
+  );
 
+  $items[$class_uri . '/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_form', $class_uri_argument_position),
+    'access callback' => 'cu_class_access',
+    'file' => 'cu_class.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
 
   // Layout settings
   $items['admin/config/content/class'] = array(
@@ -116,7 +135,7 @@ function cu_class_menu() {
   
    // This provides a place for Field API to hang its own
   // interface and has to be the same as what was defined
-  // in airing_entity_info() above.
+  // in class_entity_info() above.
   $items['admin/structure/class/manage'] = array(
     'title' => 'Class',
     'description' => 'Manage Class Entity Structure',
@@ -224,7 +243,7 @@ function cu_class_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = $class_uri['path'];
 
-  drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $airing))));
+  drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $class))));
 }
 
 /**
@@ -242,7 +261,7 @@ function cu_class_admin_page() {
 }
 
 /**
- * Load a airing.
+ * Load a class.
  */
 function cu_class_load($class_id, $reset = FALSE) {
   $classes = cu_class_load_multiple(array($class_id), array(), $reset);
@@ -250,7 +269,7 @@ function cu_class_load($class_id, $reset = FALSE) {
 }
 
 /**
- * Load multiple airings based on certain conditions.
+ * Load multiple classes based on certain conditions.
  */
 function cu_class_load_multiple($class_ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('cu_class', $class_ids, $conditions, $reset);

@@ -21,6 +21,11 @@ function cu_class_schema() {
         'length' => 255,
         'not null' => FALSE,
       ),
+      'course_id' => array(
+        'description' => 'Course ID',
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
       'type' => array(
         'description' => 'The type (bundle) of this class',
         'type' => 'varchar',
