@@ -1,0 +1,17 @@
+.class-wrapper h3 {
+  font-size: 65%;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+.class-entity-wrapper .field-label {
+  display: none;
+}
+.class-section {
+  margin-bottom: 20px;
+}
+.class-wrapper {
+  padding-top: 20px;
+  margin-bottom: 20px;
+  border-top:1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+}
