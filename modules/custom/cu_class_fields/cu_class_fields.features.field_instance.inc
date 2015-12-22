@@ -475,6 +475,41 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_instruction_mode'.
+  $field_instances['cu_class-class-field_class_instruction_mode'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 25,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_instruction_mode',
+    'label' => 'INSTRUCTION_MODE',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 32,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_last_updated'.
   $field_instances['cu_class-class-field_class_last_updated'] = array(
     'bundle' => 'class',
@@ -697,6 +732,41 @@ function cu_class_fields_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 8,
+    ),
+  );
+
+  // Exported field_instance: 'cu_class-class-field_class_ssr_descrlong'.
+  $field_instances['cu_class-class-field_class_ssr_descrlong'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 1,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_ssr_descrlong',
+    'label' => 'SSR_DESCRLONG',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 31,
     ),
   );
 
@@ -951,12 +1021,14 @@ function cu_class_fields_field_default_field_instances() {
   t('ENRL_STAT');
   t('ENRL_TOT');
   t('INSTITUTION');
+  t('INSTRUCTION_MODE');
   t('Last Updated');
   t('MEETING_TIME_END');
   t('MEETING_TIME_START');
   t('SCC_LATITUDE');
   t('SCC_LONGITUDE');
   t('SSR_COMPONENT');
+  t('SSR_DESCRLONG');
   t('SSR_INSTR_LONG');
   t('SSR_MTG_SCHED_LONG');
   t('START_DT');
