@@ -1,5 +1,5 @@
 <h1 id="page-title">
-  <?php print render($content['field_class_course_title_long']); ?>
+  <?php print $title; ?>
 </h1>
 <div class="class-view-mode-full class-entity-wrapper">
   <div class="course-description class-section">
@@ -40,5 +40,5 @@
     </div>
   </div>
 </div>
-<?php print render($content); ?>
+<?php //print render($content); ?>
 <?php //dpm($content); ?>
