@@ -46,6 +46,15 @@ function cu_class_entity_info() {
 
   return $info;
 }
+/**
+ * Implements hook_entity_info_alter().
+ */
+function cu_class_entity_info_alter(&$entity_info) {
+  $entity_info['cu_class']['view modes']['short'] = array(
+    'label' => t('Short'),
+    'custom settings' => TRUE,
+  );
+}
 
 /**
  * Implements hook_flush_caches().
@@ -296,8 +305,9 @@ function cu_class_preprocess_entity(&$vars) {
   $entity_type = $vars['elements']['#entity_type'];
   $bundle = $vars['elements']['#bundle'];
   if (($entity_type == 'cu_class') && ($bundle == 'class')) {
-    //$vars['theme_hook_suggestions'][] = '';
-
+    if ($vars['view_mode'] == 'short') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__short';
+    }
     $vars['title'] = $vars['content']['field_class_course_title_long'][0]['#markup'];
     drupal_set_title($vars['content']['field_class_course_title_long'][0]['#markup'], $output = CHECK_PLAIN);
 
