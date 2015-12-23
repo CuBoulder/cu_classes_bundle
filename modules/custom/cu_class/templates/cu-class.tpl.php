@@ -40,3 +40,5 @@
     </div>
   </div>
 </div>
+<?php print render($content); ?>
+<?php //dpm($content); ?>
