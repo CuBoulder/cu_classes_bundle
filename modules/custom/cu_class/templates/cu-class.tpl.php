@@ -34,8 +34,9 @@
     <div class="class-availability class-section col-lg-3 col-md-3 col-sm-3 col-xs-12">
       <h3>Availability</h3>
       <?php print $available; ?>
+      <div class="updated">
+        <?php print $updated; ?>
+      </div>
     </div>
   </div>
 </div>
-<?php print render($content); ?>
-<?php dpm($content); ?>

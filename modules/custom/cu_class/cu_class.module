@@ -302,8 +302,10 @@ function cu_class_preprocess_entity(&$vars) {
     drupal_set_title($vars['content']['field_class_course_title_long'][0]['#markup'], $output = CHECK_PLAIN);
 
     // Dates
-    $vars['start_date'] = date('M n', strtotime($content['field_class_start_dt']['#items'][0]['value']));
-    $vars['end_date'] = date('M n', strtotime($content['field_class_end_dt']['#items'][0]['value']));
+    $vars['start_date'] = date('M n', strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']));
+    $vars['end_date'] = date('M n', strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']));
+
+    $vars['updated'] = 'Updated: ' . date('n/j/y', strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']));
 
     // Available seats
     $cap = intval($vars['content']['field_class_enrl_cap'][0]['#markup']);
