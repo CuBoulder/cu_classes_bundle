@@ -10,6 +10,39 @@
 function cu_class_fields_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'cu_class-class-field_class_campus_des'.
+  $field_instances['cu_class-class-field_class_campus_des'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 29,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'field_name' => 'field_class_campus_des',
+    'label' => 'CAMPUS_LOVDescr',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 36,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_catalog_nbr'.
   $field_instances['cu_class-class-field_class_catalog_nbr'] = array(
     'bundle' => 'class',
@@ -510,6 +543,39 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_instruction_mode_des'.
+  $field_instances['cu_class-class-field_class_instruction_mode_des'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 28,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'field_name' => 'field_class_instruction_mode_des',
+    'label' => 'INSTRUCTION_MODE_LOVDescr',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 35,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_last_updated'.
   $field_instances['cu_class-class-field_class_last_updated'] = array(
     'bundle' => 'class',
@@ -805,6 +871,41 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_ssr_mtg_loc_long'.
+  $field_instances['cu_class-class-field_class_ssr_mtg_loc_long'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 27,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_ssr_mtg_loc_long',
+    'label' => 'SSR_MTG_LOC_LONG',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 34,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_ssr_mtg_sched_long'.
   $field_instances['cu_class-class-field_class_ssr_mtg_sched_long'] = array(
     'bundle' => 'class',
@@ -966,6 +1067,41 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_units_acad_prog'.
+  $field_instances['cu_class-class-field_class_units_acad_prog'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 26,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_units_acad_prog',
+    'label' => 'UNITS_ACAD_PROG',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 33,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_wait_tot'.
   $field_instances['cu_class-class-field_class_wait_tot'] = array(
     'bundle' => 'class',
@@ -1009,6 +1145,7 @@ function cu_class_fields_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('CAMPUS_LOVDescr');
   t('CATALOG_NBR');
   t('CLASS_NBR');
   t('CLASS_SECTION');
@@ -1022,6 +1159,7 @@ function cu_class_fields_field_default_field_instances() {
   t('ENRL_TOT');
   t('INSTITUTION');
   t('INSTRUCTION_MODE');
+  t('INSTRUCTION_MODE_LOVDescr');
   t('Last Updated');
   t('MEETING_TIME_END');
   t('MEETING_TIME_START');
@@ -1030,10 +1168,12 @@ function cu_class_fields_field_default_field_instances() {
   t('SSR_COMPONENT');
   t('SSR_DESCRLONG');
   t('SSR_INSTR_LONG');
+  t('SSR_MTG_LOC_LONG');
   t('SSR_MTG_SCHED_LONG');
   t('START_DT');
   t('STRM');
   t('SUBJECT');
+  t('UNITS_ACAD_PROG');
   t('WAIT_TOT');
 
   return $field_instances;
