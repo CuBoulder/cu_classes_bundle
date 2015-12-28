@@ -59,7 +59,7 @@ function cu_class_views_views_default_views() {
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->display->display_options['path'] = 'class-list';
+  $handler->display->display_options['path'] = 'courses/search';
   $export['cu_classes'] = $view;
 
   return $export;
