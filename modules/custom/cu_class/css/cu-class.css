@@ -7,14 +7,14 @@
 .course-class-list .field-label {
   display: none;
 }
-.class-section {
+.class-view-mode-short .class-section {
   margin-bottom: 20px;
 }
-.course-classes {
+.class-view-mode-short .course-classes {
   border-top:1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
 }
-.class-wrapper {
+.class-view-mode-short .class-wrapper {
   padding-top: 20px;
   margin-bottom: 20px;
 
@@ -30,7 +30,7 @@
   font-size: 100%;
   text-transform: uppercase;
 }
-.class-content {
+.class-view-mode-short .class-content {
   padding: 20px 10px 0;
   background-color: #f7f7f7;
 }
@@ -58,4 +58,34 @@
 
 .url-textfield {
   display: none;
+}
+/* COURSE SEARCH */
+.view-cu-classes .views-exposed-form label {
+  font-size: 75%;
+}
+.view-cu-classes .views-exposed-form input.form-text {
+  padding: 5px;
+}
+.view-cu-classes .views-row {
+  padding:10px;
+}
+.view-cu-classes .views-row-odd {
+  background-color: #f7f7f7;
+}
+.course-classes-all {
+  padding:20px;
+  border:1px solid #e0e0e0;
+}
+#other-classes {
+  display: none;
+  padding: 20px 0;
+}
+#other-classes .class-view-mode-short:nth-child(odd) .class-content {
+  background-color: #fff;
+}
+#other-classes-trigger {
+  font-weight: 600;
+}
+.class-view-mode-list h2.class-title {
+  font-size: 120%;
 }

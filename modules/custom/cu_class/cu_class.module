@@ -319,9 +319,9 @@ function cu_class_preprocess_entity(&$vars) {
     $title[] = $vars['content']['field_class_subject'][0]['#markup'];
     $title[] = $vars['content']['field_class_catalog_nbr'][0]['#markup'];
     $title[] = '<span class="class-title">' . $vars['content']['field_class_course_title_long'][0]['#markup'] . '</span>';
-    //$title[] = '<span class="class-section-number">Section ' . $vars['content']['field_class_class_section'][0]['#markup'] . '</span>';
-    //$vars['title'] = join(' ', $title);
-    //drupal_set_title(strip_tags($vars['title']), $output = CHECK_PLAIN);
+
+    $course_link_title = $vars['content']['field_class_course_title_long'][0]['#markup'] . ' - Section ' .  $vars['content']['field_class_class_section'][0]['#markup'];
+    $vars['course_link'] = l($course_link_title, 'course/' . $vars['content']['field_class_crse_id'][0]['#markup'], array('query' => array('class_id' => $vars['content']['field_class_class_nbr'][0]['#markup'])));
 
     // Dates
     $vars['start_date'] = date('M n', strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']));

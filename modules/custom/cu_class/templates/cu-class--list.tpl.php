@@ -1,6 +1,6 @@
 <div class="class-view-mode-list class-entity-wrapper">
   <div class="class-wrapper">
-    <h2><?php print $content['field_class_course_title_long'][0]['#markup']; ?> Section <?php print $content['field_class_class_section'][0]['#markup']; ?></h2>
+    <h2 class="class-title"><?php print $course_link; ?></h2>
     <div class="class-content">
       <div class="row clearfix">
         <div class="class-meta class-section col-lg-6 col-md-6 col-sm-6 col-xs-12">
