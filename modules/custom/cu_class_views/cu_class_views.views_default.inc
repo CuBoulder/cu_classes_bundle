@@ -37,71 +37,16 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['class_id']['id'] = 'class_id';
   $handler->display->display_options['fields']['class_id']['table'] = 'cu_class';
   $handler->display->display_options['fields']['class_id']['field'] = 'class_id';
-  /* Filter criterion: Class: SUBJECT (field_class_subject) */
-  $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
-  $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
-  $handler->display->display_options['filters']['field_class_subject_value']['field'] = 'field_class_subject_value';
-  $handler->display->display_options['filters']['field_class_subject_value']['operator'] = 'contains';
-  $handler->display->display_options['filters']['field_class_subject_value']['group'] = 1;
-  $handler->display->display_options['filters']['field_class_subject_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator_id'] = 'field_class_subject_value_op';
-  $handler->display->display_options['filters']['field_class_subject_value']['expose']['label'] = 'Subject';
-  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator'] = 'field_class_subject_value_op';
-  $handler->display->display_options['filters']['field_class_subject_value']['expose']['identifier'] = 'field_class_subject_value';
-  $handler->display->display_options['filters']['field_class_subject_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    8 => 0,
-    12 => 0,
-    6 => 0,
-    10 => 0,
-    16 => 0,
-  );
-  /* Filter criterion: Class: CRSE_ATTR_VALUE (field_class_crse_attr_value) */
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['id'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['table'] = 'field_data_field_class_crse_attr_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['field'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['operator'] = 'contains';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['group'] = 1;
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator_id'] = 'field_class_crse_attr_value_value_op';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['label'] = 'Core Requirements';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator'] = 'field_class_crse_attr_value_value_op';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['identifier'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    8 => 0,
-    12 => 0,
-    6 => 0,
-    10 => 0,
-    16 => 0,
-  );
-  /* Filter criterion: Class: INSTRUCTION_MODE (field_class_instruction_mode) */
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['id'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['table'] = 'field_data_field_class_instruction_mode';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['field'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['operator'] = 'contains';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['group'] = 1;
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator_id'] = 'field_class_instruction_mode_value_op';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['label'] = 'Format';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator'] = 'field_class_instruction_mode_value_op';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['identifier'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    8 => 0,
-    12 => 0,
-    6 => 0,
-    10 => 0,
-    16 => 0,
+  $handler->display->display_options['filter_groups']['groups'] = array(
+    1 => 'AND',
+    2 => 'AND',
   );
   /* Filter criterion: Class: COURSE_TITLE_LONG (field_class_course_title_long) */
   $handler->display->display_options['filters']['field_class_course_title_long_value']['id'] = 'field_class_course_title_long_value';
   $handler->display->display_options['filters']['field_class_course_title_long_value']['table'] = 'field_data_field_class_course_title_long';
   $handler->display->display_options['filters']['field_class_course_title_long_value']['field'] = 'field_class_course_title_long_value';
   $handler->display->display_options['filters']['field_class_course_title_long_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_course_title_long_value']['group'] = 1;
   $handler->display->display_options['filters']['field_class_course_title_long_value']['expose']['operator_id'] = 'field_class_course_title_long_value_op';
   $handler->display->display_options['filters']['field_class_course_title_long_value']['expose']['label'] = 'Keyword Search';
   $handler->display->display_options['filters']['field_class_course_title_long_value']['expose']['operator'] = 'field_class_course_title_long_value_op';
@@ -128,22 +73,93 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_ssr_descrlong_value']['table'] = 'field_data_field_class_ssr_descrlong';
   $handler->display->display_options['filters']['field_class_ssr_descrlong_value']['field'] = 'field_class_ssr_descrlong_value';
   $handler->display->display_options['filters']['field_class_ssr_descrlong_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_ssr_descrlong_value']['group'] = 1;
   /* Filter criterion: Class: SSR_INSTR_LONG (field_class_ssr_instr_long) */
   $handler->display->display_options['filters']['field_class_ssr_instr_long_value']['id'] = 'field_class_ssr_instr_long_value';
   $handler->display->display_options['filters']['field_class_ssr_instr_long_value']['table'] = 'field_data_field_class_ssr_instr_long';
   $handler->display->display_options['filters']['field_class_ssr_instr_long_value']['field'] = 'field_class_ssr_instr_long_value';
   $handler->display->display_options['filters']['field_class_ssr_instr_long_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_ssr_instr_long_value']['group'] = 1;
   /* Filter criterion: Global: Combine fields filter */
   $handler->display->display_options['filters']['combine']['id'] = 'combine';
   $handler->display->display_options['filters']['combine']['table'] = 'views';
   $handler->display->display_options['filters']['combine']['field'] = 'combine';
-  $handler->display->display_options['filters']['combine']['operator'] = 'word';
+  $handler->display->display_options['filters']['combine']['operator'] = 'contains';
+  $handler->display->display_options['filters']['combine']['group'] = 1;
   $handler->display->display_options['filters']['combine']['exposed'] = TRUE;
   $handler->display->display_options['filters']['combine']['expose']['operator_id'] = 'combine_op';
   $handler->display->display_options['filters']['combine']['expose']['label'] = 'Keyword Search';
   $handler->display->display_options['filters']['combine']['expose']['operator'] = 'combine_op';
   $handler->display->display_options['filters']['combine']['expose']['identifier'] = 'combine';
   $handler->display->display_options['filters']['combine']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    8 => 0,
+    12 => 0,
+    6 => 0,
+    10 => 0,
+    16 => 0,
+  );
+  $handler->display->display_options['filters']['combine']['group_info']['label'] = 'Combine fields filter';
+  $handler->display->display_options['filters']['combine']['group_info']['identifier'] = 'combine';
+  $handler->display->display_options['filters']['combine']['group_info']['remember'] = FALSE;
+  $handler->display->display_options['filters']['combine']['group_info']['group_items'] = array(
+    1 => array(),
+    2 => array(),
+    3 => array(),
+  );
+  /* Filter criterion: Class: SUBJECT (field_class_subject) */
+  $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
+  $handler->display->display_options['filters']['field_class_subject_value']['field'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_subject_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_subject_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator_id'] = 'field_class_subject_value_op';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['label'] = 'Subject';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator'] = 'field_class_subject_value_op';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['identifier'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    8 => 0,
+    12 => 0,
+    6 => 0,
+    10 => 0,
+    16 => 0,
+  );
+  /* Filter criterion: Class: CRSE_ATTR_VALUE (field_class_crse_attr_value) */
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['id'] = 'field_class_crse_attr_value_value';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['table'] = 'field_data_field_class_crse_attr_value';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['field'] = 'field_class_crse_attr_value_value';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator_id'] = 'field_class_crse_attr_value_value_op';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['label'] = 'Core Requirements';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator'] = 'field_class_crse_attr_value_value_op';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['identifier'] = 'field_class_crse_attr_value_value';
+  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    8 => 0,
+    12 => 0,
+    6 => 0,
+    10 => 0,
+    16 => 0,
+  );
+  /* Filter criterion: Class: INSTRUCTION_MODE (field_class_instruction_mode) */
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['id'] = 'field_class_instruction_mode_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['table'] = 'field_data_field_class_instruction_mode';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['field'] = 'field_class_instruction_mode_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator_id'] = 'field_class_instruction_mode_value_op';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['label'] = 'Format';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator'] = 'field_class_instruction_mode_value_op';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['identifier'] = 'field_class_instruction_mode_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     8 => 0,
