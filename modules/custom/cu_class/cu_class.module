@@ -54,6 +54,10 @@ function cu_class_entity_info_alter(&$entity_info) {
     'label' => t('Short'),
     'custom settings' => TRUE,
   );
+  $entity_info['cu_class']['view modes']['list'] = array(
+    'label' => t('List'),
+    'custom settings' => FALSE,
+  );
 }
 
 /**
@@ -307,6 +311,9 @@ function cu_class_preprocess_entity(&$vars) {
   if (($entity_type == 'cu_class') && ($bundle == 'class')) {
     if ($vars['view_mode'] == 'short') {
       $vars['theme_hook_suggestions'][] = 'cu_class__short';
+    }
+    if ($vars['view_mode'] == 'list') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__list';
     }
     $title = array();
     $title[] = $vars['content']['field_class_subject'][0]['#markup'];
