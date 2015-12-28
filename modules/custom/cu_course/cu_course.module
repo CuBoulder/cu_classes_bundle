@@ -278,3 +278,7 @@ function cu_course_load($course_id, $reset = FALSE) {
 function cu_course_load_multiple($course_ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('cu_course', $course_ids, $conditions, $reset);
 }
+
+function cu_course_page_alter(&$page) {
+  drupal_add_js(drupal_get_path('module', 'cu_course') . '/js/cu-course.js');
+}
