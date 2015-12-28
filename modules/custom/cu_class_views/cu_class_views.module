@@ -5,3 +5,19 @@
  */
 
 include_once 'cu_class_views.features.inc';
+
+function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
+    $form['field_class_crse_attr_value_value']['#type'] = 'select';
+    $form['field_class_crse_attr_value_value']['#options'] = array(
+      'HIST' => 'HIST',
+      'METHO' => 'METHO',
+      'AH' => 'AH',
+      'AM' => 'AM',
+      'GT-HI1' => 'GT-HI1',
+    );
+    unset($form['field_class_crse_attr_value_value']['#size']);
+    $form['field_class_crse_attr_value_value']['#multiple'] = FALSE;
+    $form['field_class_crse_attr_value_value']['#empty_value'] = '';
+  }
+}
