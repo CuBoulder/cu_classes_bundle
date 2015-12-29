@@ -1,9 +1,29 @@
 <?php
 
+// because the details aren't available from cu_master,
+// first import the courses to 
+
 /**
  * Implements hook_menu().
  */
 function cu_class_import_menu() {
+  // COURSES MUST BE IMPORTED FIRST
+  $items['course/import'] = array(
+    'title' => 'Course Import',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('cu_course_import_form'), 
+    'access callback' => 'cu_class_import_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['course/import/process'] = array(
+    'title' => 'Processing Course Import',
+    'page callback' => 'cu_course_import_process',
+    'access callback' => 'cu_class_import_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+  
   $items['class/import'] = array(
     'title' => 'Class Import',
     'page callback' => 'drupal_get_form', 
@@ -12,6 +32,7 @@ function cu_class_import_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
+  
   $items['class/import/process'] = array(
     'title' => 'Class Import',
     'page callback' => 'cu_class_import_process',
@@ -40,8 +61,6 @@ function cu_class_import_menu() {
  * Class Form.
  */
 function cu_class_detail_import_form($form, &$form_state, $class) {
-  
-  dsm($class);
   
   $form_state['class'] = $class;
 
@@ -76,7 +95,7 @@ function cu_class_import_access() {
 /**
  * Process form
  */
-function cu_class_import_form() {
+function cu_course_import_form() {
   // @TODO: Save imports a something... ctool exportable?
   
 
@@ -97,403 +116,40 @@ function cu_class_import_form() {
 	  '#description' => t('Terms are available X days before enrollment opens'),
 	);
   
-  // @TODO: Look these up
-  $subject_options = array(
-  'AAS' => 'AAS',
-  'ACCT' => 'ACCT',
-  'AGRI' => 'AGRI',
-  'AH' => 'AH',
-  'AIRR' => 'AIRR',
-  'ANAT' => 'ANAT',
-  'ANEQ' => 'ANEQ',
-  'ANES' => '',
-  'ANMS' => '',
-  'ANTH' => '',
-  'ANTP' => '',
-  'APPM' => '',
-  'APRD' => '',
-  'ARAB' => '',
-  'ARBC' => '',
-  'ARCH' => '',
-  'AREN' => '',
-  'ARSC' => '',
-  'ARTF' => '',
-  'ARTH' => '',
-  'ARTS' => '',
-  'ASEN' => '',
-  'ASIA' => '',
-  'ASL' => '',
-  'ASTR' => '',
-  'ATLS' => '',
-  'ATOC' => '',
-  'BADM' => '',
-  'BAKR' => '',
-  'BANA' => '',
-  'BCOR' => '',
-  'BGSO' => '',
-  'BIOE' => '',
-  'BIOL' => '',
-  'BIOS' => '',
-  'BLAW' => '',
-  'BPOL' => '',
-  'BSLW' => '',
-  'BUAD' => '',
-  'BUSM' => '',
-  'BUSN' => '',
-  'CAMW' => '',
-  'CANB' => '',
-  'CAND' => '',
-  'CBHS' => '',
-  'CCDI' => '',
-  'CCDM' => '',
-  'CEES' => '',
-  'CESR' => '',
-  'CHBH' => '',
-  'CHE' => '',
-  'CHEM' => '',
-  'CHEN' => '',
-  'CHIN' => '',
-  'CJ' => '',
-  'CLAS' => '',
-  'CLDE' => '',
-  'CLSC' => '',
-  'CMCI' => '',
-  'CMDT' => '',
-  'CNCR' => '',
-  'COEN' => '',
-  'COML' => '',
-  'COMM' => '',
-  'COMR' => '',
-  'CONF' => '',
-  'CONV' => '',
-  'COUN' => '',
-  'CPBS' => '',
-  'CPCE' => '',
-  'CRJU' => '',
-  'CS' => '',
-  'CSCI' => '',
-  'CSDV' => '',
-  'CSVC' => '',
-  'CURR' => '',
-  'CVEN' => '',
-  'CWCV' => '',
-  'DERM' => '',
-  'DISP' => '',
-  'DNCE' => '',
-  'DPER' => '',
-  'DPTR' => '',
-  'DSAD' => '',
-  'DSBS' => '',
-  'DSDD' => '',
-  'DSEL' => '',
-  'DSEN' => '',
-  'DSEP' => '',
-  'DSFD' => '',
-  'DSGD' => '',
-  'DSOD' => '',
-  'DSON' => '',
-  'DSOP' => '',
-  'DSOR' => '',
-  'DSOT' => '',
-  'DSPD' => '',
-  'DSPE' => '',
-  'DSPL' => '',
-  'DSRE' => '',
-  'DSRP' => '',
-  'DSSD' => '',
-  'EALC' => '',
-  'EBIO' => '',
-  'ECE' => '',
-  'ECED' => '',
-  'ECEN' => '',
-  'ECON' => '',
-  'EDFN' => '',
-  'EDLI' => '',
-  'EDRM' => '',
-  'EDUC' => '',
-  'EHOH' => '',
-  'EHON' => '',
-  'ELEC' => '',
-  'ELED' => '',
-  'EMED' => '',
-  'EMEN' => '',
-  'EMGT' => '',
-  'EMUS' => '',
-  'ENE' => '',
-  'ENGL' => 'ENGL',
-  'ENGR' => '',
-  'ENSC' => '',
-  'ENTP' => '',
-  'ENVD' => '',
-  'ENVS' => '',
-  'EPID' => '',
-  'EPSY' => '',
-  'ERHS' => '',
-  'ESBM' => '',
-  'ESLG' => '',
-  'ETHN' => '',
-  'ETHS' => '',
-  'ETST' => '',
-  'EVEN' => '',
-  'FARR' => '',
-  'FCS' => '',
-  'FILM' => '',
-  'FINE' => '',
-  'FITV' => '',
-  'FMMD' => '',
-  'FNCE' => '',
-  'FNDS' => '',
-  'FR' => '',
-  'FRE' => '',
-  'FREN' => '',
-  'FRSI' => '',
-  'FSHN' => '',
-  'FTEC' => '',
-  'FWLD' => '',
-  'GDD' => '',
-  'GEEN' => '',
-  'GEMM' => '',
-  'GENC' => '',
-  'GEOG' => '',
-  'GEOL' => '',
-  'GER' => '',
-  'GERO' => '',
-  'GES' => '',
-  'GPS' => '',
-  'GREK' => '',
-  'GRK' => '',
-  'GRMN' => '',
-  'GRNT' => '',
-  'GRTE' => '',
-  'GSAP' => '',
-  'GSLL' => '',
-  'HBSC' => '',
-  'HCAD' => '',
-  'HDFR' => '',
-  'HDFS' => '',
-  'HEBR' => '',
-  'HEHM' => '',
-  'HESC' => '',
-  'HIND' => '',
-  'HIPR' => '',
-  'HIS' => '',
-  'HIST' => 'HIST',
-  'HLTH' => '',
-  'HMGP' => '',
-  'HONR' => '',
-  'HPL' => '',
-  'HRMG' => '',
-  'HRSS' => '',
-  'HSCI' => '',
-  'HSMP' => '',
-  'HUEN' => '',
-  'HUM' => '',
-  'HUMN' => '',
-  'IAFS' => '',
-  'ID' => '',
-  'IDPT' => '',
-  'IECE' => '',
-  'IEOO' => '',
-  'IMMU' => '',
-  'IMUS' => '',
-  'INBU' => '',
-  'INDO' => '',
-  'INFS' => '',
-  'INOV' => '',
-  'INTB' => '',
-  'INTE' => '',
-  'INTS' => '',
-  'INVS' => '',
-  'IPED' => '',
-  'IPHY' => '',
-  'ISMG' => '',
-  'ITAL' => '',
-  'ITED' => '',
-  'IWKS' => '',
-  'JOUR' => '',
-  'JPNS' => '',
-  'JPS' => '',
-  'JRNL' => '',
-  'JTCM' => '',
-  'JWST' => '',
-  'KREN' => '',
-  'LAMS' => '',
-  'LAT' => '',
-  'LATN' => '',
-  'LAWS' => '',
-  'LCRT' => '',
-  'LDAR' => '',
-  'LDSP' => '',
-  'LEAD' => '',
-  'LGBT' => '',
-  'LIBB' => '',
-  'LIBR' => '',
-  'LING' => '',
-  'MAE' => '',
-  'MATH' => '',
-  'MBAC' => '',
-  'MBAX' => '',
-  'MCDB' => '',
-  'MCEN' => '',
-  'MCKE' => '',
-  'MDST' => '',
-  'MECH' => '',
-  'MEDS' => '',
-  'MEMS' => '',
-  'MGMT' => '',
-  'MICB' => '',
-  'MILR' => '',
-  'MINS' => '',
-  'MKTG' => '',
-  'MLNG' => '',
-  'MOLB' => '',
-  'MPAS' => '',
-  'MS' => '',
-  'MSBC' => '',
-  'MSBX' => '',
-  'MSEN' => '',
-  'MSGP' => '',
-  'MSRA' => '',
-  'MTED' => '',
-  'MTH' => '',
-  'MU' => '',
-  'MUEL' => '',
-  'MUS' => '',
-  'MUSC' => '',
-  'MUSM' => '',
-  'NANT' => '',
-  'NAVR' => '',
-  'NBMS' => '',
-  'NBUS' => '',
-  'NCBE' => '',
-  'NCCL' => '',
-  'NCCM' => '',
-  'NCED' => '',
-  'NCEG' => '',
-  'NCEN' => '',
-  'NCES' => '',
-  'NCIE' => '',
-  'NCMA' => '',
-  'NCTM' => '',
-  'NECE' => '',
-  'NEDU' => '',
-  'NELC' => '',
-  'NENG' => '',
-  'NEUR' => '',
-  'NHSC' => '',
-  'NMAT' => '',
-  'NNUR' => '',
-  'NPHI' => '',
-  'NRLN' => '',
-  'NRSC' => '',
-  'NSUR' => '',
-  'NTOP' => '',
-  'NUDO' => '',
-  'NURS' => '',
-  'OBGY' => '',
-  'OPHT' => '',
-  'OPIM' => '',
-  'OPTM' => '',
-  'ORMG' => '',
-  'ORTH' => '',
-  'OTOL' => '',
-  'PACS' => '',
-  'PAD' => '',
-  'PATH' => '',
-  'PBHC' => '',
-  'PBHL' => '',
-  'PEDS' => '',
-  'PES' => '',
-  'PGMT' => '',
-  'PHCL' => '',
-  'PHED' => '',
-  'PHIL' => '',
-  'PHMD' => '',
-  'PHRD' => '',
-  'PHSC' => '',
-  'PHSL' => '',
-  'PHYS' => '',
-  'PMUS' => '',
-  'POLS' => '',
-  'PORT' => '',
-  'PRDI' => '',
-  'PRDO' => '',
-  'PRLC' => '',
-  'PRMD' => '',
-  'PSC' => '',
-  'PSCI' => '',
-  'PSCY' => '',
-  'PSY' => '',
-  'PSYC' => '',
-  'PSYM' => '',
-  'PUAD' => '',
-  'PUBH' => '',
-  'QUAN' => '',
-  'RADI' => '',
-  'RAON' => '',
-  'RCPR' => '',
-  'REAL' => '',
-  'RHSC' => '',
-  'RISK' => '',
-  'RLST' => '',
-  'RPSC' => '',
-  'RSEI' => '',
-  'RSEM' => '',
-  'RUSS' => '',
-  'SCAN' => '',
-  'SCHL' => '',
-  'SECE' => '',
-  'SEWL' => '',
-  'SJUS' => '',
-  'SL' => '',
-  'SLHS' => '',
-  'SNSK' => '',
-  'SOC' => '',
-  'SOCO' => '',
-  'SOCY' => '',
-  'SPAN' => '',
-  'SPCE' => '',
-  'SPCM' => '',
-  'SPED' => '',
-  'SPSY' => '',
-  'SPTM' => '',
-  'SRMS' => '',
-  'SSCI' => '',
-  'SSIR' => '',
-  'STBB' => '',
-  'STDY' => '',
-  'STRT' => '',
-  'STYB' => '',
-  'STYC' => '',
-  'SURG' => '',
-  'SUST' => '',
-  'SWED' => '',
-  'SYSE' => '',
-  'SYST' => '',
-  'TED' => '',
-  'TFVP' => '',
-  'THTR' => '',
-  'TLED' => '',
-  'TLEN' => '',
-  'TMUS' => '',
-  'TXCL' => '',
-  'UEDU' => '',
-  'UNHL' => '',
-  'URBN' => '',
-  'URPL' => '',
-  'UTED' => '',
-  'UTLS' => '',
-  'VA' => '',
-  'VAPA' => '',
-  'VSCS' => '',
-  'WEST' => '',
-  'WGST' => '',
-  'WMST' => '',
-  'WRTG' => '',
-  'XBUS' => '',
-  'XHAD' => '',
-  );
   
+  $subject_options = array(
+  'AREN' => 'AREN',
+  'GEOG' => 'GEOG',
+  'PHIL' => 'PHIL',
+  'HIST' => 'HIST',
+  'JRNL' => 'JRNL',
+  'IAFS' => 'IAFS',
+  'HUMN' => 'HUMN',
+  'ENGL' => 'ENGL',
+  'ECON' => 'ECON',
+  'JPNS' => 'JPNS',
+  'ANTH' => 'ANTH',
+  'LEAD' => 'LEAD',
+  'ETHN' => 'ETHN',
+  'MUEL' => 'MUEL',
+  'EDUC' => 'EDUC',
+  'LAWS' => 'LAWS',
+  'CLAS' => 'CLAS',
+  'DNCE' => 'DNCE',
+  'THTR' => 'THTR',
+  'ATOC' => 'ATOC',
+  'PSYC' => 'PSYC',
+  'FREN' => 'FREN',
+  'RUSS' => 'RUSS',
+  'EBIO' => 'EBIO',
+  'PHYS' => 'PHYS',
+  'MCEN' => 'MCEN',
+  'CVEN' => 'CVEN',
+  'ENVD' => 'ENVD',
+  'CSCI' => 'CSCI',
+  'SPAN' => 'SPAN',
+  );
+
   $form['subject'] = array(
 	  '#type' => 'select',
 	  '#default_value' => 'HIST',
@@ -502,12 +158,12 @@ function cu_class_import_form() {
 	  '#description' => t(''),
 	);
   
-  $form['course_id'] = array(
-    '#type' => 'textfield', //you can find a list of available types in the form api
-    '#title' => 'Course ID',
-    '#size' => 10,
-    '#maxlength' => 10,
-  );
+  //$form['course_id'] = array(
+  //  '#type' => 'textfield', //you can find a list of available types in the form api
+  //  '#title' => 'Course ID',
+  //  '#size' => 10,
+  //  '#maxlength' => 10,
+  //);
   
   $form['submit_button'] = array(
     '#type' => 'submit',
@@ -520,49 +176,20 @@ function cu_class_import_form() {
 /**
  * Process form
  */
-function cu_class_import_form_submit($form, &$form_state) {
+function cu_course_import_form_submit($form, &$form_state) {
   //dsm($form);
   //$term = '2161';
   $institution = 'CUBLD';
   
   $subject = $form['subject']['#value'];
-  $course_id = $form['course_id']['#value'];
   $term = $form['term']['#value'];
   
-  // ADD FORM
-  // CREATE CLASS ENTITIES
-  // LOOP BACK THROUGH FOR DETAILS
-  
-  //$file = drupal_get_path('module', 'cu_class_import') . '/example.xml';
-  //dsm($file);
-  //if (file_exists($file)) {
-  //  $xml = simplexml_load_file($file);
-  //} else {
-  //  return('Failed to open example.xml.');
-  //}
-  
-  if (!$subject) {
-    // only used for testing
-    $subject = 'HIST';
-    //$course_id = '108161';
-  }
-  
-  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
   //dsm($response);
   $xml = simplexml_load_string($response);
     
   if (is_object($xml)) {
     
-    //ser namspce only exists in detail
-    if ($course_id) {
-      $namespaces = $xml->getNameSpaces(true);
-      $ser = $xml->children($namespaces['ser']);
-      //dsm('ser');
-      //dsm($ser);
-      $course_id = (string) $ser->SEARCH_RESULT->SUBJECTS->SUBJECT->CRSE_ID;
-      //dsm($course_id);
-    }
-    else {
       //dsm(xml2array_parse($xml)); 
       
       if ($xml->IS_FAULT) {
@@ -574,31 +201,39 @@ function cu_class_import_form_submit($form, &$form_state) {
       
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
-          //dsm($subject); 
+
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
-          //$subject->ACAD_CAREER;
           $title = (string) $subject->COURSE_TITLE_LONG;
-          //$subject->CRSE_OFFER_NBR;
           
           $output .= $title . '<br />';
+
+          // check to see if already exists... 
           
-          // create entity with entity_save
-    
-          $values = array(
-            'crse_id' => (string) $subject->CRSE_ID,
-            'title' => (string) $subject->COURSE_TITLE_LONG,
-            'type' => 'class',
-          );
           
-          $values['field_class_course_title_long']['value'] = $title;
+          // if doesn't exist, add it
           
-          //array('type' => 'class')
-          dsm($values);
-          drupal_set_message('Created local copy of ' . $title);
-          //$class = entity_create('class', $values);
-          $class = entity_create('cu_class', $values);
-          dsm($class);
+          // create entity with entity_save vs. db_insert
+          
+          $result = db_insert('cu_course')
+            ->fields(array(
+              'course_id' => (string) $subject->CRSE_ID,
+              'title' => (string) $subject->COURSE_TITLE_LONG,
+              'type' => 'course',
+              'changed' => REQUEST_TIME,
+              'subject' => $subject,
+              'term_id' => $term,
+              'inst' => $institution,
+              'catalog_nbr' => (string) $subject->CATALOG_NBR,
+            ))
+            ->execute();
+          
+          // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
+          //$course = entity_create('cu_course', $values);
+          
+          drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
+          
+          
           // field_class_course_title_long
           
           // field_class_subject
@@ -625,12 +260,12 @@ function cu_class_import_form_submit($form, &$form_state) {
           
           // field_class_last_updated
           // 
-          entity_save('cu_class', $class);
+          
           
         }
       } // isset
     }
-  }
+  
   
 
   
@@ -638,20 +273,48 @@ function cu_class_import_form_submit($form, &$form_state) {
 }
 
 /**
+ * Process form
+ */
+function cu_class_import_form() {
+  // @TODO: Save imports a something... ctool exportable?
+  
+  // query courses?
+  
+  // @TODO: Look these up
+  $term_options = array(
+    '2154' => t('2015 Summer'),
+    '2157' => t('2015 Fall'),
+	  '2161' => t('2016 Spring'),
+	  '2164' => t('2016 Summer'),
+    '2167' => t('2016 Fall'),
+  );
+
+	$form['course'] = array(
+	  '#type' => 'select',
+	  '#default_value' => 'All',
+	  '#title' => t('Couse'),
+	  '#options' => $term_options,
+	  '#description' => t(''),
+	);
+  
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+  
+  return $form;
+}
+
+
+/**
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
+function cu_course_import_curl($institution, $term, $subject, $course_id = NULL) {
   
-  //
-  if (!$course_id) {
-    $type = 'cu_master';
-  } 
-  else {
-    $type = 'cu_detail';
-  }
+
   // Setup our cURL parameters
-  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=' . $type . '&languageCd=en';
+  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   //dsm($request_path);
   // Got credentials from Matthew Arveson at CU-SIS
   $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
@@ -679,7 +342,58 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // Additional data that the API takes
   $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
   //dsm($curl_request_body);
-  //INSTRUCTION_MODE OL
+
+  curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$curl_response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+  // Close the curl to free resources
+  curl_close($curl);
+  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+}
+
+/**
+ * Setup the cURL, run it, and write the result to a _latest file.
+ * If there is an error it will be logged to the normal php error log.
+ */
+function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
+  
+
+  // Setup our cURL parameters
+  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
+  //dsm($request_path);
+  // Got credentials from Matthew Arveson at CU-SIS
+  $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
+  $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
+  $request_auth_string = $request_user . ':' . $request_pass;
+ 
+  // Setup the cURL
+  $curl = curl_init();
+  // Empty out the error message.
+  $error_message = NULL;
+
+  // Set path
+  curl_setopt($curl, CURLOPT_URL, $request_path);
+  // Use a POST rather than a GET
+  curl_setopt($curl, CURLOPT_POST, true);
+  // This allows us to access the endpoint without verifying the SSL cert.
+  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+  // Use Basic Auth
+  curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+  curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+  // Additional data that the API takes
+  $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+  //dsm($curl_request_body);
+
   curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
 
   // Return the transfer as a string of the values if the curl succeeds.
@@ -702,5 +416,4 @@ function xml2array_parse($xml){
      } 
      return $return; 
 }
-
 // cron
