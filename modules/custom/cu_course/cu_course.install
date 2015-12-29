@@ -17,7 +17,8 @@ function cu_course_schema() {
       ),
       'catalog_nbr' => array(
         'description' => 'Catalog Number',
-        'type' => 'int',
+        'type' => 'varchar',
+         'length' => 25,
         'not null' => FALSE,
       ),
       'title' => array(
