@@ -324,10 +324,9 @@ function cu_class_preprocess_entity(&$vars) {
     $vars['course_link'] = l($course_link_title, 'course/' . $vars['content']['field_class_crse_id'][0]['#markup'], array('query' => array('class_id' => $vars['content']['field_class_class_nbr'][0]['#markup'])));
 
     // Dates
-    $vars['start_date'] = date('M n', strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']));
-    $vars['end_date'] = date('M n', strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']));
-
-    $vars['updated'] = 'Updated: ' . date('n/j/y', strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']));
+    $vars['start_date'] = format_date(strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']), 'cu_medium_date');
+    $vars['end_date'] = format_date(strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']), 'cu_medium_date');
+    $vars['updated'] = 'Updated: ' . format_date(strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']), 'cu_short_date');
 
     // Available seats
     $cap = intval($vars['content']['field_class_enrl_cap'][0]['#markup']);
