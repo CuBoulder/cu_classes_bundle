@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ * Code for the CU Class Views feature.
+ */
+
+include_once 'cu_class_views.features.inc';
+
+function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
+    // Subject
+    $form['field_class_subject_value']['#type'] = 'select';
+    $form['field_class_subject_value']['#options'] = array(
+      'HIST' => 'History',
+    );
+    unset($form['field_class_subject_value']['#size']);
+    $form['field_class_subject_value']['#multiple'] = FALSE;
+    $form['field_class_subject_value']['#empty_value'] = '';
+
+    // Core Requirements
+    $form['field_class_crse_attr_value_value']['#type'] = 'select';
+    $form['field_class_crse_attr_value_value']['#options'] = array(
+      'HIST' => 'HIST',
+      'METHO' => 'METHO',
+      'AH' => 'AH',
+      'AM' => 'AM',
+      'GT-HI1' => 'GT-HI1',
+    );
+    unset($form['field_class_crse_attr_value_value']['#size']);
+    $form['field_class_crse_attr_value_value']['#multiple'] = FALSE;
+    $form['field_class_crse_attr_value_value']['#empty_value'] = '';
+
+    // Format
+    $form['field_class_instruction_mode_value']['#type'] = 'select';
+    $form['field_class_instruction_mode_value']['#options'] = array(
+      'online' => 'Online',
+      'hybrid' => 'Hybrid',
+    );
+    unset($form['field_class_instruction_mode_value']['#size']);
+    $form['field_class_instruction_mode_value']['#multiple'] = FALSE;
+    $form['field_class_instruction_mode_value']['#empty_value'] = '';
+  }
+}

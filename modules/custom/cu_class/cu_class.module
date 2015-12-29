@@ -46,6 +46,19 @@ function cu_class_entity_info() {
 
   return $info;
 }
+/**
+ * Implements hook_entity_info_alter().
+ */
+function cu_class_entity_info_alter(&$entity_info) {
+  $entity_info['cu_class']['view modes']['short'] = array(
+    'label' => t('Short'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['cu_class']['view modes']['list'] = array(
+    'label' => t('List'),
+    'custom settings' => FALSE,
+  );
+}
 
 /**
  * Implements hook_flush_caches().
@@ -83,7 +96,7 @@ function cu_class_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
-  
+
   $class_uri = 'class/%cu_class';
   $class_uri_argument_position = 1;
 
@@ -101,7 +114,7 @@ function cu_class_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  
+
   $items[$class_uri . '/delete'] = array(
     'title' => 'Delete',
     'title callback' => 'cu_class_label',
@@ -132,7 +145,7 @@ function cu_class_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'cu_class.admin.inc',
   );
-  
+
    // This provides a place for Field API to hang its own
   // interface and has to be the same as what was defined
   // in class_entity_info() above.
@@ -142,7 +155,7 @@ function cu_class_menu() {
     'page callback' => 'cu_class_admin_page',
     'access arguments' => array('administer class content'),
     'weight' => -50,
-  );  
+  );
 
   return $items;
 }
@@ -206,7 +219,7 @@ function cu_class_add() {
  * Class Form.
  */
 function cu_class_form($form, &$form_state, $class) {
-  
+
   $form_state['class'] = $class;
 
   field_attach_form('cu_class', $class, $form, $form_state);
@@ -238,7 +251,7 @@ function cu_class_form_submit($form, &$form_state) {
   entity_form_submit_build_entity('cu_class', $class, $form, $form_state);
 
   entity_save('cu_class', $class);
-  
+
   $class_uri = entity_uri('cu_class', $class);
 
   $form_state['redirect'] = $class_uri['path'];
@@ -254,9 +267,9 @@ function cu_class_admin_page() {
   //$output = 'Welcome to the administration page for your Airing Entities.<br/>';
   //$output .= '<ul class="action-links"><li><a href="/airing/add">Add Airing</a></li></ul>';
   //return $output;
-  
+
   // Not sure why we'd need an admin landing page, so I'm redirecting to field
-  
+
   drupal_goto('admin/structure/class/manage/fields');
 }
 
@@ -273,4 +286,60 @@ function cu_class_load($class_id, $reset = FALSE) {
  */
 function cu_class_load_multiple($class_ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('cu_class', $class_ids, $conditions, $reset);
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function cu_class_theme_registry_alter(&$theme_registry) {
+  $module_path = drupal_get_path('module', 'cu_class');
+  $theme_registry_copy = $theme_registry;
+  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'cu_class', $module_path);
+  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+  $hooks = array('cu_class');
+  foreach ($hooks as $h) {
+    if (isset($theme_registry[$h]['theme paths'])) {
+      $first_element = array_shift($theme_registry[$h]['theme paths']);
+      array_unshift($theme_registry[$h]['theme paths'], array_shift($theme_registry[$h]['theme paths']), $module_path);
+    }
+  }
+}
+
+function cu_class_preprocess_entity(&$vars) {
+  $entity_type = $vars['elements']['#entity_type'];
+  $bundle = $vars['elements']['#bundle'];
+  if (($entity_type == 'cu_class') && ($bundle == 'class')) {
+    if ($vars['view_mode'] == 'short') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__short';
+    }
+    if ($vars['view_mode'] == 'list') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__list';
+    }
+    $title = array();
+    $title[] = $vars['content']['field_class_subject'][0]['#markup'];
+    $title[] = $vars['content']['field_class_catalog_nbr'][0]['#markup'];
+    $title[] = '<span class="class-title">' . $vars['content']['field_class_course_title_long'][0]['#markup'] . '</span>';
+
+    $course_link_title = $vars['content']['field_class_course_title_long'][0]['#markup'] . ' - Section ' .  $vars['content']['field_class_class_section'][0]['#markup'];
+    $vars['course_link'] = l($course_link_title, 'course/' . $vars['content']['field_class_crse_id'][0]['#markup'], array('query' => array('class_id' => $vars['content']['field_class_class_nbr'][0]['#markup'])));
+
+    // Dates
+    $vars['start_date'] = format_date(strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']), 'cu_medium_date');
+    $vars['end_date'] = format_date(strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']), 'cu_medium_date');
+    $vars['updated'] = 'Updated: ' . format_date(strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']), 'cu_short_date');
+
+    // Available seats
+    $cap = intval($vars['content']['field_class_enrl_cap'][0]['#markup']);
+    $total = intval($vars['content']['field_class_enrl_tot'][0]['#markup']);
+    $available = $cap - $total;
+    if ($available == 1) {
+      $vars['available'] = $available . ' seat available';
+    } else {
+      $vars['available'] = $available . ' seats available';
+    }
+  }
+}
+
+function cu_class_page_alter(&$page) {
+  drupal_add_css(drupal_get_path('module', 'cu_class') . '/css/cu-class.css');
 }
