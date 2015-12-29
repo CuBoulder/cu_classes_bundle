@@ -83,25 +83,29 @@ function cu_course_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
-  
+
   $course_uri = 'course/%cu_course';
   $course_uri_argument_position = 1;
 
   $items[$course_uri] = array(
-    'title callback' => 'entity_label',
-    'title arguments' => array('cu_course', $course_uri_argument_position),
-    'page callback' => 'cu_course_view',
+    'page callback' => 'cu_course_display',
     'page arguments' => array($course_uri_argument_position),
-    'access callback' => 'cu_course_access',
+    'access callback' => TRUE,
     'file' => 'cu_course.pages.inc',
+    'title callback' => 'cu_course_title',
+    'title arguments' => array($course_uri_argument_position),
   );
 
   $items[$course_uri . '/view'] = array(
-    'title' => 'View',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
+    'page callback' => 'cu_course_display',
+    'page arguments' => array($course_uri_argument_position),
+    'access callback' => TRUE,
+    'file' => 'cu_course.pages.inc',
+    'title' => 'View',
   );
-  
+
   $items[$course_uri . '/delete'] = array(
     'title' => 'Delete',
     'title callback' => 'cu_course_label',
@@ -132,7 +136,7 @@ function cu_course_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'cu_course.admin.inc',
   );
-  
+
    // This provides a place for Field API to hang its own
   // interface and has to be the same as what was defined
   // in course_entity_info() above.
@@ -142,7 +146,7 @@ function cu_course_menu() {
     'page callback' => 'cu_course_admin_page',
     'access arguments' => array('administer course content'),
     'weight' => -50,
-  );  
+  );
 
   return $items;
 }
@@ -206,7 +210,7 @@ function cu_course_add() {
  * Course Form.
  */
 function cu_course_form($form, &$form_state, $course) {
-  
+
   $form_state['course'] = $course;
 
   field_attach_form('cu_course', $course, $form, $form_state);
@@ -238,7 +242,7 @@ function cu_course_form_submit($form, &$form_state) {
   entity_form_submit_build_entity('cu_course', $course, $form, $form_state);
 
   entity_save('cu_course', $course);
-  
+
   $course_uri = entity_uri('cu_course', $course);
 
   $form_state['redirect'] = $course_uri['path'];
@@ -254,9 +258,9 @@ function cu_course_admin_page() {
   //$output = 'Welcome to the administration page for your Airing Entities.<br/>';
   //$output .= '<ul course="action-links"><li><a href="/airing/add">Add Airing</a></li></ul>';
   //return $output;
-  
+
   // Not sure why we'd need an admin landing page, so I'm redirecting to field
-  
+
   drupal_goto('admin/structure/course/manage/fields');
 }
 
@@ -273,4 +277,8 @@ function cu_course_load($course_id, $reset = FALSE) {
  */
 function cu_course_load_multiple($course_ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('cu_course', $course_ids, $conditions, $reset);
+}
+
+function cu_course_page_alter(&$page) {
+  drupal_add_js(drupal_get_path('module', 'cu_course') . '/js/cu-course.js');
 }
