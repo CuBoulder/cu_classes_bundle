@@ -213,6 +213,8 @@ function cu_course_import_form_submit($form, &$form_state) {
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
 
+          //dsm($subject);
+
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
           $title = (string) $subject->COURSE_TITLE_LONG;
@@ -235,7 +237,7 @@ function cu_course_import_form_submit($form, &$form_state) {
                 'title' => (string) $subject->COURSE_TITLE_LONG,
                 'type' => 'course',
                 'changed' => REQUEST_TIME,
-                'subject' => $subject,
+                'subject' => (string) $subject->SUBJECT,
                 'term_id' => $term,
                 'inst' => $institution,
                 'catalog_nbr' => (string) $subject->CATALOG_NBR,
@@ -336,13 +338,11 @@ function cu_class_import_form() {
   
   // query courses?
   $course_options = array();
-  $results = db_query('SELECT course_id, $course->title FROM {cu_course}');
+  $results = db_query('SELECT course_id, title FROM {cu_course}');
 
-  foreach ($results as $course) {
+  foreach($results as $course) {
     $course_options[$course->course_id] = $course->course_id . ' - ' . $course->title;
   }
-
-  sort($course_options);
 
 	$form['course'] = array(
 	  '#type' => 'select',
@@ -363,14 +363,19 @@ function cu_class_import_form() {
  * Process form
  */
 function cu_class_import_form_submit($form, &$form_state) {
-  dsm($form_state);
-  //$term = '2161';
+
+  $term = '2164';
   $institution = 'CUBLD';
 
-  $subject = $form['subject']['#value'];
-  $term = $form['term']['#value'];
+  $course_id = $form['course']['#value'];
 
-  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
+  //need the subject
+  $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
+
+  //dsm($course);
+
+
+  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
   //dsm($response);
   $xml = simplexml_load_string($response);
 
