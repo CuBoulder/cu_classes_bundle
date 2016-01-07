@@ -7,6 +7,14 @@
  * Implements hook_menu().
  */
 function cu_class_import_menu() {
+  $items['admin/config/system/class-import'] = array(
+      'title' => 'Class Import',
+      'description' =>  'Configure Class Import.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('class_import_admin_settings'),
+      'access arguments' => array('administer modules'),
+  );
+
   // COURSES MUST BE IMPORTED FIRST
   $items['course/import'] = array(
     'title' => 'Course Import',
@@ -44,12 +52,12 @@ function cu_class_import_menu() {
   $class_uri = 'class/%cu_class';
   $class_uri_argument_position = 1;
   
-  $items[$class_uri . '/import'] = array(
-    'title' => 'Import Details',
+  $items[$class_uri . '/update'] = array(
+    'title' => 'Update Details',
     'title callback' => 'cu_class_label',
     'title arguments' => array($class_uri_argument_position),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cu_class_detail_import_form', $class_uri_argument_position),
+    'page callback' => 'cu_class_import_update',
+    'page arguments' => array($class_uri_argument_position),
     'access callback' => cu_class_access,
     'type' => MENU_LOCAL_TASK,
   );
@@ -57,31 +65,34 @@ function cu_class_import_menu() {
   return $items;
 }
 
+function class_import_admin_settings() {
+  $form = array();
+
+  $form['cu_class_import_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en'),
+    '#title' => t('Base URL of API'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+  $form['cu_class_import_url_prime'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_url_prime', 0),
+    '#title' => t('Use RESTFul Posts'),
+    '#description' => t(''),
+  );
+
+  return system_settings_form($form);
+}
 /**
- * Class Form.
+ * Updates all Classes that match the course.
  */
-function cu_class_detail_import_form($form, &$form_state, $class) {
+function cu_class_import_update($class) {
   
-  $form_state['class'] = $class;
+  // Query the detail
+  // Compare to existing entities
+  // Save entities with diffs
 
-  field_attach_form('cu_class', $class, $form, $form_state);
-
-  $submit = array();
-  if (!empty($form['#submit'])) {
-    $submit += $form['#submit'];
-  }
-
-  $form['actions'] = array(
-    '#weight' => 100,
-  );
-
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save class'),
-    '#submit' => $submit + array('cu_class_form_submit'),
-  );
-
-  return $form;
 }
 
 /**
@@ -110,7 +121,7 @@ function cu_course_import_form() {
 
 	$form['term'] = array(
 	  '#type' => 'select',
-	  '#default_value' => '2161',
+	  '#default_value' => '2164',
 	  '#title' => t('Term'),
 	  '#options' => $term_options,
 	  '#description' => t('Terms are available X days before enrollment opens'),
@@ -212,9 +223,187 @@ function cu_course_import_form_submit($form, &$form_state) {
           
           
           // if doesn't exist, add it
+          $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
+          if($result->rowCount() > 0) {
+
+            //UPDATE
+          }
+          else {
+            $result = db_insert('cu_course')
+              ->fields(array(
+                'course_id' => (string) $subject->CRSE_ID,
+                'title' => (string) $subject->COURSE_TITLE_LONG,
+                'type' => 'course',
+                'changed' => REQUEST_TIME,
+                'subject' => $subject,
+                'term_id' => $term,
+                'inst' => $institution,
+                'catalog_nbr' => (string) $subject->CATALOG_NBR,
+              ))
+              ->execute();
+
+            // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
+            //$course = entity_create('cu_course', $values);
+
+            drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
+
+          }
+          // create entity with entity_save vs. db_insert?
+
           
-          // create entity with entity_save vs. db_insert
+
           
+        }
+      } // isset
+    }
+  
+  
+
+  
+  return $ouput;
+}
+
+
+/**
+ * Setup the cURL, run it, and write the result to a _latest file.
+ * If there is an error it will be logged to the normal php error log.
+ */
+function cu_course_import_curl($institution, $term, $subject, $course_id = NULL) {
+
+  $request_path = variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en');
+
+  // Setup the cURL
+  $curl = curl_init();
+  // Empty out the error message.
+  $error_message = NULL;
+
+  // when priming courses and classes, we aren't using a post
+  if (variable_get('cu_class_import_url_prime', 1)) {
+    $request_path .= "$institution/$term/$subject";
+  }
+
+  // Set path
+  curl_setopt($curl, CURLOPT_URL, $request_path);
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+  if (!variable_get('cu_class_import_url_prime', 0)) {
+
+
+    // @TODO: Set these in admin config
+    $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
+    $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
+    $request_auth_string = $request_user . ':' . $request_pass;
+
+
+    // Use a POST rather than a GET
+    curl_setopt($curl, CURLOPT_POST, true);
+    // This allows us to access the endpoint without verifying the SSL cert.
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    // Use Basic Auth
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+    // <CRSE_ID>' . $course_id .'</CRSE_ID>
+
+    // Additional data that the API takes
+    $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+    //dsm($curl_request_body);
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+
+
+  }
+
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$curl_response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+  // Close the curl to free resources
+  curl_close($curl);
+  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form() {
+  // @TODO: Save imports a something... ctool exportable?
+  
+  // query courses?
+  $course_options = array();
+  $results = db_query('SELECT course_id, $course->title FROM {cu_course}');
+
+  foreach ($results as $course) {
+    $course_options[$course->course_id] = $course->course_id . ' - ' . $course->title;
+  }
+
+  sort($course_options);
+
+	$form['course'] = array(
+	  '#type' => 'select',
+	  '#title' => t('Course'),
+	  '#options' => $course_options,
+	  '#description' => t(''),
+	);
+  
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+  
+  return $form;
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form_submit($form, &$form_state) {
+  dsm($form_state);
+  //$term = '2161';
+  $institution = 'CUBLD';
+
+  $subject = $form['subject']['#value'];
+  $term = $form['term']['#value'];
+
+  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
+  //dsm($response);
+  $xml = simplexml_load_string($response);
+
+  if (is_object($xml)) {
+
+    //dsm(xml2array_parse($xml));
+
+    if ($xml->IS_FAULT) {
+
+      $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
+      drupal_set_message($error, 'error');
+      return;
+    }
+
+    if(isset($xml->SEARCH_RESULT->SUBJECTS)){
+      foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
+
+        $course_id = (string) $subject->CRSE_ID;
+        $catalog_number = (string) $subject->CATALOG_NBR;
+        $title = (string) $subject->COURSE_TITLE_LONG;
+
+        $output .= $title . '<br />';
+
+        // check to see if already exists...
+
+
+        // if doesn't exist, add it
+        $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
+        if($result->rowCount() > 0) {
+
+          //UPDATE
+        }
+        else {
           $result = db_insert('cu_course')
             ->fields(array(
               'course_id' => (string) $subject->CRSE_ID,
@@ -227,136 +416,26 @@ function cu_course_import_form_submit($form, &$form_state) {
               'catalog_nbr' => (string) $subject->CATALOG_NBR,
             ))
             ->execute();
-          
+
           // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
           //$course = entity_create('cu_course', $values);
-          
+
           drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
-          
-          
-          // field_class_course_title_long
-          
-          // field_class_subject
-          // field_class_institution
-          // field_class_strm
-          // field_class_class_section
-          // field_class_ssr_component
-          // field_class_enrl_cap
-          // field_class_enrl_tot
-          // field_class_wait_tot 
-          // field_class_enrl_stat 
-          // field_class_crse_attr
-          // field_class_crse_attr_value
-          // field_class_meeting_time_start
-          // field_class_meeting_time_end
-          // field_class_end_dt
-          // field_class_start_dt
-          
-          // field_class_scc_latitude
-          // field_class_scc_longitude
-          
-          // field_class_ssr_mtg_sched_long 
-          // field_class_ssr_instr_long
-          
-          // field_class_last_updated
-          // 
-          
-          
+
         }
-      } // isset
-    }
-  
-  
-
-  
-  return $ouput;
-}
-
-/**
- * Process form
- */
-function cu_class_import_form() {
-  // @TODO: Save imports a something... ctool exportable?
-  
-  // query courses?
-  
-  // @TODO: Look these up
-  $term_options = array(
-    '2154' => t('2015 Summer'),
-    '2157' => t('2015 Fall'),
-	  '2161' => t('2016 Spring'),
-	  '2164' => t('2016 Summer'),
-    '2167' => t('2016 Fall'),
-  );
-
-	$form['course'] = array(
-	  '#type' => 'select',
-	  '#default_value' => 'All',
-	  '#title' => t('Couse'),
-	  '#options' => $term_options,
-	  '#description' => t(''),
-	);
-  
-  $form['submit_button'] = array(
-    '#type' => 'submit',
-    '#value' => t('Import'),
-  );
-  
-  return $form;
-}
+        // create entity with entity_save vs. db_insert?
 
 
-/**
- * Setup the cURL, run it, and write the result to a _latest file.
- * If there is an error it will be logged to the normal php error log.
- */
-function cu_course_import_curl($institution, $term, $subject, $course_id = NULL) {
-  
 
-  // Setup our cURL parameters
-  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
-  //dsm($request_path);
-  // Got credentials from Matthew Arveson at CU-SIS
-  $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
-  $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
-  $request_auth_string = $request_user . ':' . $request_pass;
- 
-  // Setup the cURL
-  $curl = curl_init();
-  // Empty out the error message.
-  $error_message = NULL;
 
-  // Set path
-  curl_setopt($curl, CURLOPT_URL, $request_path);
-  // Use a POST rather than a GET
-  curl_setopt($curl, CURLOPT_POST, true);
-  // This allows us to access the endpoint without verifying the SSL cert.
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-  // Use Basic Auth
-  curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-  curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
-  
-  // <CRSE_ID>' . $course_id .'</CRSE_ID>
-  
-  // Additional data that the API takes
-  $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-  //dsm($curl_request_body);
-
-  curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
-
-  // Return the transfer as a string of the values if the curl succeeds.
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-  // Get the data! Also check and see if the curl worked and log the error if it did not.
-  if (!$curl_response = curl_exec($curl)) {
-    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-    error_log($error_message, 0);
-    print_r($error_message);
+      }
+    } // isset
   }
-  // Close the curl to free resources
-  curl_close($curl);
-  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+
+
+
+
+  return $ouput;
 }
 
 /**
@@ -417,3 +496,30 @@ function xml2array_parse($xml){
      return $return; 
 }
 // cron
+
+// field_class_course_title_long
+
+// field_class_subject
+// field_class_institution
+// field_class_strm
+// field_class_class_section
+// field_class_ssr_component
+// field_class_enrl_cap
+// field_class_enrl_tot
+// field_class_wait_tot
+// field_class_enrl_stat
+// field_class_crse_attr
+// field_class_crse_attr_value
+// field_class_meeting_time_start
+// field_class_meeting_time_end
+// field_class_end_dt
+// field_class_start_dt
+
+// field_class_scc_latitude
+// field_class_scc_longitude
+
+// field_class_ssr_mtg_sched_long
+// field_class_ssr_instr_long
+
+// field_class_last_updated
+//
