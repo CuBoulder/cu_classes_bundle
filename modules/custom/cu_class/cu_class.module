@@ -88,7 +88,7 @@ function cu_class_views_api($module = NULL, $api = NULL) {
  * Implements hook_menu().
  */
 function cu_class_menu() {
-  // Edit layout
+  // Add Class
   $items['class/add'] = array(
     'title' => 'Add Class',
     'page callback' => 'cu_class_add',
@@ -253,7 +253,7 @@ function cu_class_form_submit($form, &$form_state) {
   entity_save('cu_class', $class);
 
   $class_uri = entity_uri('cu_class', $class);
-
+  dsm($class_uri);
   $form_state['redirect'] = $class_uri['path'];
 
   drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $class))));
@@ -278,6 +278,7 @@ function cu_class_admin_page() {
  */
 function cu_class_load($class_id, $reset = FALSE) {
   $classes = cu_class_load_multiple(array($class_id), array(), $reset);
+  //dsm($classes);
   return reset($classes);
 }
 
