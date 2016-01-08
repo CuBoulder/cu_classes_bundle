@@ -231,6 +231,7 @@ function cu_course_import_form_submit($form, &$form_state) {
             //UPDATE
           }
           else {
+
             $result = db_insert('cu_course')
               ->fields(array(
                 'course_id' => (string) $subject->CRSE_ID,
@@ -246,7 +247,6 @@ function cu_course_import_form_submit($form, &$form_state) {
 
             // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
             //$course = entity_create('cu_course', $values);
-
             drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
 
           }
@@ -381,7 +381,8 @@ function cu_class_import_form_submit($form, &$form_state) {
 
   if (is_object($xml)) {
 
-    //dsm(xml2array_parse($xml));
+    dsm(xml2array_parse($xml));
+    //dsm($xml);
 
     if ($xml->IS_FAULT) {
 
@@ -396,6 +397,7 @@ function cu_class_import_form_submit($form, &$form_state) {
         //dsm($class);
         dsm(xml2array_parse($class));
 
+        $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
         $catalog_number = (string) $class->CATALOG_NBR;
         $title = (string) $class->CRSE_ID_LOVDescr;
@@ -424,10 +426,17 @@ function cu_class_import_form_submit($form, &$form_state) {
 
           //ACAD_CAREER
 
-
-
-          //$class= entity_create('cu_class', $values);
-
+          /*
+          // Doesn't work with cu_class_fields turned on.
+          $values = array(
+            'class_id' => $class_id,
+            'title' => $title,
+            'course_id' => $course_id,
+            'type' => 'class',
+          );
+          $class = entity_create('cu_class', $values);
+          $created = entity_save('cu_class', $class);
+          */
           drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title);
 
         //}
@@ -502,7 +511,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-    //dsm($curl_request_body);
+    dsm($curl_request_body);
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
 
@@ -517,6 +526,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   }
   // Close the curl to free resources
   curl_close($curl);
+  //dsm($curl_response);
   return str_replace('<?xml version="1.0"?>', '', $curl_response);
 }
 
@@ -529,7 +539,6 @@ function xml2array_parse($xml){
 // cron
 
 // field_class_course_title_long
-
 // field_class_subject
 // field_class_institution
 // field_class_strm
