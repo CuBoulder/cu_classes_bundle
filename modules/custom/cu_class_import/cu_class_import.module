@@ -188,7 +188,7 @@ function cu_course_import_form() {
  * Process form
  */
 function cu_course_import_form_submit($form, &$form_state) {
-  //dsm($form);
+
   //$term = '2161';
   $institution = 'CUBLD';
   
@@ -196,7 +196,7 @@ function cu_course_import_form_submit($form, &$form_state) {
   $term = $form['term']['#value'];
   
   $response = cu_course_import_curl($institution, $term, $subject, $course_id);
-  //dsm($response);
+
   $xml = simplexml_load_string($response);
     
   if (is_object($xml)) {
@@ -391,43 +391,46 @@ function cu_class_import_form_submit($form, &$form_state) {
     }
 
     if(isset($xml->SEARCH_RESULT->SUBJECTS)){
-      foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
+      foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        $course_id = (string) $subject->CRSE_ID;
-        $catalog_number = (string) $subject->CATALOG_NBR;
-        $title = (string) $subject->COURSE_TITLE_LONG;
+        //dsm($class);
+        dsm(xml2array_parse($class));
 
-        $output .= $title . '<br />';
+        $course_id = (string) $class->CRSE_ID;
+        $catalog_number = (string) $class->CATALOG_NBR;
+        $title = (string) $class->CRSE_ID_LOVDescr;
+        $catalog_nbr = (string) $class->CATALOG_NBR;
+        $subject = (string) $class->SUBJECT;
+        $session_code = (string) $class->SESSION_CODE;
+        $section = (string) $class->CLASS_SECTION;
 
+        //foreach ($subject->CLASSES_SUMMARY->children() as $class) {
+
+          //dsm($class);
+          //dsm(xml2array_parse($class));
+        //}
         // check to see if already exists...
 
 
         // if doesn't exist, add it
-        $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
-        if($result->rowCount() > 0) {
+        // @TODO: Need to check spefici sections
+        //$result = db_query('SELECT * FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
+        //if($result->rowCount() > 0) {
 
           //UPDATE
-        }
-        else {
-          $result = db_insert('cu_course')
-            ->fields(array(
-              'course_id' => (string) $subject->CRSE_ID,
-              'title' => (string) $subject->COURSE_TITLE_LONG,
-              'type' => 'course',
-              'changed' => REQUEST_TIME,
-              'subject' => $subject,
-              'term_id' => $term,
-              'inst' => $institution,
-              'catalog_nbr' => (string) $subject->CATALOG_NBR,
-            ))
-            ->execute();
+        //}
+        //else {
+          // set up entity
 
-          // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
-          //$course = entity_create('cu_course', $values);
+          //ACAD_CAREER
 
-          drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
 
-        }
+
+          //$class= entity_create('cu_class', $values);
+
+          drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title);
+
+        //}
         // create entity with entity_save vs. db_insert?
 
 
@@ -452,15 +455,25 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // Setup our cURL parameters
   $request_path = variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en');
 
+  //@TODO: need to back this up a level in the config... just replacing for now
+  //$request_path = 'http://express.local/express14/primer/class/';
+  $request_path = str_replace("courses", "class", $request_path);
   // Setup the cURL
   $curl = curl_init();
   // Empty out the error message.
   $error_message = NULL;
 
+  // if doesn't exist, add it
+  $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
+
   // when priming courses and classes, we aren't using a post
   if (variable_get('cu_class_import_url_prime', 1)) {
-    $request_path .= "$institution/$term/$subject";
+    // need subject
+
+    $request_path .= "$institution/$term/$subject/$course_id";
   }
+
+  dsm($request_path);
 
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
