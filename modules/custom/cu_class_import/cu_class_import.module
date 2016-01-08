@@ -448,40 +448,53 @@ function cu_class_import_form_submit($form, &$form_state) {
  * If there is an error it will be logged to the normal php error log.
  */
 function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
-  
 
   // Setup our cURL parameters
-  $request_path = 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
-  //dsm($request_path);
-  // Got credentials from Matthew Arveson at CU-SIS
-  $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
-  $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
-  $request_auth_string = $request_user . ':' . $request_pass;
- 
+  $request_path = variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en');
+
   // Setup the cURL
   $curl = curl_init();
   // Empty out the error message.
   $error_message = NULL;
 
+  // when priming courses and classes, we aren't using a post
+  if (variable_get('cu_class_import_url_prime', 1)) {
+    $request_path .= "$institution/$term/$subject";
+  }
+
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
-  // Use a POST rather than a GET
-  curl_setopt($curl, CURLOPT_POST, true);
-  // This allows us to access the endpoint without verifying the SSL cert.
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-  // Use Basic Auth
-  curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-  curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
-
-  // Additional data that the API takes
-  $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-  //dsm($curl_request_body);
-
-  curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
-
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+  if (!variable_get('cu_class_import_url_prime', 0)) {
+
+
+    // @TODO: Set these in admin config
+    $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
+    $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
+    $request_auth_string = $request_user . ':' . $request_pass;
+
+
+    // Use a POST rather than a GET
+    curl_setopt($curl, CURLOPT_POST, true);
+    // This allows us to access the endpoint without verifying the SSL cert.
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    // Use Basic Auth
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+    // <CRSE_ID>' . $course_id .'</CRSE_ID>
+
+    // Additional data that the API takes
+    $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+    //dsm($curl_request_body);
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+
+
+  }
 
   // Get the data! Also check and see if the curl worked and log the error if it did not.
   if (!$curl_response = curl_exec($curl)) {
