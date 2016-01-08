@@ -425,12 +425,6 @@ function cu_class_import_form_submit($form, &$form_state) {
           );
 
           // field_class_ssr_component
-          // field_class_enrl_cap
-          // field_class_enrl_tot
-          // field_class_wait_tot
-          // field_class_enrl_stat
-          // field_class_crse_attr
-          // field_class_crse_attr_value
           // field_class_meeting_time_start
           // field_class_meeting_time_end
           // field_class_end_dt
@@ -442,15 +436,27 @@ function cu_class_import_form_submit($form, &$form_state) {
           // field_class_ssr_mtg_sched_long
           // field_class_ssr_instr_long
 
-          // field_class_last_updated
+          //
 
         $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
         $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
         $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
         $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
         $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
         $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+
+        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+
+        $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+        $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+        // expecting format to be 2016-01-08 22:45:45
+        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
 
         $class = entity_create('cu_class', $values);
         $created = entity_save('cu_class', $class);
