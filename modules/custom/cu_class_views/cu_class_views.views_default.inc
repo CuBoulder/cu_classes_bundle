@@ -57,7 +57,6 @@ function cu_class_views_views_default_views() {
     'thousand_separator' => '',
     'prefix_suffix' => 1,
   );
-  $handler->display->display_options['fields']['field_class_class_nbr']['field_api_classes'] = TRUE;
   /* Field: Class: CLASS_SECTION */
   $handler->display->display_options['fields']['field_class_class_section']['id'] = 'field_class_class_section';
   $handler->display->display_options['fields']['field_class_class_section']['table'] = 'field_data_field_class_class_section';
@@ -87,7 +86,6 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_crse_attr_value']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_crse_attr_value']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_crse_attr_value']['element_default_classes'] = FALSE;
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['field_api_classes'] = TRUE;
   /* Field: Class: INSTRUCTION_MODE */
   $handler->display->display_options['fields']['field_class_instruction_mode']['id'] = 'field_class_instruction_mode';
   $handler->display->display_options['fields']['field_class_instruction_mode']['table'] = 'field_data_field_class_instruction_mode';
@@ -201,6 +199,37 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_ssr_descrlong']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_ssr_descrlong']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['field_class_ssr_descrlong']['field_api_classes'] = TRUE;
+  /* Field: Class: CRSE_ID */
+  $handler->display->display_options['fields']['field_class_crse_id']['id'] = 'field_class_crse_id';
+  $handler->display->display_options['fields']['field_class_crse_id']['table'] = 'field_data_field_class_crse_id';
+  $handler->display->display_options['fields']['field_class_crse_id']['field'] = 'field_class_crse_id';
+  $handler->display->display_options['fields']['field_class_crse_id']['label'] = '';
+  $handler->display->display_options['fields']['field_class_crse_id']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crse_id']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_crse_id']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crse_id']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_class_crse_id']['settings'] = array(
+    'thousand_separator' => '',
+    'prefix_suffix' => 1,
+  );
+  /* Field: Class: CRSE_ATTR */
+  $handler->display->display_options['fields']['field_class_crse_attr']['id'] = 'field_class_crse_attr';
+  $handler->display->display_options['fields']['field_class_crse_attr']['table'] = 'field_data_field_class_crse_attr';
+  $handler->display->display_options['fields']['field_class_crse_attr']['field'] = 'field_class_crse_attr';
+  $handler->display->display_options['fields']['field_class_crse_attr']['label'] = '';
+  $handler->display->display_options['fields']['field_class_crse_attr']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crse_attr']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_crse_attr']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crse_attr']['element_default_classes'] = FALSE;
+  /* Field: Class: SUBJECT */
+  $handler->display->display_options['fields']['field_class_subject']['id'] = 'field_class_subject';
+  $handler->display->display_options['fields']['field_class_subject']['table'] = 'field_data_field_class_subject';
+  $handler->display->display_options['fields']['field_class_subject']['field'] = 'field_class_subject';
+  $handler->display->display_options['fields']['field_class_subject']['label'] = '';
+  $handler->display->display_options['fields']['field_class_subject']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_subject']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_subject']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_subject']['element_default_classes'] = FALSE;
   $handler->display->display_options['filter_groups']['groups'] = array(
     1 => 'AND',
     2 => 'AND',

@@ -1,6 +1,6 @@
 <?php
 // Create class title
-$class_title = $fields['field_class_course_title_long']->content . ' - Section ' . $fields['field_class_class_section']->content;
+$class_title = html_entity_decode($fields['field_class_course_title_long']->content) . ' - Section ' . $fields['field_class_class_section']->content;
 
 // Link class title to course page
 $class_title_link = l($class_title, 'course/' . $fields['field_class_crse_id']->content, array('query' => array('class_id' => $fields['field_class_class_nbr']->content)));
@@ -19,6 +19,10 @@ if ($available == 1) {
 } else {
   $available_seats = $available . ' seats available';
 }
+if ($fields['field_class_crse_attr']->content == 'BCRQ') {
+  $reqs = $fields['field_class_crse_attr_value']->content;
+  $course_requirements = cu_class_core_requirements($reqs);
+}
 
 ?>
 <div class="class-view-mode-list class-entity-wrapper">
@@ -34,8 +38,8 @@ if ($available == 1) {
             </div>
             <div class="class-section col-lg-6 col-md-6 col-sm-6 col-xs-12">
 
-              <h3>Core</h3>
-              <?php print $fields['field_class_crse_attr_value']->content; ?>
+              <h3>Core Requirements</h3>
+              <?php print $course_requirements; ?>
             </div>
           </div>
 

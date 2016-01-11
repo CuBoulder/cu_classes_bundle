@@ -14,8 +14,8 @@
               <?php print render($content['field_class_class_nbr']); ?>
             </div>
           </div>
-          <h3>Core</h3>
-          <?php print render($content['field_class_crse_attr_value']); ?>
+          <h3>Core Requirements</h3>
+          <?php print $course_requirements; ?>
         </div>
         <div class="class-date-instructor col-lg-3 col-md-3 col-sm-3 col-xs-12">
           <div class="class-section">
