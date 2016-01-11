@@ -433,3 +433,15 @@ function cu_class_subject_values() {
   asort($subjects);
   return $subjects;
 }
+
+function cu_class_format_values() {
+  $formats = array(
+    'P' => 'P',
+    'OL' => 'OL',
+    'CD' => 'CD',
+    'HY' => 'HY',
+    'IS' => 'IS',
+  );
+  asort($formats);
+  return $formats;
+}

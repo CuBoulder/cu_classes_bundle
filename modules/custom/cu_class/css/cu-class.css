@@ -89,3 +89,9 @@
 .class-view-mode-list h2.class-title {
   font-size: 120%;
 }
+.view-cu-classes select {
+  max-width: 75px;
+}
+.view-cu-classes .views-exposed-widget input:not(:first-child) {
+  margin-left:15px;
+}

@@ -95,7 +95,6 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_instruction_mode']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_instruction_mode']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_instruction_mode']['element_default_classes'] = FALSE;
-  $handler->display->display_options['fields']['field_class_instruction_mode']['field_api_classes'] = TRUE;
   /* Field: Class: SSR_INSTR_LONG */
   $handler->display->display_options['fields']['field_class_ssr_instr_long']['id'] = 'field_class_ssr_instr_long';
   $handler->display->display_options['fields']['field_class_ssr_instr_long']['table'] = 'field_data_field_class_ssr_instr_long';
