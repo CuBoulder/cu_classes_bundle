@@ -61,16 +61,19 @@ function cu_course_display($course) {
     $current_class = current($highlight_class_ids);
     unset($classes[$current_class]);
   }
-
+  $class_multiple = !empty($classes) ? TRUE : FALSE;
   $output = array();
-  $output['classes'] = entity_view('cu_class', $classes, 'short');
-  $output['classes']['#weight'] = 100;
-  $output['classes']['#prefix'] = '<div class="course-classes">';
-  $output['classes']['#suffix'] = '</div>';
-  $class = current($output['classes']['cu_class']);
-  $output['description'] = $class['field_class_ssr_descrlong'];
-  $output['description']['#prefix'] = '<div class="course-description">';
-  $output['description']['#suffix'] = '</div>';
+
+  if ($class_multiple) {
+    $output['classes'] = entity_view('cu_class', $classes, 'short');
+    $output['classes']['#weight'] = 100;
+    $output['classes']['#prefix'] = '<div class="course-classes">';
+    $output['classes']['#suffix'] = '</div>';
+    // if multiple classes get description here
+    $class = current($output['classes']['cu_class']);
+    $output['description'] = $class['field_class_ssr_descrlong'];
+  }
+
 
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
@@ -86,11 +89,20 @@ function cu_course_display($course) {
     $output['classes_highlighted']['#weight'] = 99;
     $output['classes_highlighted']['#prefix'] = '<div class="course-classes-highlighted">';
     $output['classes_highlighted']['#suffix'] = '</div>';
+    // If single class get description here
+    $class = current($output['classes_highlighted']['cu_class']);
+    $output['description'] = $class['field_class_ssr_descrlong'];
 
     // Put the rest of the classes in an expandable section
-    $output['classes']['#prefix'] = '<div class="course-classes-all"><a href="#other-classes" id="other-classes-trigger"><i class="fa fa-plus-square"></i> Other Classes/Sections</a><div id="other-classes">';
-    $output['classes']['#suffix'] = '</div></div>';
+    if ($class_multiple) {
+      $output['classes']['#prefix'] = '<div class="course-classes-all"><a href="#other-classes" id="other-classes-trigger"><i class="fa fa-plus-square"></i> Other Classes/Sections</a><div id="other-classes">';
+      $output['classes']['#suffix'] = '</div></div>';
+    }
   }
+
+  // Description markup
+  $output['description']['#prefix'] = '<div class="course-description">';
+  $output['description']['#suffix'] = '</div>';
   return $output;
 }
 
