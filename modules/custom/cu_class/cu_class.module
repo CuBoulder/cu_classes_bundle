@@ -41,6 +41,14 @@ function cu_class_entity_info() {
           'label' => t('Default'),
           'custom settings' => FALSE,
         ),
+        'short' => array(
+          'label' => t('Short'),
+          'custom settings' => FALSE,
+        ),
+        'list' => array(
+          'label' => t('List'),
+          'custom settings' => FALSE,
+        ),
       ),
   );
 
@@ -50,14 +58,7 @@ function cu_class_entity_info() {
  * Implements hook_entity_info_alter().
  */
 function cu_class_entity_info_alter(&$entity_info) {
-  $entity_info['cu_class']['view modes']['short'] = array(
-    'label' => t('Short'),
-    'custom settings' => TRUE,
-  );
-  $entity_info['cu_class']['view modes']['list'] = array(
-    'label' => t('List'),
-    'custom settings' => FALSE,
-  );
+
 }
 
 /**
@@ -338,9 +339,97 @@ function cu_class_preprocess_entity(&$vars) {
     } else {
       $vars['available'] = $available . ' seats available';
     }
+    if ($vars['content']['field_class_crse_attr'][0]['#markup'] == 'BCRQ') {
+      $reqs = $vars['content']['field_class_crse_attr_value'][0]['#markup'];
+      $vars['course_requirements'] = cu_class_core_requirements($reqs);
+    }
+    else {
+      $vars['course_requirements'] = '';
+    }
   }
 }
 
 function cu_class_page_alter(&$page) {
   drupal_add_css(drupal_get_path('module', 'cu_class') . '/css/cu-class.css');
+}
+
+function cu_class_core_requirements($reqs) {
+  $keys = explode(' ', $reqs);
+  $requirements = array(
+    'AD' => 'Human Diversity',
+    'AF' => 'Foreign Language',
+    'AH' => 'Historical Context',
+    'AI' => 'Ideals & Values',
+    'AL' => 'Literature and the Arts',
+    'AM' => 'MAPS Course',
+    'AQ' => 'QUant Rsn & Mathmat Skills',
+    'AS' => 'Contemporary Societies',
+    'AU' => 'United States Context',
+    'AW' => 'Written Communication',
+    'AX' => 'Natural Sciences Sequence',
+    'AY' => 'Natural Sciences Non-sequence',
+    'AZ' => 'Natural Sciences Lab',
+  );
+  $values = array();
+  foreach ($keys as $key) {
+    $values[] = $requirements[$key];
+  }
+  return join(', ', $values);
+}
+
+function cu_class_core_requirements_values() {
+  $requirements = array(
+    'AD' => 'Human Diversity',
+    'AF' => 'Foreign Language',
+    'AH' => 'Historical Context',
+    'AI' => 'Ideals & Values',
+    'AL' => 'Literature and the Arts',
+    'AM' => 'MAPS Course',
+    'AQ' => 'QUant Rsn & Mathmat Skills',
+    'AS' => 'Contemporary Societies',
+    'AU' => 'United States Context',
+    'AW' => 'Written Communication',
+    'AX' => 'Natural Sciences Sequence',
+    'AY' => 'Natural Sciences Non-sequence',
+    'AZ' => 'Natural Sciences Lab',
+  );
+  asort($requirements);
+  return $requirements;
+}
+
+function cu_class_subject_values() {
+  $subjects = array(
+    'AREN' => 'Architecture Engineering, Engineering & Applied Sciences',
+    'GEOG' => 'Geography, Arts & Sciences',
+    'PHIL' => 'Philosophy, Arts & Sciences',
+    'HIST' => 'History, Arts & Sciences',
+    'JRNL' => 'Journalism, Media, Communication and Information',
+    'IAFS' => 'International Affairs, Arts & Sciences',
+    'HUMN' => 'Humanities, Arts & Sciences',
+    'ENGL' => 'English, Arts & Sciences',
+    'ECON' => 'Economics, Arts & Sciences',
+    'JPNS' => 'Japanese , Arts & Sciences',
+    'ANTH' => 'Anthropology, Arts & Sciences',
+    'LEAD' => 'Leadership, Education',
+    'ETHN' => 'Ethnic Studies',
+    'MUEL' => 'Music, Music',
+    'EDUC' => 'Education, Education',
+    'LAWS' => 'Law, Law',
+    'CLAS' => 'Classics, Arts & Sciences',
+    'DNCE' => 'Dance, Arts & Sciences',
+    'THTR' => 'Theater, Arts & Sciences',
+    'ATOC' => 'Atmospheric & Oceanic Sciences, Arts & Sciences',
+    'PSYC' => 'Psychology & Neuroscience, Arts & Sciences',
+    'FREN' => 'French, Arts & Sciences',
+    'RUSS' => 'Russian, Arts & Sciences',
+    'EBIO' => 'Ecology & Evolutionary Biology, Arts & Sciences',
+    'PHYS' => 'Physics, Arts & Sciences',
+    'MCEN' => 'Mechanical Engineering, Engineering & Applied Sciences',
+    'CVEN' => 'Civil Engineering, Engineering & Applied Sciences',
+    'ENVD' => 'Environmental Design, Program in Environmental Design',
+    'CSCI' => 'Computer Sciences, Engineering & Applied Sciences',
+    'SPAN' => 'Spanish, Arts & Sciences',
+  );
+  asort($subjects);
+  return $subjects;
 }
