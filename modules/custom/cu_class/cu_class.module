@@ -378,7 +378,7 @@ function cu_class_core_requirements($reqs) {
 }
 
 function cu_class_core_requirements_values() {
-  return array(
+  $requirements = array(
     'AD' => 'Human Diversity',
     'AF' => 'Foreign Language',
     'AH' => 'Historical Context',
@@ -393,10 +393,12 @@ function cu_class_core_requirements_values() {
     'AY' => 'Natural Sciences Non-sequence',
     'AZ' => 'Natural Sciences Lab',
   );
+  asort($requirements);
+  return $requirements;
 }
 
 function cu_class_subject_values() {
-  return array(
+  $subjects = array(
     'AREN' => 'Architecture Engineering, Engineering & Applied Sciences',
     'GEOG' => 'Geography, Arts & Sciences',
     'PHIL' => 'Philosophy, Arts & Sciences',
@@ -409,5 +411,25 @@ function cu_class_subject_values() {
     'JPNS' => 'Japanese , Arts & Sciences',
     'ANTH' => 'Anthropology, Arts & Sciences',
     'LEAD' => 'Leadership, Education',
+    'ETHN' => 'Ethnic Studies',
+    'MUEL' => 'Music, Music',
+    'EDUC' => 'Education, Education',
+    'LAWS' => 'Law, Law',
+    'CLAS' => 'Classics, Arts & Sciences',
+    'DNCE' => 'Dance, Arts & Sciences',
+    'THTR' => 'Theater, Arts & Sciences',
+    'ATOC' => 'Atmospheric & Oceanic Sciences, Arts & Sciences',
+    'PSYC' => 'Psychology & Neuroscience, Arts & Sciences',
+    'FREN' => 'French, Arts & Sciences',
+    'RUSS' => 'Russian, Arts & Sciences',
+    'EBIO' => 'Ecology & Evolutionary Biology, Arts & Sciences',
+    'PHYS' => 'Physics, Arts & Sciences',
+    'MCEN' => 'Mechanical Engineering, Engineering & Applied Sciences',
+    'CVEN' => 'Civil Engineering, Engineering & Applied Sciences',
+    'ENVD' => 'Environmental Design, Program in Environmental Design',
+    'CSCI' => 'Computer Sciences, Engineering & Applied Sciences',
+    'SPAN' => 'Spanish, Arts & Sciences',
   );
+  asort($subjects);
+  return $subjects;
 }
