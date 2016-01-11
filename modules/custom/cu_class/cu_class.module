@@ -374,7 +374,7 @@ function cu_class_core_requirements($reqs) {
   foreach ($keys as $key) {
     $values[] = $requirements[$key];
   }
-  return join(' ', $values);
+  return join(', ', $values);
 }
 
 function cu_class_core_requirements_values() {
