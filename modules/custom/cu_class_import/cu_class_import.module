@@ -41,6 +41,13 @@ function cu_class_import_menu() {
     'weight' => 0,
   );
   
+  $items['class/purge'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'cu_class_import_purge', 
+    'access arguments' => array('administer modules'),
+    'type' => MENU_CALLBACK,
+  );
+  
   $items['class/import/process'] = array(
     'title' => 'Class Import',
     'page callback' => 'cu_class_import_process',
@@ -283,7 +290,8 @@ function cu_course_import_curl($institution, $term, $subject, $course_id = NULL)
   if (variable_get('cu_class_import_url_prime', 1)) {
     $request_path .= "$institution/$term/$subject";
   }
-
+  
+  drupal_set_message('Attempting to import from ' . $request_path, 'status');
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
   // Return the transfer as a string of the values if the curl succeeds.
@@ -375,13 +383,13 @@ function cu_class_import_form_submit($form, &$form_state) {
   //dsm($course);
 
 
-  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  $response = cu_class_import_curl($institution, $term, $course->subject, $course_id);
   //dsm($response);
   $xml = simplexml_load_string($response);
 
   if (is_object($xml)) {
 
-    dsm(xml2array_parse($xml));
+    //dsm(xml2array_parse($xml));
     //dsm($xml);
 
     if ($xml->IS_FAULT) {
@@ -394,7 +402,7 @@ function cu_class_import_form_submit($form, &$form_state) {
     if(isset($xml->SEARCH_RESULT->SUBJECTS)){
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        //dsm(xml2array_parse($class));
+        dsm(xml2array_parse($class));
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
@@ -404,6 +412,7 @@ function cu_class_import_form_submit($form, &$form_state) {
         $subject = (string) $class->SUBJECT;
         $session_code = (string) $class->SESSION_CODE;
         $section = (string) $class->CLASS_SECTION;
+        $descrlong = (string) $class->SSR_DESCRLONG;
 
 
         // check to see if already exists...
@@ -413,7 +422,42 @@ function cu_class_import_form_submit($form, &$form_state) {
         if($result->rowCount()) {
 
           //UPDATE
-          drupal_set_message('Will eventually update local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title);
+           $existing_class = entity_load_single('cu_class', $class_id);
+           // attach the fields
+           //$class = entity_view('cu_class', array(entity_id('cu_class', $class) => $class), 'full');
+  
+           //$entities = entity_load('cu_class', array($class_id));
+           //$class = $entities[$class_id]; 
+           //dsm($existing_class);
+           
+           //diff fields for changes... only save update if there is a difference
+          
+			$existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
+			$existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
+			$existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
+			$existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
+			$existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+			$existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
+			$existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
+			$existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
+			$existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
+			
+			$existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+			$existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+			$existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+			$existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+			
+			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = (string) $class->START_DT;
+			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = (string) $class->END_DT;
+			
+			$existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+			$existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+			// expecting format to be 2016-01-08 22:45:45
+			$existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+            
+            $updated = entity_save('cu_class', $existing_class);
+
+          drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
         }
         else {
 
@@ -446,6 +490,7 @@ function cu_class_import_form_submit($form, &$form_state) {
         $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
         $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
         $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
 
         $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
         $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
@@ -457,18 +502,17 @@ function cu_class_import_form_submit($form, &$form_state) {
         // expecting format to be 2016-01-08 22:45:45
         $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
-
         $class = entity_create('cu_class', $values);
         $created = entity_save('cu_class', $class);
 
-        drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title);
+        drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
 
         }
       }
     } // isset
   }
 
-  return $ouput;
+  return '';
 }
 
 /**
@@ -552,5 +596,17 @@ function xml2array_parse($xml){
      } 
      return $return; 
 }
+
+function cu_class_import_purge() {
+  
+  
+  $class = cu_class_load('11582');
+  dsm($class);
+  $ids = entity_extract_ids('cu_class', $class);
+  dsm($ids);
+  
+  return 'test';
+}
+
 // cron
 
