@@ -1,9 +1,18 @@
 <?php
 // Create class title
-$class_title = html_entity_decode($fields['field_class_course_title_long']->content) . ' - Section ' . $fields['field_class_class_section']->content;
+$class_title = array();
+
+
+// Class format
+$class_title[] = html_entity_decode($fields['field_class_course_title_long']->content) . ' - Section ' . $fields['field_class_class_section']->content;
+
+if (isset($fields['field_class_instruction_mode']->content)) {
+  $mode = $fields['field_class_instruction_mode']->content;
+  $class_title[] = '<span>' . cu_class_format_translate($mode) . '</span>';
+}
 
 // Link class title to course page
-$class_title_link = l($class_title, 'course/' . $fields['field_class_crse_id']->content, array('query' => array('class_id' => $fields['field_class_class_nbr']->content)));
+$class_title_link = l(join(' ', $class_title), 'course/' . $fields['field_class_crse_id']->content, array('html' => TRUE, 'query' => array('class_id' => $fields['field_class_class_nbr']->content)));
 
 // Dates
 $start_date = $fields['field_class_start_dt']->content;

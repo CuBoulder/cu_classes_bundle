@@ -23,15 +23,22 @@
   padding-top: 0;
   margin: 0;
 }
-.course-class-list .class-wrapper h2 {
+h2.class-title {
   background: #e7e7e7;
   padding: 10px;
   margin: 0;
   font-size: 100%;
   text-transform: uppercase;
 }
-.class-view-mode-short .class-content {
-  padding: 20px 10px 0;
+h2.class-title span {
+  font-weight: 400;
+}
+.view-cu-classes h2.class-title span {
+  font-weight: 400;
+  color:#333;
+}
+.class-content {
+  padding: 20px 10px;
   background-color: #f7f7f7;
 }
 .course-class-list {
@@ -67,7 +74,9 @@
   padding: 5px;
 }
 .view-cu-classes .views-row {
-  padding:10px;
+}
+.view-cu-classes .views-row h2.class-title {
+
 }
 .view-cu-classes .views-row-odd {
   background-color: #f7f7f7;
@@ -80,7 +89,8 @@
   display: none;
   padding: 20px 0;
 }
-#other-classes .class-view-mode-short:nth-child(odd) .class-content {
+#other-classes .class-view-mode-short:nth-child(odd) .class-content,
+.view-cu-classes .views-row-odd .class-content {
   background-color: #fff;
 }
 #other-classes-trigger {
