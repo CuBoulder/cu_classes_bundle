@@ -420,6 +420,10 @@ function cu_class_import_form_submit($form, &$form_state) {
 		  
 		  $start_time = (string) $meeting->MEETING_TIME_START;
 		  $end_time = (string) $meeting->MEETING_TIME_END;
+		  
+		  $schedule_long = (string) $meeting->SSR_MTG_SCHED_LONG;
+		  
+		  $location_long = (string) $meeting->SSR_MTG_LOC_LONG;
 		}
            
         // check to see if already exists...
@@ -455,15 +459,18 @@ function cu_class_import_form_submit($form, &$form_state) {
 			
 			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
 			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
-			$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
-		    $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
+			$existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
+		    $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
+		    
+		    $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
+		    $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
 			
 			$existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
 			$existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
 			// expecting format to be 2016-01-08 22:45:45
 			$existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 			
-			$existing_class->field_class_instruction_mode_des[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+			$existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
             
             $updated = entity_save('cu_class', $existing_class);
 
@@ -508,14 +515,15 @@ function cu_class_import_form_submit($form, &$form_state) {
 		$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
 		$values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
 
-		$values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_MTG_SCHED_LONG;
+		$values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
+		$values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
 
 		$values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
 		$values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
 		// expecting format to be 2016-01-08 22:45:45
 		$values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
-		$values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+		$values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
         
         $class = entity_create('cu_class', $values);
         $created = entity_save('cu_class', $class);
