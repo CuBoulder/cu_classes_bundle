@@ -392,7 +392,7 @@ function cu_class_import_form_submit($form, &$form_state) {
     if(isset($xml->SEARCH_RESULT->SUBJECTS)){
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        dsm(xml2array_parse($class));
+        //dsm(xml2array_parse($class));
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
