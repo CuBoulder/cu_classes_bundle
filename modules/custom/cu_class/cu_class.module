@@ -372,7 +372,9 @@ function cu_class_core_requirements($reqs) {
   );
   $values = array();
   foreach ($keys as $key) {
-    $values[] = $requirements[$key];
+    if (isset($requirements[$key])) {
+      $values[] = $requirements[$key];
+    }
   }
   return join(', ', $values);
 }
