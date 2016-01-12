@@ -24,15 +24,17 @@
 }
 .view-cu-classes .class-wrapper {
   margin-bottom: 20px;
-  border-bottom:1px solid #bbb;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
 }
 h2.class-title {
-  background: #e7e7e7;
+  background: #333;
   padding: 10px;
   margin: 0;
   font-size: 100%;
   text-transform: uppercase;
-
+  a {
+    color:#fff;
+  }
 }
 h2.class-title span {
   font-weight: 400;
@@ -82,12 +84,7 @@ h2.class-title span {
 .view-cu-classes .views-row h2.class-title {
 
 }
-.view-cu-classes .views-row-odd {
-  background-color: red;
-}
-.view-cu-classes .views-row-event {
-  background-color: #f0f0f0;
-}
+
 .course-classes-all {
   padding:20px;
   border:1px solid #e0e0e0;
@@ -96,9 +93,12 @@ h2.class-title span {
   display: none;
   padding: 20px 0;
 }
+.class-content {
+  background-color: #f7f7f7;
+}
 #other-classes .class-view-mode-short:nth-child(odd) .class-content,
 .view-cu-classes .views-row-odd .class-content {
-  background-color: #fff;
+  background-color: #e7e7e7;
 }
 #other-classes-trigger {
   font-weight: 600;

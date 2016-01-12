@@ -10,9 +10,10 @@
 
 .course-class-list .class-wrapper { padding-top: 0; }
 
-.view-cu-classes .class-wrapper { margin-bottom: 20px; border-bottom: 1px solid #bbb; }
+.view-cu-classes .class-wrapper { margin-bottom: 20px; box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25); }
 
-h2.class-title { background: #e7e7e7; padding: 10px; margin: 0; font-size: 100%; text-transform: uppercase; }
+h2.class-title { background: #333; padding: 10px; margin: 0; font-size: 100%; text-transform: uppercase; }
+h2.class-title a { color: #fff; }
 
 h2.class-title span { font-weight: 400; }
 
@@ -39,15 +40,13 @@ h2.class-title span { font-weight: 400; }
 
 .view-cu-classes .views-exposed-form input.form-text { padding: 5px; }
 
-.view-cu-classes .views-row-odd { background-color: red; }
-
-.view-cu-classes .views-row-event { background-color: #f0f0f0; }
-
 .course-classes-all { padding: 20px; border: 1px solid #e0e0e0; }
 
 #other-classes { display: none; padding: 20px 0; }
 
-#other-classes .class-view-mode-short:nth-child(odd) .class-content, .view-cu-classes .views-row-odd .class-content { background-color: #fff; }
+.class-content { background-color: #f7f7f7; }
+
+#other-classes .class-view-mode-short:nth-child(odd) .class-content, .view-cu-classes .views-row-odd .class-content { background-color: #e7e7e7; }
 
 #other-classes-trigger { font-weight: 600; }
 
