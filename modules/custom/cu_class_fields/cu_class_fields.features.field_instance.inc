@@ -476,7 +476,11 @@ function cu_class_fields_field_default_field_instances() {
   // Exported field_instance: 'cu_class-class-field_class_institution'.
   $field_instances['cu_class-class-field_class_institution'] = array(
     'bundle' => 'class',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 'CUBLD',
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -766,6 +770,39 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_session_code'.
+  $field_instances['cu_class-class-field_class_session_code'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 30,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'field_name' => 'field_class_session_code',
+    'label' => 'SESSION_CODE',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 37,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_ssr_component'.
   $field_instances['cu_class-class-field_class_ssr_component'] = array(
     'bundle' => 'class',
@@ -994,7 +1031,11 @@ function cu_class_fields_field_default_field_instances() {
   // Exported field_instance: 'cu_class-class-field_class_strm'.
   $field_instances['cu_class-class-field_class_strm'] = array(
     'bundle' => 'class',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 2164,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -1165,6 +1206,7 @@ function cu_class_fields_field_default_field_instances() {
   t('MEETING_TIME_START');
   t('SCC_LATITUDE');
   t('SCC_LONGITUDE');
+  t('SESSION_CODE');
   t('SSR_COMPONENT');
   t('SSR_DESCRLONG');
   t('SSR_INSTR_LONG');
