@@ -257,17 +257,9 @@ function cu_course_import_form_submit($form, &$form_state) {
             drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
 
           }
-          // create entity with entity_save vs. db_insert?
-
-          
-
-          
         }
       } // isset
     }
-  
-  
-
   
   return $ouput;
 }
@@ -380,17 +372,15 @@ function cu_class_import_form_submit($form, &$form_state) {
   //need the subject... could be passing this since the course has it
   $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
 
-  //dsm($course);
-
-
   $response = cu_class_import_curl($institution, $term, $course->subject, $course_id);
-  //dsm($response);
+  
+  //strip ser namespace for now
+  $response  = str_replace("ser:", "", $response);
+  
   $xml = simplexml_load_string($response);
-
+  $ns = $xml->getNamespaces(true);
+  
   if (is_object($xml)) {
-
-    //dsm(xml2array_parse($xml));
-    //dsm($xml);
 
     if ($xml->IS_FAULT) {
 
@@ -402,7 +392,7 @@ function cu_class_import_form_submit($form, &$form_state) {
     if(isset($xml->SEARCH_RESULT->SUBJECTS)){
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        dsm(xml2array_parse($class));
+        //dsm(xml2array_parse($class));
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
@@ -414,7 +404,13 @@ function cu_class_import_form_submit($form, &$form_state) {
         $section = (string) $class->CLASS_SECTION;
         $descrlong = (string) $class->SSR_DESCRLONG;
 
+        $start = (string) $class->START_DT;
+        $end = (string) $class->END_DT;
 
+        //convert date to Y-m-d
+        $start = date('Y-m-d', strtotime($start));
+        $end = date('Y-m-d', strtotime($end));
+           
         // check to see if already exists...
         // if doesn't exist, add it
         // @TODO: Need to check specific sections?
@@ -423,15 +419,9 @@ function cu_class_import_form_submit($form, &$form_state) {
 
           //UPDATE
            $existing_class = entity_load_single('cu_class', $class_id);
-           // attach the fields
-           //$class = entity_view('cu_class', array(entity_id('cu_class', $class) => $class), 'full');
-  
-           //$entities = entity_load('cu_class', array($class_id));
-           //$class = $entities[$class_id]; 
-           //dsm($existing_class);
+ 
+           //@TODO: diff fields for changes... only save update if there is a difference
            
-           //diff fields for changes... only save update if there is a difference
-          
 			$existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
 			$existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
 			$existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
@@ -447,13 +437,20 @@ function cu_class_import_form_submit($form, &$form_state) {
 			$existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
 			$existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 			
-			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = (string) $class->START_DT;
-			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = (string) $class->END_DT;
+			$existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+		    $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+
+		    $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+			
+			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
+			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
 			
 			$existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
 			$existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
 			// expecting format to be 2016-01-08 22:45:45
 			$existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+			
+			$existing_class->field_class_instruction_mode_des[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
             
             $updated = entity_save('cu_class', $existing_class);
 
@@ -469,39 +466,44 @@ function cu_class_import_form_submit($form, &$form_state) {
           );
 
           // field_class_ssr_component
-          // field_class_meeting_time_start
-          // field_class_meeting_time_end
-          // field_class_end_dt
-          // field_class_start_dt
 
           // field_class_scc_latitude
           // field_class_scc_longitude
 
-          // field_class_ssr_mtg_sched_long
-          // field_class_ssr_instr_long
+		$values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
+		$values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
+		$values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
+		$values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
+		$values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+		$values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
+		$values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+		$values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+		$values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
 
-          //
+		$values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+		$values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+		$values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+		$values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 
-        $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
-        $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
-        $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
-        $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
-        $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
-        $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
-        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
-        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
+		$values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+		$values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
 
-        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+		$values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
 
-        $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-        $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-        // expecting format to be 2016-01-08 22:45:45
-        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+		$values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
+		$values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
+		$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = (string) $class->MEETING_TIME_START;
+		$values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = (string) $class->MEETING_TIME_END;
 
+		$values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_MTG_SCHED_LONG;
+
+		$values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+		$values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+		// expecting format to be 2016-01-08 22:45:45
+		$values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+		$values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+        
         $class = entity_create('cu_class', $values);
         $created = entity_save('cu_class', $class);
 
@@ -527,6 +529,8 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   //@TODO: need to back this up a level in the config... just replacing for now
   //$request_path = 'http://express.local/express14/primer/class/';
   $request_path = str_replace("courses", "class", $request_path);
+  
+  
   // Setup the cURL
   $curl = curl_init();
   // Empty out the error message.
@@ -541,8 +545,8 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
 
     $request_path .= "$institution/$term/$subject/$course_id";
   }
-
-  //dsm($request_path);
+  
+  drupal_set_message('Attempting to import from ' . $request_path, 'status');
 
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
