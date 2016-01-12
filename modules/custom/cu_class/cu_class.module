@@ -495,7 +495,7 @@ function cu_class_subject_values() {
     'LEAD' => 'CU Engage, Education',
     'LING' => 'Linguistics, Arts & Sciences',
     'MATH' => 'Mathematics, Arts & Sciences',
-    'MCDB' => 'Moleculary',
+    'MCDB' => 'Molecular and Cellular and Developmental Biology, Arts & Sciences ',
     'MCEN' => 'Mechanical Engineering, Engineering & Applied Sciences',
     'MDST' => 'Media Studies, Media, Communication & Information',
     'MGMT' => 'Management, Media, Communication & Information',
