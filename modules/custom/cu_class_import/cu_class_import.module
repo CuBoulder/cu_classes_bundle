@@ -378,7 +378,7 @@ function cu_class_import_form_submit($form, &$form_state) {
   $response  = str_replace("ser:", "", $response);
   
   $xml = simplexml_load_string($response);
-  $ns = $xml->getNamespaces(true);
+  //$ns = $xml->getNamespaces(true);
   
   if (is_object($xml)) {
 
@@ -403,13 +403,24 @@ function cu_class_import_form_submit($form, &$form_state) {
         $session_code = (string) $class->SESSION_CODE;
         $section = (string) $class->CLASS_SECTION;
         $descrlong = (string) $class->SSR_DESCRLONG;
-
-        $start = (string) $class->START_DT;
-        $end = (string) $class->END_DT;
-
-        //convert date to Y-m-d
-        $start = date('Y-m-d', strtotime($start));
-        $end = date('Y-m-d', strtotime($end));
+        
+        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
+          $start = (string) $meeting->START_DT;
+          $end = (string) $meeting->END_DT;
+       
+		  //convert date to Y-m-d
+		  $start = date('Y-m-d', strtotime($start));
+		  $end = date('Y-m-d', strtotime($end));
+		  
+		  //SSR_MTG_SCHED_LONG
+		  //SSR_MTG_LOC_LONG
+		  //SSR_INSTR_LONG
+		  
+		  $instructor = (string) $meeting->SSR_INSTR_LONG;
+		  
+		  $start_time = (string) $meeting->MEETING_TIME_START;
+		  $end_time = (string) $meeting->MEETING_TIME_END;
+		}
            
         // check to see if already exists...
         // if doesn't exist, add it
@@ -437,13 +448,15 @@ function cu_class_import_form_submit($form, &$form_state) {
 			$existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
 			$existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 			
-			$existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
-		    $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+			$existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+		    $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
 
-		    $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+		    $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
 			
 			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
 			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
+			$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+		    $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
 			
 			$existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
 			$existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
@@ -485,15 +498,15 @@ function cu_class_import_form_submit($form, &$form_state) {
 		$values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
 		$values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 
-		$values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
-		$values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+		$values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+		$values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
 
 		$values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
 
 		$values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
 		$values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
-		$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = (string) $class->MEETING_TIME_START;
-		$values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = (string) $class->MEETING_TIME_END;
+		$values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+		$values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
 
 		$values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_MTG_SCHED_LONG;
 
