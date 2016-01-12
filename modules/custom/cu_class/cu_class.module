@@ -346,6 +346,8 @@ function cu_class_preprocess_entity(&$vars) {
     else {
       $vars['course_requirements'] = '';
     }
+    $mode = $vars['content']['field_class_instruction_mode'][0]['#markup'];
+    $vars['format'] = cu_class_format_translate($mode);
   }
 }
 
@@ -372,7 +374,9 @@ function cu_class_core_requirements($reqs) {
   );
   $values = array();
   foreach ($keys as $key) {
-    $values[] = $requirements[$key];
+    if (isset($requirements[$key])) {
+      $values[] = $requirements[$key];
+    }
   }
   return join(', ', $values);
 }
@@ -429,18 +433,120 @@ function cu_class_subject_values() {
     'ENVD' => 'Environmental Design, Program in Environmental Design',
     'CSCI' => 'Computer Sciences, Engineering & Applied Sciences',
     'SPAN' => 'Spanish, Arts & Sciences',
+    'ACCT' => 'Accounting, Business',
+    'ANTH' => 'Anthropology, Arts & Sciences',
+    'APPM' => 'Applied Mathematics, Arts & Sciences',
+    'APRD' => 'Advertising, Public Relations and Media Design, Media, Communication and Information',
+    'AREN' => 'Architecture Engineering, Engineering & Applied Sciences',
+    'ARTF' => 'Art & Art History-Film, Arts & Sciences',
+    'ARTH' => 'Art History, Arts & Sciences',
+    'ARTS' => 'Art-Studio, Arts & Sciences',
+    'ASEN' => 'Aerospace Engineering Sciences, Engineering & Applied Sciences',
+    'ASIA' => 'Asian Studies, Arts & Sciences',
+    'ASTR' => 'Astrophysical & Planetary Sciences, Arts & Sciences',
+    'ATLS' => 'ATLAS, Engineering & Applied Sciences',
+    'ATOC' => 'Atmospheric & Oceanic Sciences, Arts & Sciences',
+    'BADM' => 'Business Administration, Business',
+    'BCOR' => 'Business Core, Business',
+    'BPOL' => 'Business Policy & Strategic Management, Business',
+    'CESR' => 'Current Emphasis on Social Responsibility, Business',
+    'CHEM' => 'Chemistry & Biochemistry, Arts & Sciences',
+    'CHEN' => 'Chemistry & Biochemistry, Arts & Sciences',
+    'CLAS' => 'Classics, Arts & Sciences',
+    'CMDP' => 'Critical Media Practices, Media, Communication & Information',
+    'COEN' => 'Engineering & Applied Science Administration',
+    'COML' => 'Comparative Literature, Arts & Sciences',
+    'COMM' => 'Communications, Media, Communication & Information',
+    'CSCI' => 'Computer Science, Engineering & Applied Science',
+    'CVEN' => 'Civil, Environmental & Architectural Engineering',
+    'DNCE' => 'Dance, Arts & Sciences',
+    'EBIO' => 'Ecology & Evolutionary Biology, Arts & Sciences',
+    'ECEN' => 'Electrical, Computer & Energy Engineering, Engineering & Applied Sciences',
+    'ECON' => 'Economics, Arts & Sciences',
+    'EDUC' => 'Education, Education',
+    'EMEN' => 'Engineering Management, Engineering & Applied Sciences',
+    'ENGL' => 'English, Arts & Sciences',
+    'ENVD' => 'Environmental Design, Program in Environmental Design',
+    'ENVS' => 'Environmental Studies, Arts & Sciences',
+    'ESBM' => 'Entrepreneurship & Small Business, Business',
+    'ETHN' => 'Ethnic Studies, Arts & Sciences',
+    'FILM' => 'Film Studies, Arts & Sciences',
+    'FNCE' => 'Finance, Business',
+    'FREN' => 'French, Arts & Sciences',
+    'GEEN' => 'General Engineering, Engineering & Applied Sciences',
+    'GEOG' => 'Geography, Arts & Sciences',
+    'GEOL' => 'Geological Sciences, Arts & Sciences',
+    'GRMN' => 'Germanic & Slavic Language & Lit, Arts & Sciences',
+    'HIST' => 'History, Arts & Sciences',
+    'HONR' => 'Honors, Arts & Sciences',
+    'HUEN' => 'Humanities for Engineers, Engineering & Applied Sciences',
+    'HUMN' => 'Humanities, Arts & Sciences',
+    'IAFS' => 'International Affairs, Arts & Sciences',
+    'INBU' => 'International Business, Business',
+    'IPHY' => 'Integrative Physiology, Arts & Sciences',
+    'ITAL' => 'Italian, Arts & Sciences',
+    'JPNS' => 'Japanese, Arts & Sciences',
+    'JRNL' => 'Journalism, Media, Communication and Information',
+    'JWST' => 'Jewish Studies, Arts & Sciences',
+    'KREN' => 'Korean, Arts & Sciences',
+    'LATN' => 'Latin, Arts & Sciences',
+    'LAWS' => 'Law, Law',
+    'LDSP' => 'Leadership Residential Academic Program, Cross College Program',
+    'LEAD' => 'CU Engage, Education',
+    'LING' => 'Linguistics, Arts & Sciences',
+    'MATH' => 'Mathematics, Arts & Sciences',
+    'MCDB' => 'Moleculary',
+    'MCEN' => 'Mechanical Engineering, Engineering & Applied Sciences',
+    'MDST' => 'Media Studies, Media, Communication & Information',
+    'MGMT' => 'Management, Media, Communication & Information',
+    'MKTG' => 'Marketing, Business',
+    'MUEL' => 'Music, Music',
+    'MUSC' => 'Music, Music',
+    'MUSM' => 'Museum Studies, Arts & Sciences',
+    'NRSC' => 'Psychology & Neuroscience, Arts & Sciences',
+    'PHIL' => 'Philosophy, Arts & Sciences',
+    'PHYS' => 'Physics, Arts & Sciences',
+    'PRLC' => ' Presidents Leadership Class, Cross College Program',
+    'PSCI' => 'Political Science, Arts & Sciences',
+    'PSYC' => 'Psychology, Arts & Sciences',
+    'REAL' => 'Real Estate, Business',
+    'RLST' => 'Religious Studies, Arts & Sciences',
+    'RUSS' => 'Russian, Arts & Sciences',
+    'SCAN' => ' Nordic, Arts & Sciences',
+    'SLHS' => 'Speech, Language and Hearing Sciences, Arts & Sciences',
+    'SOCY' => 'Sociology, Arts & Sciences',
+    'SPAN' => 'Spanish, Arts & Sciences',
+    'THTR' => 'Theater, Arts & Sciences',
+    'TLEN' => 'Telecommunication, Engineering & Applied Sciences',
+    'TMUS' => 'Thesis Music, Music',
+    'WMST' => 'Womens Studies, Arts & Sciences',
+    'WRTG' => 'Writing & Rhetoric, Arts & Sciences',
   );
   asort($subjects);
   return $subjects;
 }
 
+function cu_class_format_translate($format) {
+  $formats = cu_class_format_values();
+  if (isset($formats[$format])) {
+    return $formats[$format];
+  }
+}
+
 function cu_class_format_values() {
   $formats = array(
-    'P' => 'P',
-    'OL' => 'OL',
-    'CD' => 'CD',
-    'HY' => 'HY',
-    'IS' => 'IS',
+    'CD' => 'Candidate degree',
+    'CN' => 'CU Net',
+    'CO' => 'Correspondence',
+    'DL' => 'Distance Learning',
+    'HY' => 'Hybrid',
+    'IS' => 'Independent study',
+    'OL' => 'Online',
+    'OS' => 'Online, self-paced',
+    'OT' => 'Online, term-based',
+    'P' => 'In Person',
+    'Temp-oc' => 'Online Completion',
+    'TV' => 'Television',
   );
   asort($formats);
   return $formats;
