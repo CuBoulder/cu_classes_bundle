@@ -373,9 +373,13 @@ function cu_class_import_form_submit($form, &$form_state) {
   $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
 
   $response = cu_class_import_curl($institution, $term, $course->subject, $course_id);
-
+  
+  //strip ser namespace for now
+  $response  = str_replace("ser:", "", $response);
+  
   $xml = simplexml_load_string($response);
-
+  $ns = $xml->getNamespaces(true);
+  
   if (is_object($xml)) {
 
     if ($xml->IS_FAULT) {
@@ -388,7 +392,7 @@ function cu_class_import_form_submit($form, &$form_state) {
     if(isset($xml->SEARCH_RESULT->SUBJECTS)){
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        dsm(xml2array_parse($class));
+        //dsm(xml2array_parse($class));
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
@@ -433,6 +437,11 @@ function cu_class_import_form_submit($form, &$form_state) {
 			$existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
 			$existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 			
+			$existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+		    $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+
+		    $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+			
 			$existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
 			$existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
 			
@@ -440,6 +449,8 @@ function cu_class_import_form_submit($form, &$form_state) {
 			$existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
 			// expecting format to be 2016-01-08 22:45:45
 			$existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+			
+			$existing_class->field_class_instruction_mode_des[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
             
             $updated = entity_save('cu_class', $existing_class);
 
