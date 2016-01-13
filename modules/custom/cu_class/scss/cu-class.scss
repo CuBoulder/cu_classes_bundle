@@ -186,7 +186,7 @@ h2.class-title span {
 
 $radius: 0px;
 .view-cu-classes {
-  .form-type-select {
+  .form-type-select1 {
     overflow: hidden;
     width:100px;
     background-color:#e7e7e7;
@@ -197,7 +197,7 @@ $radius: 0px;
   input[type="text"] {
     font-size: 13px;
   }
-  select {
+  select1 {
     //background-color:#e7e7e7;
     color:#333;
     font-weight: 600;
@@ -212,6 +212,26 @@ $radius: 0px;
     box-shadow: none;
     padding:8px;
     width:118%;
+  }
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    border: 1px solid #aaa;
+    padding: 8px 30px 8px 8px;
+    background-color:#e7e7e7;
+    background-image: url(../images/select-arrows.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+    -webkit-border-radius: $radius;
+    -moz-border-radius: $radius;
+    border-radius: $radius;
+    border:none;
+    color: #333;
+    font-weight: 600;
+    font-size:12px;
+    max-width: 100px;
   }
   option {
     background:#f5f5f5;
@@ -235,7 +255,7 @@ $radius: 0px;
   input[type="reset"] {
     background-color: #444;
   }
-  @media screen and (min-width:768px) {
+  @media screen and (min-width:960px) {
     .views-exposed-widgets {
       display: table;
     }
@@ -246,7 +266,7 @@ $radius: 0px;
       vertical-align: bottom;
     }
   }
-  @media screen and (max-width:767px) {
+  @media screen and (max-width:959px) {
     .views-widget-filter-combine {
       float: none;
       margin: 0 0 10px 0;
@@ -259,10 +279,12 @@ $radius: 0px;
 }
 .class-view-column-headers {
   font-weight: 600;
-  padding:20px 20px 0;
-  font-size: 75%;
+  padding:10px 20px;
+  font-size: 65%;
   text-transform: uppercase;
   display: none;
+  color:#333;
+  background-color: #ccc;
 }
 @media screen and (min-width:768px) {
   .class-view-column-headers {
