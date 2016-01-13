@@ -36,8 +36,8 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_session_code_value']['#multiple'] = FALSE;
     $form['field_class_session_code_value']['#empty_value'] = '';
 
-    // Reset button
-    $form['actions']['reset'] = array('#markup' => '<input class="button button-gray" id="reset" type="reset" value="Reset" />', '#weight' => 1000);
+    $form['submit']['#attributes']['class'][] = 'button button-blue';
+    $form['reset']['#attributes']['class'][] = 'button button-gray';
   }
 }
 
