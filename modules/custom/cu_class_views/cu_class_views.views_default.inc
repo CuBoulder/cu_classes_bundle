@@ -28,6 +28,8 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Search';
+  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['style_plugin'] = 'default';
@@ -365,6 +367,25 @@ function cu_class_views_views_default_views() {
     6 => 0,
     10 => 0,
     16 => 0,
+  );
+  /* Filter criterion: Class: SESSION_CODE (field_class_session_code) */
+  $handler->display->display_options['filters']['field_class_session_code_value']['id'] = 'field_class_session_code_value';
+  $handler->display->display_options['filters']['field_class_session_code_value']['table'] = 'field_data_field_class_session_code';
+  $handler->display->display_options['filters']['field_class_session_code_value']['field'] = 'field_class_session_code_value';
+  $handler->display->display_options['filters']['field_class_session_code_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_session_code_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['operator_id'] = 'field_class_session_code_value_op';
+  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['label'] = 'Session';
+  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['operator'] = 'field_class_session_code_value_op';
+  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['identifier'] = 'field_class_session_code_value';
+  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
   );
 
   /* Display: Page */
