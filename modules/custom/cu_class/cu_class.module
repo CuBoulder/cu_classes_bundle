@@ -348,6 +348,9 @@ function cu_class_preprocess_entity(&$vars) {
     }
     $mode = $vars['content']['field_class_instruction_mode'][0]['#markup'];
     $vars['format'] = cu_class_format_translate($mode);
+
+    $session = $vars['content']['field_class_session_code'][0]['#markup'];
+    $vars['session'] = cu_class_session_translator($session);
   }
 }
 
@@ -550,4 +553,23 @@ function cu_class_format_values() {
   );
   asort($formats);
   return $formats;
+}
+
+function cu_class_session_translator($session) {
+  $sessions = array(
+    'BCS'	=> 'Boulder C Session/8 Weeks',
+    'BAS'	=> 'Boulder A Session/1st 5 Weeks',
+    'BAM'	=> 'Boulder Maymester/3 Weeks',
+    'BBS'	=> 'Boulder B Session/2nd 5 Weeks',
+    'BD1'	=> 'Boulder D Session/10 Weeks',
+    'BGS'	=> 'Boulder Augmester/3 Weeks',
+    'BS2'	=> 'Boulder Campus - 2nd 6 weeks',
+    'BS1'	=> 'Boulder Campus - 1st 6 weeks',
+    'BES'	=> 'Boulder E Session/1st 5 Weeks',
+    'BD2'	=> 'Boulder D (w/B Drop/Add Dates)',
+    'BFS'	=> 'Boulder F Session/2nd 5 Weeks',
+  );
+  if (isset($sessions[$session])) {
+    return $sessions[$session];
+  }
 }
