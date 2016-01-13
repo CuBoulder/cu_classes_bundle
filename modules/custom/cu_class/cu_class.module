@@ -367,7 +367,7 @@ function cu_class_core_requirements($reqs) {
     'AI' => 'Ideals & Values',
     'AL' => 'Literature and the Arts',
     'AM' => 'MAPS Course',
-    'AQ' => 'QUant Rsn & Mathmat Skills',
+    'AQ' => 'Quantitative Reasoning & Mathmatical Skills',
     'AS' => 'Contemporary Societies',
     'AU' => 'United States Context',
     'AW' => 'Written Communication',

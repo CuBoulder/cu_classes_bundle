@@ -71,7 +71,10 @@ function cu_course_display($course) {
     $output['classes']['#suffix'] = '</div>';
     // if multiple classes get description here
     $class = current($output['classes']['cu_class']);
-    $output['description'] = $class['field_class_ssr_descrlong'];
+    $output['description']['credits']['#markup'] = $class['field_class_units_acad_prog'][0]['#markup'] . ' Credit Hours';
+    $output['description']['credits']['#prefix'] = '<h3 class="course-credits">';
+    $output['description']['credits']['#suffix'] = '</h3>';
+    $output['description']['text'] = $class['field_class_ssr_descrlong'];
   }
 
 
@@ -91,7 +94,10 @@ function cu_course_display($course) {
     $output['classes_highlighted']['#suffix'] = '</div>';
     // If single class get description here
     $class = current($output['classes_highlighted']['cu_class']);
-    $output['description'] = $class['field_class_ssr_descrlong'];
+    $output['description']['credits']['#markup'] = $class['field_class_units_acad_prog'][0]['#markup'] . ' Credit Hours';
+    $output['description']['credits']['#prefix'] = '<h3 class="course-credits">';
+    $output['description']['credits']['#suffix'] = '</h3>';
+    $output['description']['text'] = $class['field_class_ssr_descrlong'];
 
     // Put the rest of the classes in an expandable section
     if ($class_multiple) {
@@ -103,6 +109,7 @@ function cu_course_display($course) {
   // Description markup
   $output['description']['#prefix'] = '<div class="course-description">';
   $output['description']['#suffix'] = '</div>';
+  $output['description']['#sorted'] = TRUE;
   return $output;
 }
 
