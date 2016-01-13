@@ -255,12 +255,14 @@ $radius: 0px;
     background-image: none;
     -webkit-appearance: none;
     border: none;
-    box-shadow: none;
     padding:8px;
   }
-  input[type="reset"] {
+  input#edit-reset {
     background-color: #444;
   }
+  input[type=submit]:focus {
+  outline: #000 solid 2px;
+}
   @media screen and (min-width:960px) {
     .views-exposed-widgets {
       display: table;
