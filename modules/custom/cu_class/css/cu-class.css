@@ -66,6 +66,8 @@ h2.class-title span { font-weight: 700; }
 .view-cu-classes input[type="text"] { font-size: 13px; }
 .view-cu-classes select1 { color: #333; font-weight: 600; font-size: 12px; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; background-image: none; background-color: transparent; -webkit-appearance: none; border: none; box-shadow: none; padding: 8px; width: 118%; }
 .view-cu-classes select { -webkit-appearance: none; -moz-appearance: none; -ms-appearance: none; appearance: none; border: 1px solid #aaa; padding: 8px 30px 8px 8px; background-color: #e7e7e7; background-image: url(../images/select-arrows.png); background-position: right center; background-repeat: no-repeat; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; border: none; color: #333; font-weight: 600; font-size: 12px; max-width: 100px; }
+.view-cu-classes select:hover { background-color: #d7d7d7; }
+.view-cu-classes select::-ms-expand { display: none; }
 .view-cu-classes option { background: #f5f5f5; color: #333; font-weight: 400; }
 .view-cu-classes input[type="submit"], .view-cu-classes input[type="reset"] { background-color: #007BC8; color: #fff; font-weight: 600; font-size: 12px; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; background-image: none; -webkit-appearance: none; border: none; box-shadow: none; padding: 8px; }
 .view-cu-classes input[type="reset"] { background-color: #444; }
