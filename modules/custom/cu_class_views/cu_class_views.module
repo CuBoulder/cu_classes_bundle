@@ -30,6 +30,26 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_instruction_mode_value']['#empty_value'] = '';
 
     // Reset button
-    $form['actions']['reset'] = array('#markup' => '<input id="reset" type="reset" value="Reset" />', '#weight' => 1000);
+    $form['actions']['reset'] = array('#markup' => '<input class="button button-gray" id="reset" type="reset" value="Reset" />', '#weight' => 1000);
   }
+}
+
+function cu_class_views_views_pre_render(&$view) {
+  $view_headers = '<div class="class-view-column-headers">
+    <div class="row clearfix">
+      <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        Class
+      </div>
+      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        Session
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+        Credits
+      </div>
+      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        Format
+      </div>
+    </div>
+  </div>';
+  $view->attachment_before = $view_headers;
 }
