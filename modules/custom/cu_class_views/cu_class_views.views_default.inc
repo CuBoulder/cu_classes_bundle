@@ -157,7 +157,7 @@ function cu_class_views_views_default_views() {
     'multiple_number' => '',
     'multiple_from' => '',
     'multiple_to' => '',
-    'show_remaining_days' => 1,
+    'show_remaining_days' => 0,
   );
   /* Field: Class: ENRL_CAP */
   $handler->display->display_options['fields']['field_class_enrl_cap']['id'] = 'field_class_enrl_cap';
@@ -229,6 +229,24 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_subject']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_subject']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_subject']['element_default_classes'] = FALSE;
+  /* Field: Class: SESSION_CODE */
+  $handler->display->display_options['fields']['field_class_session_code']['id'] = 'field_class_session_code';
+  $handler->display->display_options['fields']['field_class_session_code']['table'] = 'field_data_field_class_session_code';
+  $handler->display->display_options['fields']['field_class_session_code']['field'] = 'field_class_session_code';
+  $handler->display->display_options['fields']['field_class_session_code']['label'] = '';
+  $handler->display->display_options['fields']['field_class_session_code']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_session_code']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_session_code']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_session_code']['element_default_classes'] = FALSE;
+  /* Field: Class: UNITS_ACAD_PROG */
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['id'] = 'field_class_units_acad_prog';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['table'] = 'field_data_field_class_units_acad_prog';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['field'] = 'field_class_units_acad_prog';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['label'] = '';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_units_acad_prog']['element_default_classes'] = FALSE;
   $handler->display->display_options['filter_groups']['groups'] = array(
     1 => 'AND',
     2 => 'AND',
