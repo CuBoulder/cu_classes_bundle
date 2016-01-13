@@ -13,6 +13,13 @@
     text-transform: uppercase;
   }
 }
+@media screen and (min-width:768px) {
+  .view-cu-classes .class-section h3 {
+    position: absolute !important;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px, 1px, 1px, 1px);
+  }
+}
 .class-view-mode-short .course-classes {
   border-top:1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
@@ -248,6 +255,18 @@ $radius: 0px;
         width: 100%;
       }
     }
+  }
+}
+.class-view-column-headers {
+  font-weight: 600;
+  padding:20px 20px 0;
+  font-size: 75%;
+  text-transform: uppercase;
+  display: none;
+}
+@media screen and (min-width:768px) {
+  .class-view-column-headers {
+    display: block;
   }
 }
 

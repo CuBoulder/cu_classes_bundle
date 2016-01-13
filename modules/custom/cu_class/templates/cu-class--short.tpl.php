@@ -1,4 +1,3 @@
-<?php dpm($content); ?>
 <div class="class-view-mode-short class-entity-wrapper">
   <div class="class-wrapper">
     <div class="class-title-wrapper">

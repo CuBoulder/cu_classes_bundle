@@ -55,7 +55,10 @@ $format = cu_class_format_translate($fields['field_class_instruction_mode']->con
         <div class="class-availability col-lg-2 col-md-2 col-sm-2 col-xs-12">
           <div class="class-section">
             <h3 >Credits</h3>
-            <?php print $fields['field_class_units_acad_prog']->content; ?>
+            <?php
+              $credits_value = $fields['field_class_units_acad_prog']->content;
+              print number_format($credits_value, 1, '.', '');
+            ?>
           </div>
         </div>
 

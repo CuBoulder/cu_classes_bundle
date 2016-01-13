@@ -3,6 +3,7 @@
 .class-section { margin-bottom: 10px; }
 .class-section h3 { font-size: 85%; margin: 0; text-transform: uppercase; }
 
+@media screen and (min-width: 768px) { .view-cu-classes .class-section h3 { position: absolute !important; clip: rect(1px 1px 1px 1px); /* IE6, IE7 */ clip: rect(1px, 1px, 1px, 1px); } }
 .class-view-mode-short .course-classes { border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; }
 
 .class-wrapper { font-size: 85%; }
@@ -72,6 +73,9 @@ h2.class-title span { font-weight: 700; }
 @media screen and (max-width: 767px) { .view-cu-classes .views-widget-filter-combine { float: none; margin: 0 0 10px 0; width: 100%; }
   .view-cu-classes .views-widget-filter-combine input.form-text { width: 100%; } }
 
+.class-view-column-headers { font-weight: 600; padding: 20px 20px 0; font-size: 75%; text-transform: uppercase; display: none; }
+
+@media screen and (min-width: 768px) { .class-view-column-headers { display: block; } }
 h3.course-credits { color: #777; font-size: 100%; }
 
 .class-title-wrapper h2.class-format { margin: 0; }
