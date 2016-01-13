@@ -186,32 +186,8 @@ h2.class-title span {
 
 $radius: 0px;
 .view-cu-classes {
-  .form-type-select1 {
-    overflow: hidden;
-    width:100px;
-    background-color:#e7e7e7;
-    background-image: url(../images/select-arrows.png);
-    background-position: right center;
-    background-repeat: no-repeat;
-  }
   input[type="text"] {
     font-size: 13px;
-  }
-  select1 {
-    //background-color:#e7e7e7;
-    color:#333;
-    font-weight: 600;
-    font-size:12px;
-    -webkit-border-radius: $radius;
-    -moz-border-radius: $radius;
-    border-radius: $radius;
-    background-image: none;
-    background-color: transparent;
-    -webkit-appearance: none;
-    border: none;
-    box-shadow: none;
-    padding:8px;
-    width:118%;
   }
   select {
     -webkit-appearance: none;
@@ -232,18 +208,20 @@ $radius: 0px;
     font-weight: 600;
     font-size:12px;
     max-width: 100px;
+    width:100%;
   }
   select:hover {
     background-color: #d7d7d7;
   }
   select::-ms-expand {
     display: none;
-}
+  }
   option {
     background:#f5f5f5;
     color:#333;
     font-weight: 400;
   }
+
   input[type="submit"], input[type="reset"] {
     background-color: #007BC8;
     color:#fff;
@@ -266,12 +244,17 @@ $radius: 0px;
   @media screen and (min-width:960px) {
     .views-exposed-widgets {
       display: table;
+      table-layout:fixed;
     }
     .views-exposed-widgets > div {
       display: table-cell;
       float: none;
       margin: 0;
       vertical-align: bottom;
+      white-space: nowrap;
+    }
+    select {
+      max-width: none;
     }
   }
   @media screen and (max-width:959px) {
