@@ -400,7 +400,27 @@ function cu_class_core_requirements_values() {
     'AY' => 'Natural Sciences Non-sequence',
     'AZ' => 'Natural Sciences Lab',
   );
-  asort($requirements);
+  // Cache available class formats
+  if ($cache = cache_get('cu_class_search_requirements_available')) {
+    $requirements = $cache->data;
+  } else {
+    $query = db_select('field_data_field_class_crse_attr_value', 'req');
+    $query->fields('req', array('field_class_crse_attr_value_value'));
+    $query->groupBy('req.field_class_crse_attr_value_value');
+    $class_reqs = $query->execute()->fetchCol();
+
+    $current_reqs = array();
+    foreach ($class_reqs as $class_req) {
+      $current_reqs[$class_req] = $class_req;
+    }
+    foreach ($requirements as $key => $requirement) {
+      if (!array_key_exists($key, $current_reqs)) {
+        unset($requirements[$key]);
+      }
+    }
+    asort($requirements);
+    cache_set('cu_class_search_requirements_available', $requirements, 'cache', time() + 60 * 60 * 24);
+  }
   return $requirements;
 }
 
@@ -525,7 +545,29 @@ function cu_class_subject_values() {
     'WMST' => 'Womens Studies',
     'WRTG' => 'Writing & Rhetoric',
   );
-  asort($subjects);
+
+  // Cache available class subjects
+  if ($cache = cache_get('cu_class_search_subjects_available')) {
+    $subjects = $cache->data;
+  } else {
+    $query = db_select('field_data_field_class_subject', 'subject');
+    $query->fields('subject', array('field_class_subject_value'));
+    $query->groupBy('subject.field_class_subject_value');
+    $class_subjects = $query->execute()->fetchCol();
+
+    $current_subjects = array();
+    foreach ($class_subjects as $class_subject) {
+      $current_subjects[$class_subject] = $class_subject;
+    }
+    foreach ($subjects as $key => $subject) {
+      if (!array_key_exists($key, $current_subjects)) {
+        unset($subjects[$key]);
+      }
+    }
+    asort($subjects);
+    cache_set('cu_class_search_subjects_available', $subjects, 'cache', time() + 60 * 60 * 24);
+  }
+
   return $subjects;
 }
 
@@ -551,7 +593,29 @@ function cu_class_format_values() {
     'Temp-oc' => 'Online Completion',
     'TV' => 'Television',
   );
-  asort($formats);
+
+  // Cache available class formats
+  if ($cache = cache_get('cu_class_search_formats_available')) {
+    $formats = $cache->data;
+  } else {
+    $query = db_select('field_data_field_class_instruction_mode', 'mode');
+    $query->fields('mode', array('field_class_instruction_mode_value'));
+    $query->groupBy('mode.field_class_instruction_mode_value');
+    $modes = $query->execute()->fetchCol();
+
+    $current_modes = array();
+    foreach ($modes as $mode) {
+      $current_modes[$mode] = $mode;
+    }
+    foreach ($formats as $key => $format) {
+      if (!array_key_exists($key, $current_modes)) {
+        unset($formats[$key]);
+      }
+    }
+    asort($formats);
+    cache_set('cu_class_search_formats_available', $formats, 'cache', time() + 60 * 60 * 24);
+  }
+
   return $formats;
 }
 
@@ -588,5 +652,28 @@ function cu_class_session_values() {
     'BD2'	=> 'D (w/B Drop/Add Dates)',
     'BFS'	=> 'F Session/2nd 5 Weeks',
   );
+
+  // Cache available class sessions
+  if ($cache = cache_get('cu_class_search_sessions_available')) {
+    $sessions = $cache->data;
+  } else {
+    $query = db_select('field_data_field_class_session_code', 'session');
+    $query->fields('session', array('field_class_session_code_value'));
+    $query->groupBy('session.field_class_session_code_value');
+    $class_sessions = $query->execute()->fetchCol();
+
+    $current_sessions = array();
+    foreach ($class_sessions as $class_session) {
+      $current_sessions[$class_session] = $class_session;
+    }
+    foreach ($sessions as $key => $session) {
+      if (!array_key_exists($key, $current_sessions)) {
+        unset($sessions[$key]);
+      }
+    }
+    asort($sessions);
+    cache_set('cu_class_search_sessions_available', $sessions, 'cache', time() + 60 * 60 * 24);
+  }
+
   return $sessions;
 }
