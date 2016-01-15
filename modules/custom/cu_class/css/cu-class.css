@@ -72,7 +72,7 @@ h2.class-title span { font-weight: 700; }
 .view-cu-classes input[type=submit]:focus { outline: #000 solid 2px; }
 @media screen and (min-width: 960px) { .view-cu-classes .views-exposed-widgets { display: table; table-layout: fixed; }
   .view-cu-classes .views-exposed-widgets > div { display: table-cell; float: none; margin: 0; vertical-align: bottom; white-space: nowrap; }
-  .view-cu-classes select { max-width: none; } }
+  .view-cu-classes select { max-width: 120px; } }
 @media screen and (max-width: 959px) { .view-cu-classes .views-widget-filter-combine { float: none; margin: 0 0 10px 0; width: 100%; }
   .view-cu-classes .views-widget-filter-combine input.form-text { width: 100%; } }
 
