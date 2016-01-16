@@ -432,15 +432,8 @@ function cu_class_import_course_batch_update() {
   //$results = db_query('SELECT * FROM {cu_course}');
   $subjects = cu_class_import_get_subjects();
 
-  // @TODO: Check to see when the last time this course was updated?
-  // Currently the changed timestamp is only updated when the course
-  // is created
-
   foreach ($subjects as $subject) {
-    //dsm($subject);
-    $batch['operations'][] = array('cu_class_import_course_batch_process', $subject);
-    // this is so we don't overwhelm the servers
-    //sleep(1);
+    $batch['operations'][] = array('cu_class_import_course_batch_process', array($subject));
   }
 
   batch_set($batch);
@@ -450,16 +443,16 @@ function cu_class_import_course_batch_update() {
 /**
  * The batch processor.
  */
-function cu_class_import_course_batch_process($subject, &$context) {
+function cu_class_import_course_batch_process($subjects, &$context) {
+
   // Do heavy lifting here...
   // Display a progress message...
-  $context['message'] = "Now processing Course: $subject...";
+  $context['message'] = "Now processing Course: $subjects[0]...";
 
   $term = '2164';
   $institution = 'CUBLD';
-  //dsm($subject);
 
-  cu_course_import($institution, $term, $subject);
+  cu_course_import($institution, $term, $subjects[0]);
 
 }
 
@@ -657,7 +650,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
  * process the import
  */
 function cu_course_import($institution, $term, $subject) {
-
+  dsm('cu_course_import');
   $response = cu_course_import_curl($institution, $term, $subject, $course_id);
   //dsm($response);
   $xml = simplexml_load_string($response);

@@ -79,7 +79,7 @@ function cu_course_menu() {
   $items['course/add'] = array(
     'title' => 'Add Course',
     'page callback' => 'cu_course_add',
-    'access callback' => 'cu_course_access',
+    'access callback' => FALSE,
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
@@ -90,7 +90,7 @@ function cu_course_menu() {
   $items[$course_uri] = array(
     'page callback' => 'cu_course_display',
     'page arguments' => array($course_uri_argument_position),
-    'access callback' => TRUE,
+    'access arguments' => array('access content'),
     'file' => 'cu_course.pages.inc',
     'title callback' => 'cu_course_title',
     'title arguments' => array($course_uri_argument_position),
@@ -101,7 +101,7 @@ function cu_course_menu() {
     'weight' => -10,
     'page callback' => 'cu_course_display',
     'page arguments' => array($course_uri_argument_position),
-    'access callback' => TRUE,
+    'access arguments' =>  array('access content'),
     'file' => 'cu_course.pages.inc',
     'title' => 'View',
   );
@@ -112,7 +112,7 @@ function cu_course_menu() {
     'title arguments' => array($course_uri_argument_position),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_course_delete_form', $course_uri_argument_position),
-    'access callback' => cu_course_access,
+    'access callback' => FALSE,
     'file' => 'cu_course.admin.inc',
   );
 
@@ -120,7 +120,7 @@ function cu_course_menu() {
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_course_form', $course_uri_argument_position),
-    'access callback' => 'cu_course_access',
+    'access callback' => FALSE,
     'file' => 'cu_course.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -132,7 +132,7 @@ function cu_course_menu() {
     'description' => 'Configure Course settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_course_settings_form'),
-    'access arguments' => array('administer coursees'),
+    'access callback' => FALSE,
     'type' => MENU_NORMAL_ITEM,
     'file' => 'cu_course.admin.inc',
   );
@@ -144,46 +144,12 @@ function cu_course_menu() {
     'title' => 'Course',
     'description' => 'Manage Course Entity Structure',
     'page callback' => 'cu_course_admin_page',
-    'access arguments' => array('administer course content'),
+    'access callback' => FALSE,
     'weight' => -50,
   );
 
   return $items;
 }
-
-/**
- * Access callback for ???
- */
-function cu_course_access() {
-  // switch to a custom permission?
-  return TRUE;
-}
-
-/**
- * Implements hook_permission().
- */
-function cu_course_permission() {
-  return array(
-    'administer course content' => array(
-      'title' => 'Administer Course Content',
-      'description' => 'Configure import settings',
-    ),
-    'import coursees' => array(
-      'title' => 'Import Course Content',
-      'description' => 'Allows user to find a specific course or group of coursees to import',
-    ),
-    'override course fields' => array(
-      'title' => 'Override Course Fields',
-      'description' => 'Modify fields added to Course entity',
-    ),
-    'view unpublished coursees' => array(
-      'title' => 'View Unpublished Course Content',
-      'description' => '',
-    ),
-  );
-}
-
-
 
 /**
  * Implements hook_entity_view().
