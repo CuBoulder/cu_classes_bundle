@@ -42,6 +42,13 @@ function cu_class_import_menu() {
     'access arguments' => array('administer modules'),
   );
 
+  // IMPORTS ALL COURSE FOR EACH SUBJECT
+  $items['course/import/batch'] = array(
+    'title' => 'Batch Update Classes',
+    'page callback' => 'cu_class_import_course_batch_update',
+    'access arguments' => array('administer modules'),
+  );
+
   // DELETES ALL CLASSES
   $items['class/purge'] = array(
     'title' => 'Class Import',
@@ -116,96 +123,7 @@ function cu_course_import_form() {
 	);
 
 
-  $subject_options = array(
-  'ENVD' => 'ENVD',
-  'ARTF' => 'ARTF',
-	'ARTH' => 'ARTH',
-	'ARTS' => 'ARTS',
-	'JPNS' => 'JPNS',
-	'KREN' => 'KREN',
-	'ANTH' => 'ANTH',
-	'APPM' => 'APPM',
-	'ASIA' => 'ASIA',
-	'ASTR' => 'ASTR',
-	'ATOC' => 'ATOC',
-	'CHEM' => 'CHEM',
-	'CLAS' => 'CLAS',
-	'LATN' => 'LATN',
-	'COML' => 'COML',
-	'EBIO' => 'EBIO',
-	'ECON' => 'ECON',
-	'ENGL' => 'ENGL',
-	'ENVS' => 'ENVS',
-	'ETHN' => 'ETHN',
-	'FILM' => 'FILM',
-	'FREN' => 'FREN',
-	'ITAL' => 'ITAL',
-	'GEOG' => 'GEOG',
-	'GEOL' => 'GEOL',
-	'GRMN' => 'GRMN',
-	'RUSS' => 'RUSS',
-	'SCAN' => 'SCAN',
-	'HIST' => 'HIST',
-	'HONR' => 'HONR',
-	'HUMN' => 'HUMN',
-	'IAFS' => 'IAFS',
-	'IPHY' => 'IPHY',
-	'JWST' => 'JWST',
-	'LING' => 'LING',
-	'MATH' => 'MATH',
-	'MCDB' => 'MCDB',
-	'MUSM' => 'MUSM',
-	'PHIL' => 'PHIL',
-	'PHYS' => 'PHYS',
-	'PSCI' => 'PSCI',
-	'NRSC' => 'NRSC',
-	'PSYC' => 'PSYC',
-	'WRTG' => 'WRTG',
-	'RLST' => 'RLST',
-	'SLHS' => 'SLHS',
-	'SOCY' => 'SOCY',
-	'SPAN' => 'SPAN',
-	'DNCE' => 'DNCE',
-	'THTR' => 'THTR',
-	'WMST' => 'WMST',
-	'ACCT' => 'ACCT',
-	'BADM' => 'BADM',
-	'BCOR' => 'BCOR',
-	'BPOL' => 'BPOL',
-	'CESR' => 'CESR',
-	'ESBM' => 'ESBM',
-	'FNCE' => 'FNCE',
-	'INBU' => 'INBU',
-	'MGMT' => 'MGMT',
-	'MKTG' => 'MKTG',
-	'REAL' => 'REAL',
-	'APRD' => 'APRD',
-	'COMM' => 'COMM',
-	'CMDP' => 'CMDP',
-	'JRNL' => 'JRNL',
-	'MDST' => 'MDST',
-	'LDSP' => 'LDSP',
-	'PRLC' => 'PRLC',
-	'EDUC' => 'EDUC',
-	'LEAD' => 'LEAD',
-	'ASEN' => 'ASEN',
-	'ATLS' => 'ATLS',
-	'CHEN' => 'CHEN',
-	'CSCI' => 'CSCI',
-	'AREN' => 'AREN',
-	'CVEN' => 'CVEN',
-	'ECEN' => 'ECEN',
-	'EMEN' => 'EMEN',
-	'COEN' => 'COEN',
-	'GEEN' => 'GEEN',
-	'HUEN' => 'HUEN',
-	'MCEN' => 'MCEN',
-	'TLEN' => 'TLEN',
-	'LAWS' => 'LAWS',
-	'MUEL' => 'MUEL',
-	'MUSC' => 'MUSC',
-	'TMUS' => 'TMUS',
-  );
+  $subject_options = cu_class_import_get_subjects();
 
   asort($subject_options);
   $form['subject'] = array(
@@ -235,73 +153,16 @@ function cu_course_import_form() {
  * Process form
  */
 function cu_course_import_form_submit($form, &$form_state) {
-
-  //$term = '2161';
+  //@TODO: Term and Institution should come from form.
+  $term = '2164';
   $institution = 'CUBLD';
 
   $subject = $form['subject']['#value'];
-  $term = $form['term']['#value'];
 
-  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
-  //dsm($response);
-  $xml = simplexml_load_string($response);
+  cu_course_import($institution, $term, $subject);
 
-  if (is_object($xml)) {
+  return '';
 
-      //dsm(xml2array_parse($xml));
-
-      if ($xml->IS_FAULT) {
-
-        $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
-        drupal_set_message($error, 'error');
-        return;
-      }
-
-      if(isset($xml->SEARCH_RESULT->SUBJECTS)){
-        foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
-
-          //dsm($subject);
-
-          $course_id = (string) $subject->CRSE_ID;
-          $catalog_number = (string) $subject->CATALOG_NBR;
-          $title = (string) $subject->COURSE_TITLE_LONG;
-
-          $output .= $title . '<br />';
-
-          // check to see if already exists...
-
-
-          // if doesn't exist, add it
-          $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
-          if($result->rowCount() > 0) {
-
-            //UPDATE
-          }
-          else {
-
-            $result = db_insert('cu_course')
-              ->fields(array(
-                'course_id' => (string) $subject->CRSE_ID,
-                'title' => (string) $subject->COURSE_TITLE_LONG,
-                'type' => 'course',
-                'changed' => REQUEST_TIME,
-                'subject' => (string) $subject->SUBJECT,
-                'term_id' => $term,
-                'inst' => $institution,
-                'catalog_nbr' => (string) $subject->CATALOG_NBR,
-              ))
-              ->execute();
-
-            // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
-            //$course = entity_create('cu_course', $values);
-            drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
-
-          }
-        }
-      } // isset
-    }
-
-  return $ouput;
 }
 
 
@@ -452,7 +313,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
 
   if (!variable_get('cu_class_import_url_prime', 0)) {
 
-
     // @TODO: Set these in admin config
     $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
     $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
@@ -475,8 +335,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
     //dsm($curl_request_body);
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
-
-
   }
 
   // Get the data! Also check and see if the curl worked and log the error if it did not.
@@ -491,19 +349,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   return str_replace('<?xml version="1.0"?>', '', $curl_response);
 }
 
-
-/**
- * Deletes all classes
- */
-function cu_class_import_purge() {
-  $output = array();
-  $classes = entity_load('cu_class');
-  foreach ($classes as $key => $class) {
-   entity_delete('cu_class', $key);
-  }
-  drupal_set_message('All Classes have been deleted.');
-  return $output;
-}
 
 
 /**
@@ -520,7 +365,7 @@ function cu_class_import_batch_update() {
   );
 
   // get all courses
-  $results = db_query('SELECT * FROM {cu_course}');
+  $results = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
 
   // @TODO: Check to see when the last time this course was updated?
   // Currently the changed timestamp is only updated when the course
@@ -528,8 +373,6 @@ function cu_class_import_batch_update() {
 
   foreach ($results as $result) {
     $batch['operations'][] = array('cu_class_import_batch_process', array($result));
-    // this is so we don't overwhelm the servers
-    //sleep(1);
   }
 
   batch_set($batch);
@@ -550,7 +393,8 @@ function cu_class_import_batch_process($course, &$context) {
   $course_id = $course->course_id;
 
   cu_class_import($institution, $term, $subject, $course_id);
-
+  // this is so we don't overwhelm the servers
+  sleep(1);
 }
 
 /**
@@ -569,6 +413,72 @@ function cu_class_import_batch_finished($success, $results, $operations) {
     drupal_set_message($message, 'error');
   }
   drupal_set_message(l('Attempt to run again', 'class/import/batch'));
+}
+
+/**
+ * The batch callback.
+ */
+function cu_class_import_course_batch_update() {
+  $batch = array(
+    'operations' => array(),
+    'finished' => 'cu_class_import_course_batch_finished',
+    'title' => t('Batch update'),
+    'init_message' => t('update is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Update has encountered an error.')
+  );
+
+  // get all courses
+  //$results = db_query('SELECT * FROM {cu_course}');
+  $subjects = cu_class_import_get_subjects();
+
+  // @TODO: Check to see when the last time this course was updated?
+  // Currently the changed timestamp is only updated when the course
+  // is created
+
+  foreach ($subjects as $subject) {
+    //dsm($subject);
+    $batch['operations'][] = array('cu_class_import_course_batch_process', $subject);
+    // this is so we don't overwhelm the servers
+    //sleep(1);
+  }
+
+  batch_set($batch);
+  batch_process('courses/search'); // The path to redirect to when done.
+}
+
+/**
+ * The batch processor.
+ */
+function cu_class_import_course_batch_process($subject, &$context) {
+  // Do heavy lifting here...
+  // Display a progress message...
+  $context['message'] = "Now processing Course: $subject...";
+
+  $term = '2164';
+  $institution = 'CUBLD';
+  //dsm($subject);
+
+  cu_course_import($institution, $term, $subject);
+
+}
+
+/**
+ * The batch finish handler.
+ */
+function cu_class_import_course_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message('Update is complete!');
+  }
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE)
+    ));
+    drupal_set_message($message, 'error');
+  }
+  drupal_set_message(l('Attempt to run again', 'course/import/batch'));
 }
 
 /**
@@ -744,6 +654,86 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 }
 
 /**
+ * process the import
+ */
+function cu_course_import($institution, $term, $subject) {
+
+  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
+  //dsm($response);
+  $xml = simplexml_load_string($response);
+
+  if (is_object($xml)) {
+
+      //dsm(xml2array_parse($xml));
+
+      if ($xml->IS_FAULT) {
+
+        $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
+        drupal_set_message($error, 'error');
+        return;
+      }
+
+      if(isset($xml->SEARCH_RESULT->SUBJECTS)){
+        foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
+
+          //dsm($subject);
+
+          $course_id = (string) $subject->CRSE_ID;
+          $catalog_number = (string) $subject->CATALOG_NBR;
+          $title = (string) $subject->COURSE_TITLE_LONG;
+
+          $output .= $title . '<br />';
+
+          // check to see if already exists...
+
+
+          // if doesn't exist, add it
+          $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
+          if($result->rowCount() > 0) {
+
+            //UPDATE
+          }
+          else {
+
+            $result = db_insert('cu_course')
+              ->fields(array(
+                'course_id' => (string) $subject->CRSE_ID,
+                'title' => (string) $subject->COURSE_TITLE_LONG,
+                'type' => 'course',
+                'changed' => REQUEST_TIME,
+                'subject' => (string) $subject->SUBJECT,
+                'term_id' => $term,
+                'inst' => $institution,
+                'catalog_nbr' => (string) $subject->CATALOG_NBR,
+              ))
+              ->execute();
+
+            // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
+            //$course = entity_create('cu_course', $values);
+            drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
+
+          }
+        }
+      } // isset
+    }
+
+  return $ouput;
+}
+
+/**
+ * Deletes all classes
+ */
+function cu_class_import_purge() {
+  $output = array();
+  $classes = entity_load('cu_class');
+  foreach ($classes as $key => $class) {
+   entity_delete('cu_class', $key);
+  }
+  drupal_set_message('All Classes have been deleted.');
+  return $output;
+}
+
+/**
  * Helpful function that transforms all elements of than XML object into
  * an array that can easily be displayed
  * NOTE! This is expensive so only use whie debugging
@@ -755,6 +745,98 @@ function xml2array_parse($xml){
   return $return;
 }
 
+function cu_class_import_get_subjects() {
+  return array(
+  'ENVD' => 'ENVD',
+  'ARTF' => 'ARTF',
+	'ARTH' => 'ARTH',
+	'ARTS' => 'ARTS',
+	'JPNS' => 'JPNS',
+	'KREN' => 'KREN',
+	'ANTH' => 'ANTH',
+	'APPM' => 'APPM',
+	'ASIA' => 'ASIA',
+	'ASTR' => 'ASTR',
+	'ATOC' => 'ATOC',
+	'CHEM' => 'CHEM',
+	'CLAS' => 'CLAS',
+	'LATN' => 'LATN',
+	'COML' => 'COML',
+	'EBIO' => 'EBIO',
+	'ECON' => 'ECON',
+	'ENGL' => 'ENGL',
+	'ENVS' => 'ENVS',
+	'ETHN' => 'ETHN',
+	'FILM' => 'FILM',
+	'FREN' => 'FREN',
+	'ITAL' => 'ITAL',
+	'GEOG' => 'GEOG',
+	'GEOL' => 'GEOL',
+	'GRMN' => 'GRMN',
+	'RUSS' => 'RUSS',
+	'SCAN' => 'SCAN',
+	'HIST' => 'HIST',
+	'HONR' => 'HONR',
+	'HUMN' => 'HUMN',
+	'IAFS' => 'IAFS',
+	'IPHY' => 'IPHY',
+	'JWST' => 'JWST',
+	'LING' => 'LING',
+	'MATH' => 'MATH',
+	'MCDB' => 'MCDB',
+	'MUSM' => 'MUSM',
+	'PHIL' => 'PHIL',
+	'PHYS' => 'PHYS',
+	'PSCI' => 'PSCI',
+	'NRSC' => 'NRSC',
+	'PSYC' => 'PSYC',
+	'WRTG' => 'WRTG',
+	'RLST' => 'RLST',
+	'SLHS' => 'SLHS',
+	'SOCY' => 'SOCY',
+	'SPAN' => 'SPAN',
+	'DNCE' => 'DNCE',
+	'THTR' => 'THTR',
+	'WMST' => 'WMST',
+	'ACCT' => 'ACCT',
+	'BADM' => 'BADM',
+	'BCOR' => 'BCOR',
+	'BPOL' => 'BPOL',
+	'CESR' => 'CESR',
+	'ESBM' => 'ESBM',
+	'FNCE' => 'FNCE',
+	'INBU' => 'INBU',
+	'MGMT' => 'MGMT',
+	'MKTG' => 'MKTG',
+	'REAL' => 'REAL',
+	'APRD' => 'APRD',
+	'COMM' => 'COMM',
+	'CMDP' => 'CMDP',
+	'JRNL' => 'JRNL',
+	'MDST' => 'MDST',
+	'LDSP' => 'LDSP',
+	'PRLC' => 'PRLC',
+	'EDUC' => 'EDUC',
+	'LEAD' => 'LEAD',
+	'ASEN' => 'ASEN',
+	'ATLS' => 'ATLS',
+	'CHEN' => 'CHEN',
+	'CSCI' => 'CSCI',
+	'AREN' => 'AREN',
+	'CVEN' => 'CVEN',
+	'ECEN' => 'ECEN',
+	'EMEN' => 'EMEN',
+	'COEN' => 'COEN',
+	'GEEN' => 'GEEN',
+	'HUEN' => 'HUEN',
+	'MCEN' => 'MCEN',
+	'TLEN' => 'TLEN',
+	'LAWS' => 'LAWS',
+	'MUEL' => 'MUEL',
+	'MUSC' => 'MUSC',
+	'TMUS' => 'TMUS',
+  );
+}
 // NEED CRON FUNCTION THAT WILL UPDATE PERIODICALY
 // WITHOUT EXCEEDING THE UIS API LIMITS
 
