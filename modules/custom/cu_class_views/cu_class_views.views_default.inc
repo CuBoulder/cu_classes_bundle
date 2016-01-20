@@ -271,6 +271,10 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['sorts']['field_class_catalog_nbr_value']['id'] = 'field_class_catalog_nbr_value';
   $handler->display->display_options['sorts']['field_class_catalog_nbr_value']['table'] = 'field_data_field_class_catalog_nbr';
   $handler->display->display_options['sorts']['field_class_catalog_nbr_value']['field'] = 'field_class_catalog_nbr_value';
+  /* Sort criterion: Class: CLASS_SECTION (field_class_class_section) */
+  $handler->display->display_options['sorts']['field_class_class_section_value']['id'] = 'field_class_class_section_value';
+  $handler->display->display_options['sorts']['field_class_class_section_value']['table'] = 'field_data_field_class_class_section';
+  $handler->display->display_options['sorts']['field_class_class_section_value']['field'] = 'field_class_class_section_value';
   $handler->display->display_options['filter_groups']['groups'] = array(
     1 => 'AND',
     2 => 'AND',
@@ -289,11 +293,11 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['combine']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
-    8 => 0,
-    12 => 0,
     6 => 0,
-    10 => 0,
-    16 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
   );
   $handler->display->display_options['filters']['combine']['group_info']['label'] = 'Combine fields filter';
   $handler->display->display_options['filters']['combine']['group_info']['identifier'] = 'combine';
@@ -308,6 +312,8 @@ function cu_class_views_views_default_views() {
     'field_class_course_title_long' => 'field_class_course_title_long',
     'field_class_ssr_instr_long' => 'field_class_ssr_instr_long',
     'field_class_ssr_descrlong' => 'field_class_ssr_descrlong',
+    'field_class_subject' => 'field_class_subject',
+    'field_class_catalog_nbr' => 'field_class_catalog_nbr',
   );
   /* Filter criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';

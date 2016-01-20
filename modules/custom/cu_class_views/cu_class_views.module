@@ -42,8 +42,18 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     // Moving submit and reset buttons so they share a container
     $form['actions']['submit'] = $form['submit'];
     $form['actions']['reset'] = $form['reset'];
+    $form['actions']['#prefix'] = '<div class="class-search-actions">';
+    $form['actions']['#suffix'] =  '</div>';
     unset($form['submit']);
     unset($form['reset']);
+
+    //$form['keyword_search'][LANGUAGE_NONE][0]['combine'] = $form['combine'];
+    //$form['keyword_search']['#prefix'] = '<div class="class-search-keyword">';
+    //$form['keyword_search']['#suffix'] =  '</div>';
+    //unset($form['combine']);
+    //unset($form['#info']['filter-combine']);
+    //$form['#info']['filter-combine']['label'] = 'Keyword Search';
+    dpm($form);
   }
 }
 
