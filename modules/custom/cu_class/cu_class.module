@@ -359,14 +359,13 @@ function cu_class_page_alter(&$page) {
 }
 
 function cu_class_core_requirements($reqs) {
-  $keys = explode(' ', $reqs);
+  $keys = explode(', ', $reqs);
   $requirements = array(
     'AD' => 'Human Diversity',
     'AF' => 'Foreign Language',
     'AH' => 'Historical Context',
     'AI' => 'Ideals & Values',
     'AL' => 'Literature and the Arts',
-    'AM' => 'MAPS Course',
     'AQ' => 'Quantitative Reasoning & Mathmatical Skills',
     'AS' => 'Contemporary Societies',
     'AU' => 'United States Context',
@@ -391,7 +390,6 @@ function cu_class_core_requirements_values() {
     'AH' => 'Historical Context',
     'AI' => 'Ideals & Values',
     'AL' => 'Literature and the Arts',
-    'AM' => 'MAPS Course',
     'AQ' => 'Quantitative Reasoning & Mathmatical Skills',
     'AS' => 'Contemporary Societies',
     'AU' => 'United States Context',
@@ -408,10 +406,17 @@ function cu_class_core_requirements_values() {
     $query->fields('req', array('field_class_crse_attr_value_value'));
     $query->groupBy('req.field_class_crse_attr_value_value');
     $class_reqs = $query->execute()->fetchCol();
-
     $current_reqs = array();
     foreach ($class_reqs as $class_req) {
-      $current_reqs[$class_req] = $class_req;
+      if (strpos($class_req, ', ') !== FALSE) {
+        $keys = explode(', ', $class_req);
+        foreach($keys as $key) {
+          $current_reqs[$key] = $key;
+        }
+      }
+      else {
+        $current_reqs[$class_req] = $class_req;
+      }
     }
     foreach ($requirements as $key => $requirement) {
       if (!array_key_exists($key, $current_reqs)) {
