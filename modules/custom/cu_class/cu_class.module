@@ -580,18 +580,12 @@ function cu_class_format_translate($format) {
 
 function cu_class_format_values() {
   $formats = array(
-    'CD' => 'Candidate degree',
-    'CN' => 'CU Net',
-    'CO' => 'Correspondence',
-    'DL' => 'Distance Learning',
     'HY' => 'Hybrid',
-    'IS' => 'Independent study',
     'OL' => 'Online',
     'OS' => 'Online, self-paced',
     'OT' => 'Online, term-based',
-    'P' => 'In Person',
-    'Temp-oc' => 'Online Completion',
-    'TV' => 'Television',
+    'P' => 'On Campus',
+
   );
 
   // Cache available class formats
