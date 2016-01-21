@@ -28,9 +28,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Search';
   $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
-  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['style_plugin'] = 'default';
@@ -263,6 +261,15 @@ function cu_class_views_views_default_views() {
     'thousand_separator' => '',
     'prefix_suffix' => 0,
   );
+  /* Field: Class: SSR_MTG_SCHED_LONG */
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['id'] = 'field_class_ssr_mtg_sched_long';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['table'] = 'field_data_field_class_ssr_mtg_sched_long';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['field'] = 'field_class_ssr_mtg_sched_long';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['label'] = '';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_default_classes'] = FALSE;
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
@@ -275,9 +282,20 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['sorts']['field_class_class_section_value']['id'] = 'field_class_class_section_value';
   $handler->display->display_options['sorts']['field_class_class_section_value']['table'] = 'field_data_field_class_class_section';
   $handler->display->display_options['sorts']['field_class_class_section_value']['field'] = 'field_class_class_section_value';
+  /* Contextual filter: Class: SUBJECT (field_class_subject) */
+  $handler->display->display_options['arguments']['field_class_subject_value']['id'] = 'field_class_subject_value';
+  $handler->display->display_options['arguments']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
+  $handler->display->display_options['arguments']['field_class_subject_value']['field'] = 'field_class_subject_value';
+  $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['field_class_subject_value']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['field_class_subject_value']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['field_class_subject_value']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['field_class_subject_value']['limit'] = '0';
+  $handler->display->display_options['arguments']['field_class_subject_value']['break_phrase'] = TRUE;
   $handler->display->display_options['filter_groups']['groups'] = array(
     1 => 'AND',
     2 => 'AND',
+    3 => 'AND',
   );
   /* Filter criterion: Global: Combine fields filter */
   $handler->display->display_options['filters']['combine']['id'] = 'combine';
@@ -329,11 +347,11 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_subject_value']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
-    8 => 0,
-    12 => 0,
     6 => 0,
-    10 => 0,
-    16 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
   );
   /* Filter criterion: Class: CRSE_ATTR_VALUE (field_class_crse_attr_value) */
   $handler->display->display_options['filters']['field_class_crse_attr_value_value']['id'] = 'field_class_crse_attr_value_value';
