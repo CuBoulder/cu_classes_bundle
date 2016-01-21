@@ -41,16 +41,15 @@
           </div>
         </div>
         <div class="class-date-instructor col-lg-3 col-md-3 col-sm-3 col-xs-12">
+          <?php
+            if (strlen($content['field_class_ssr_mtg_sched_long'][0]['#markup']) > 4): ?>
           <div class="class-section">
             <h3>Meeting Time</h3>
             <div class=" ">
-              <?php
-                if (strlen($content['field_class_ssr_mtg_sched_long'][0]['#markup']) > 4) {
-                  print render($content['field_class_ssr_mtg_sched_long']);
-                }
-              ?>
+               <?php print render($content['field_class_ssr_mtg_sched_long']); ?>
             </div>
           </div>
+        <?php endif; ?>
           <?php if(!empty($content['field_class_ssr_mtg_loc_long'][0]['#markup'])): ?>
             <div class="class-section">
               <h3>Location</h3>
