@@ -101,7 +101,7 @@ function cu_course_display($course) {
 
     // Put the rest of the classes in an expandable section
     if ($class_multiple) {
-      $output['classes']['#prefix'] = '<div class="course-classes-all"><a href="#other-classes" id="other-classes-trigger"><i class="fa fa-plus-square"></i> Other Classes/Sections</a><div id="other-classes">';
+      $output['classes']['#prefix'] = '<div class="course-classes-all"><a href="#other-classes" id="other-classes-trigger"><i class="fa fa-plus-square"></i> Other sections of this course</a><div id="other-classes">';
       $output['classes']['#suffix'] = '</div></div>';
     }
   }
