@@ -177,10 +177,58 @@ function cu_class_views_colleges_schools() {
     'WMST' => 'WMST',
     'WRTG' => 'WRTG',
   );
-  $groups['engineering']['title'] = 'College of Engineering and Applied Sciences';
-  $groups['engineering']['subjects'] = array(
-    'HIST' => 'HIST',
+  $groups['business']['title'] = 'Business';
+  $groups['business']['subjects'] = array(
+    'ACCT' => 'ACCT',
+    'BADM' => 'BADM',
+    'BCOR' => 'BCOR',
+    'BPOL' => 'BPOL',
+    'CESR' => 'CESR',
+    'ESBM' => 'ESBM',
+    'FNCE' => 'FNCE',
+    'INBU' => 'INBU',
+    'MKTG' => 'MKTG',
+    'REAL' => 'REAL',
   );
+  $groups['education']['title'] = 'Education';
+  $groups['education']['subjects'] = array(
+    'EDUC' => 'EDUC',
+    'LEAD' => 'LEAD',
+  );
+  $groups['engineering']['title'] = 'Engineering and Applied Sciences';
+  $groups['engineering']['subjects'] = array(
+    'AREN' => 'AREN',
+    'ASEN' => 'ASEN',
+    'ATLS' => 'ATLS',
+    'CSCI' => 'CSCI',
+    'CVEN' => 'CVEN',
+    'ECEN' => 'ECEN',
+    'EMEN' => 'EMEN',
+    'GEEN' => 'GEEN',
+    'HUEN' => 'HUEN',
+    'MCEN' => 'MCEN',
+    'MCEN' => 'MCEN',
+    'TLEN' => 'TLEN',
+  );
+  $groups['law']['title'] = 'Law';
+  $groups['law']['subjects'] = array(
+    'LAWS' => 'LAWS',
+  );
+  $groups['media']['title'] = 'Media, Communication & Information';
+  $groups['media']['subjects'] = array(
+    'MUEL' => 'MUEL',
+    'MUSC' => 'MUSC',
+    'TMUS' => 'TMUS',
+  );
+  $groups['music']['title'] = 'Music';
+  $groups['music']['subjects'] = array(
+    'LAWS' => 'LAWS',
+  );
+  $groups['envd']['title'] = 'Environmental Design';
+  $groups['envd']['subjects'] = array(
+    'ENVD' => 'ENVD',
+  );
+  ksort($groups);
   return $groups;
 }
 
