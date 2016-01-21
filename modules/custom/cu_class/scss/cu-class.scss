@@ -48,8 +48,26 @@
   .class-title-group {
     display: -webkit-flex; /* Safari */
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     margin-bottom: 10px;
+    .class-title {
+      order:2;
+      margin:0;
+      padding: 5px 0;
+    }
+    .class-number {
+      order:1;
+      margin:0;
+      padding: 0;
+    }
+    .class-section {
+      order:3;
+      margin:0;
+      padding: 0;
+      text-transform: uppercase;
+      font-size: 75%;
+      color:#757575;
+    }
   }
 
   h2.class-title {
@@ -217,7 +235,7 @@ $radius: 0px;
     display: none;
   }
 
-  input[type="submit"], input[type="reset"] {
+  input.form-submit, input.form-reset {
     background-color: #007BC8;
     color:#fff;
     font-weight: 600;
@@ -230,18 +248,18 @@ $radius: 0px;
     border: none;
     padding:8px;
   }
+  input.form-reset,
   input#edit-reset {
     background-color: #444;
   }
   input[type=submit]:focus {
-  outline: #000 solid 2px;
-}
+    outline: #000 solid 2px;
+  }
+
   @media screen and (min-width:960px) {
     .views-exposed-widgets {
-      display: table;
-      table-layout:fixed;
     }
-    .views-exposed-widgets > div {
+    .views-exposed-widgets1 > div {
       display: table-cell;
       float: none;
       margin: 0;
@@ -251,15 +269,33 @@ $radius: 0px;
     select {
       max-width: 120px;
     }
+    .class-search-actions {
+      padding-top: 5px;
+    }
   }
   @media screen and (max-width:959px) {
-    .views-widget-filter-combine {
-      float: none;
-      margin: 0 0 10px 0;
-      width:100%;
-      input.form-text {
-        width: 100%;
-      }
+
+  }
+  .views-widget-filter-combine {
+    float: none;
+    margin: 0;
+    padding: 0;
+    width:100%;
+    input.form-text {
+      width: 100%;
+    }
+    label {
+      display: block;
+    }
+    label.icon-closed:before {
+      content: "\f196";
+      padding-right:5px;
+      font-family: FontAwesome;
+    }
+    label.icon-open:before {
+      content: "\f147";
+      padding-right:5px;
+      font-family: FontAwesome;
     }
   }
 }
@@ -285,4 +321,9 @@ h3.course-credits {
 }
 .class-title-wrapper h2.class-format {
   margin: 0;
+}
+
+.class-meeting-time {
+  font-size: 75%;
+  display: block;
 }

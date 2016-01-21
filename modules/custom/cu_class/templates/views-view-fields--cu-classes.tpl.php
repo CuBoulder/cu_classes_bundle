@@ -4,7 +4,7 @@
 $class_title = array();
 $class_title[] = '<h2 class="class-title">' .  html_entity_decode($fields['field_class_course_title_long']->content) . '</h2>';
 $class_title[] = '<h3 class="class-number">' .  $fields['field_class_subject']->content . ' ' . $fields['field_class_catalog_nbr']->content . '</h3>';
-//$class_title[] =  '<span>Section ' . $fields['field_class_class_section']->content . '</span>';
+$class_title[] =  '<h3 class="class-section">Section ' . $fields['field_class_class_section']->content . '</h3>';
 
 if (isset($fields['field_class_instruction_mode']->content)) {
   $mode = $fields['field_class_instruction_mode']->content;
@@ -49,6 +49,15 @@ $format = cu_class_format_translate($fields['field_class_instruction_mode']->con
           <div class="class-section">
             <h3 >Session</h3>
             <?php print $session; ?>
+
+            <div class="class-meeting-time">
+              <?php
+                if (strlen($fields['field_class_ssr_mtg_sched_long']->content) > 4) {
+                  print $fields['field_class_ssr_mtg_sched_long']->content;
+                }
+              ?>
+            </div>
+
           </div>
 
         </div>
