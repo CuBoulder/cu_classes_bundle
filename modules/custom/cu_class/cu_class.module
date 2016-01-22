@@ -359,14 +359,13 @@ function cu_class_page_alter(&$page) {
 }
 
 function cu_class_core_requirements($reqs) {
-  $keys = explode(' ', $reqs);
+  $keys = explode(', ', $reqs);
   $requirements = array(
     'AD' => 'Human Diversity',
     'AF' => 'Foreign Language',
     'AH' => 'Historical Context',
     'AI' => 'Ideals & Values',
     'AL' => 'Literature and the Arts',
-    'AM' => 'MAPS Course',
     'AQ' => 'Quantitative Reasoning & Mathmatical Skills',
     'AS' => 'Contemporary Societies',
     'AU' => 'United States Context',
@@ -391,7 +390,6 @@ function cu_class_core_requirements_values() {
     'AH' => 'Historical Context',
     'AI' => 'Ideals & Values',
     'AL' => 'Literature and the Arts',
-    'AM' => 'MAPS Course',
     'AQ' => 'Quantitative Reasoning & Mathmatical Skills',
     'AS' => 'Contemporary Societies',
     'AU' => 'United States Context',
@@ -408,10 +406,17 @@ function cu_class_core_requirements_values() {
     $query->fields('req', array('field_class_crse_attr_value_value'));
     $query->groupBy('req.field_class_crse_attr_value_value');
     $class_reqs = $query->execute()->fetchCol();
-
     $current_reqs = array();
     foreach ($class_reqs as $class_req) {
-      $current_reqs[$class_req] = $class_req;
+      if (strpos($class_req, ', ') !== FALSE) {
+        $keys = explode(', ', $class_req);
+        foreach($keys as $key) {
+          $current_reqs[$key] = $key;
+        }
+      }
+      else {
+        $current_reqs[$class_req] = $class_req;
+      }
     }
     foreach ($requirements as $key => $requirement) {
       if (!array_key_exists($key, $current_reqs)) {
@@ -474,7 +479,7 @@ function cu_class_subject_values() {
     'BPOL' => 'Business Policy & Strategic Management',
     'CESR' => 'Current Emphasis on Social Responsibility',
     'CHEM' => 'Chemistry & Biochemistry',
-    'CHEN' => 'Chemistry & Biochemistry',
+    'CHEN' => 'Chemical Engineering',
     'CLAS' => 'Classics',
     'CMDP' => 'Critical Media Practices',
     'COEN' => 'Engineering & Applied Science Administration',
@@ -580,18 +585,12 @@ function cu_class_format_translate($format) {
 
 function cu_class_format_values() {
   $formats = array(
-    'CD' => 'Candidate degree',
-    'CN' => 'CU Net',
-    'CO' => 'Correspondence',
-    'DL' => 'Distance Learning',
     'HY' => 'Hybrid',
-    'IS' => 'Independent study',
     'OL' => 'Online',
     'OS' => 'Online, self-paced',
     'OT' => 'Online, term-based',
-    'P' => 'In Person',
-    'Temp-oc' => 'Online Completion',
-    'TV' => 'Television',
+    'P' => 'On Campus',
+
   );
 
   // Cache available class formats
@@ -621,17 +620,14 @@ function cu_class_format_values() {
 
 function cu_class_session_translator($session) {
   $sessions = array(
-    'BCS'	=> 'C Session/8 Weeks',
-    'BAS'	=> 'A Session/1st 5 Weeks',
-    'BAM'	=> 'Maymester/3 Weeks',
-    'BBS'	=> 'B Session/2nd 5 Weeks',
-    'BD1'	=> 'D Session/10 Weeks',
-    'BGS'	=> 'Augmester/3 Weeks',
-    'BS2'	=> '2nd 6 weeks',
-    'BS1'	=> '1st 6 weeks',
-    'BES'	=> 'E Session/1st 5 Weeks',
-    'BD2'	=> 'D (w/B Drop/Add Dates)',
-    'BFS'	=> 'F Session/2nd 5 Weeks',
+    'BAM'	=> 'Maymester',
+    'BAS'	=> 'Session A',
+    'BBS'	=> 'Session B',
+    'BCS'	=> 'Session C',
+    'BD1'	=> 'Session D',
+    'BES'	=> 'Session E',
+    'BFS'	=> 'Session F',
+    'BGS'	=> 'Augmester',
   );
   if (isset($sessions[$session])) {
     return $sessions[$session];
@@ -640,17 +636,14 @@ function cu_class_session_translator($session) {
 
 function cu_class_session_values() {
   $sessions = array(
-    'BCS'	=> 'C Session/8 Weeks',
-    'BAS'	=> 'A Session/1st 5 Weeks',
-    'BAM'	=> 'Maymester/3 Weeks',
-    'BBS'	=> 'B Session/2nd 5 Weeks',
-    'BD1'	=> 'D Session/10 Weeks',
-    'BGS'	=> 'Augmester/3 Weeks',
-    'BS2'	=> '2nd 6 weeks',
-    'BS1'	=> '1st 6 weeks',
-    'BES'	=> 'E Session/1st 5 Weeks',
-    'BD2'	=> 'D (w/B Drop/Add Dates)',
-    'BFS'	=> 'F Session/2nd 5 Weeks',
+    'BAM'	=> 'Maymester',
+    'BAS'	=> 'Session A',
+    'BBS'	=> 'Session B',
+    'BCS'	=> 'Session C',
+    'BD1'	=> 'Session D',
+    'BES'	=> 'Session E',
+    'BFS'	=> 'Session F',
+    'BGS'	=> 'Augmester',
   );
 
   // Cache available class sessions
@@ -671,7 +664,7 @@ function cu_class_session_values() {
         unset($sessions[$key]);
       }
     }
-    asort($sessions);
+    //asort($sessions);
     cache_set('cu_class_search_sessions_available', $sessions, 'cache', time() + 60 * 60 * 24);
   }
 

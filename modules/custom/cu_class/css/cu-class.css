@@ -13,7 +13,10 @@
 .class-wrapper { border-bottom: 1px solid #e7e7e7; }
 
 .class-row-wrapper { padding: 20px 0 10px; border-top: 1px solid #e7e7e7; border-bottom: 1px solid #e7e7e7; margin-bottom: -1px; }
-.class-row-wrapper .class-title-group { display: -webkit-flex; /* Safari */ display: flex; flex-direction: column-reverse; margin-bottom: 10px; }
+.class-row-wrapper .class-title-group { display: -webkit-flex; /* Safari */ display: flex; flex-direction: column; margin-bottom: 10px; }
+.class-row-wrapper .class-title-group .class-title { order: 2; margin: 0; padding: 5px 0; }
+.class-row-wrapper .class-title-group .class-number { order: 1; margin: 0; padding: 0; }
+.class-row-wrapper .class-title-group .class-section { order: 3; margin: 0; padding: 0; text-transform: uppercase; font-size: 75%; color: #757575; }
 .class-row-wrapper h2.class-title { margin: 0; font-size: 100%; font-weight: 400 !important; color: #333; }
 .class-row-wrapper h3.class-number { margin: 0; font-size: 150%; font-weight: 900 !important; text-transform: uppercase; }
 .class-row-wrapper h3.class-format { margin: 0; font-size: 100%; color: #bbb; }
@@ -66,14 +69,17 @@ h2.class-title span { font-weight: 700; }
 .view-cu-classes select { -webkit-appearance: none; -moz-appearance: none; -ms-appearance: none; appearance: none; border: 1px solid #aaa; padding: 8px 30px 8px 8px; background-color: #e7e7e7; background-image: url(../images/select-arrows.png); background-position: right center; background-repeat: no-repeat; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; border: none; color: #333; font-weight: 600; font-size: 12px; max-width: 100px; width: 100%; }
 .view-cu-classes select:hover { background-color: #d7d7d7; }
 .view-cu-classes select::-ms-expand { display: none; }
-.view-cu-classes input[type="submit"], .view-cu-classes input[type="reset"] { background-color: #007BC8; color: #fff; font-weight: 600; font-size: 12px; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; background-image: none; -webkit-appearance: none; border: none; padding: 8px; }
-.view-cu-classes input#edit-reset { background-color: #444; }
+.view-cu-classes input.form-submit, .view-cu-classes input.form-reset { background-color: #007BC8; color: #fff; font-weight: 600; font-size: 12px; -webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; background-image: none; -webkit-appearance: none; border: none; padding: 8px; }
+.view-cu-classes input.form-reset, .view-cu-classes input#edit-reset { background-color: #444; }
 .view-cu-classes input[type=submit]:focus { outline: #000 solid 2px; }
-@media screen and (min-width: 960px) { .view-cu-classes .views-exposed-widgets { display: table; table-layout: fixed; }
-  .view-cu-classes .views-exposed-widgets > div { display: table-cell; float: none; margin: 0; vertical-align: bottom; white-space: nowrap; }
-  .view-cu-classes select { max-width: 120px; } }
-@media screen and (max-width: 959px) { .view-cu-classes .views-widget-filter-combine { float: none; margin: 0 0 10px 0; width: 100%; }
-  .view-cu-classes .views-widget-filter-combine input.form-text { width: 100%; } }
+@media screen and (min-width: 960px) { .view-cu-classes .views-exposed-widgets1 > div { display: table-cell; float: none; margin: 0; vertical-align: bottom; white-space: nowrap; }
+  .view-cu-classes select { max-width: 120px; }
+  .view-cu-classes .class-search-actions { padding-top: 5px; } }
+.view-cu-classes .views-widget-filter-combine { float: none; margin: 0; padding: 0; width: 100%; }
+.view-cu-classes .views-widget-filter-combine input.form-text { width: 100%; }
+.view-cu-classes .views-widget-filter-combine label { display: block; }
+.view-cu-classes .views-widget-filter-combine label.icon-closed:before { content: "\f196"; padding-right: 5px; font-family: FontAwesome; }
+.view-cu-classes .views-widget-filter-combine label.icon-open:before { content: "\f147"; padding-right: 5px; font-family: FontAwesome; }
 
 .class-view-column-headers { font-weight: 600; padding: 10px 20px; font-size: 65%; text-transform: uppercase; display: none; color: #333; background-color: #ccc; }
 
@@ -81,3 +87,5 @@ h2.class-title span { font-weight: 700; }
 h3.course-credits { color: #777; font-size: 100%; }
 
 .class-title-wrapper h2.class-format { margin: 0; }
+
+.class-meeting-time { font-size: 75%; display: block; }
