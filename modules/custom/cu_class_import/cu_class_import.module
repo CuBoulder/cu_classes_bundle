@@ -63,17 +63,45 @@ function cu_class_import_menu() {
 function class_import_admin_settings() {
   $form = array();
 
-  $form['cu_class_import_url'] = array(
+  $form['cu_class_import_api_url'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en'),
+    '#default_value' => variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/'),
     '#title' => t('Base URL of API'),
     '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
   );
 
-  $form['cu_class_import_url_prime'] = array(
+  $form['cu_class_import_api_username'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_username', ''),
+    '#title' => t('API Username'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+   $form['cu_class_import_api_password'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_password', ''),
+    '#title' => t('API Password'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+  $form['prime'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('Express+'),
+     '#collapsible' => TRUE,
+     '#collapsed' => $collapsed,
+  );
+
+  $form['prime']['cu_class_import_api_use_prime'] = array(
     '#type' => 'checkbox',
-    '#default_value' => variable_get('cu_class_import_url_prime', 0),
-    '#title' => t('Use RESTFul Posts'),
+    '#default_value' => variable_get('cu_class_import_api_use_prime', 'http://express.local/express14/'),
+    '#title' => t('Use Primer'),
+    '#description' => t(''),
+  );
+
+  $form['prime']['cu_class_import_prime_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_prime_url', 0),
+    '#title' => t('Base URL of site running cu_class_primer_bundle'),
     '#description' => t(''),
   );
 
@@ -170,18 +198,18 @@ function cu_course_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_course_import_curl($institution, $term, $subject, $course_id = NULL) {
-
-  $request_path = variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en');
+function cu_course_import_curl($institution, $term, $subject) {
 
   // Setup the cURL
   $curl = curl_init();
   // Empty out the error message.
   $error_message = NULL;
 
-  // when priming courses and classes, we aren't using a post
-  if (variable_get('cu_class_import_url_prime', 1)) {
-    $request_path .= "$institution/$term/$subject";
+  if (variable_get('cu_class_import_api_use_prime', 0)) {
+    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/courses/$institution/$term/$subject";
+  }
+  else {
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
 
   drupal_set_message('Attempting to import from ' . $request_path, 'status');
@@ -190,14 +218,10 @@ function cu_course_import_curl($institution, $term, $subject, $course_id = NULL)
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-  if (!variable_get('cu_class_import_url_prime', 0)) {
+  // when priming courses and classes, we aren't using a post and don't require a username and password
+  if (!variable_get('cu_class_import_api_use_prime', 0)) {
 
-
-    // @TODO: Set these in admin config
-    $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
-    $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
-    $request_auth_string = $request_user . ':' . $request_pass;
-
+    $request_auth_string = variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '');
 
     // Use a POST rather than a GET
     curl_setopt($curl, CURLOPT_POST, true);
@@ -215,7 +239,6 @@ function cu_course_import_curl($institution, $term, $subject, $course_id = NULL)
     //dsm($curl_request_body);
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
-
 
   }
 
@@ -239,11 +262,13 @@ function cu_class_import_form() {
 
   // query courses?
   $course_options = array();
-  $results = db_query('SELECT course_id, title FROM {cu_course}');
+  $results = db_query('SELECT subject, course_id, title FROM {cu_course}');
 
   foreach($results as $course) {
-    $course_options[$course->course_id] = $course->course_id . ' - ' . $course->title;
+    $course_options[$course->course_id] = $course->subject . ' -  ' . $course->course_id . ' - ' . $course->title;
   }
+
+  asort($course_options);
 
   $form['course'] = array(
     '#type' => 'select',
@@ -281,13 +306,12 @@ function cu_class_import_form_submit($form, &$form_state) {
  */
 function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
 
-  // Setup our cURL parameters
-  $request_path = variable_get('cu_class_import_url', 'https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en');
-
-  //@TODO: need to back this up a level in the config... just replacing for now
-  //$request_path = 'http://express.local/express14/primer/class/';
-  $request_path = str_replace("courses", "class", $request_path);
-
+  if (variable_get('cu_class_import_api_use_prime', 0)) {
+    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject";
+  }
+  else {
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
+  }
 
   // Setup the cURL
   $curl = curl_init();
@@ -297,12 +321,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // if doesn't exist, add it
   $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
 
-  // when priming courses and classes, we aren't using a post
-  if (variable_get('cu_class_import_url_prime', 1)) {
-    // need subject
-
-    $request_path .= "$institution/$term/$subject/$course_id";
-  }
 
   drupal_set_message('Attempting to import from ' . $request_path, 'status');
 
@@ -311,13 +329,10 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-  if (!variable_get('cu_class_import_url_prime', 0)) {
+    // when priming courses and classes, we aren't using a post and don't require a username and password
+  if (!variable_get('cu_class_import_api_use_prime', 0)) {
 
-    // @TODO: Set these in admin config
-    $request_user = 'CU_WS_CLASSSRCH_UCB_CUOL';
-    $request_pass = 'YEF9BYQSfFr8UXNmDvM5';
-    $request_auth_string = $request_user . ':' . $request_pass;
-
+    $request_auth_string = variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '');
 
     // Use a POST rather than a GET
     curl_setopt($curl, CURLOPT_POST, true);
@@ -327,8 +342,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
     // Use Basic Auth
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
-
-    // <CRSE_ID>' . $course_id .'</CRSE_ID>
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
@@ -650,7 +663,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
  * process the import
  */
 function cu_course_import($institution, $term, $subject) {
-  dsm('cu_course_import');
+
   $response = cu_course_import_curl($institution, $term, $subject, $course_id);
   //dsm($response);
   $xml = simplexml_load_string($response);
