@@ -307,7 +307,7 @@ function cu_class_import_form_submit($form, &$form_state) {
 function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
 
   if (variable_get('cu_class_import_api_use_prime', 0)) {
-    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject";
+    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject/$course_id";
   }
   else {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
