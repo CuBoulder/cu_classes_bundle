@@ -48,19 +48,23 @@
   .class-title-group {
     display: -webkit-flex; /* Safari */
     display: flex;
+    -webkit-flex-direction: column;
     flex-direction: column;
     margin-bottom: 10px;
     .class-title {
+      -webkit-order:2;
       order:2;
       margin:0;
       padding: 5px 0;
     }
     .class-number {
+      -webkit-order:1;
       order:1;
       margin:0;
       padding: 0;
     }
     .class-section {
+      -webkit-order:3;
       order:3;
       margin:0;
       padding: 0;
