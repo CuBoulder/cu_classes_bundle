@@ -50,9 +50,17 @@ function cu_class_import_menu() {
   );
 
   // DELETES ALL CLASSES
-  $items['class/purge'] = array(
+  $items['class/import/purge'] = array(
     'title' => 'Class Import',
-    'page callback' => 'cu_class_import_purge',
+    'page callback' => 'cu_class_import_purge_classes',
+    'access arguments' => array('administer modules'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // DELETES ALL COURSES
+  $items['course/import/purge'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'cu_class_import_purge_courses',
     'access arguments' => array('administer modules'),
     'type' => MENU_CALLBACK,
   );
@@ -84,11 +92,25 @@ function class_import_admin_settings() {
     '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
   );
 
+  $form['cu_class_import_delay'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_delay', '2'),
+    '#title' => t('Import Delay'),
+    '#description' => t('Batch imports can overwhelm a primer.  Use this to slow it down.'),
+  );
+
+   $form['prime']['cu_class_import_api_use_prime'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_api_use_prime', 'http://express.local/express14/'),
+    '#title' => t('Use Primer'),
+    '#description' => t(''),
+  );
+
   $form['prime'] = array(
      '#type' => 'fieldset',
-     '#title' => t('Express+'),
+     '#title' => t('Primer Settings'),
      '#collapsible' => TRUE,
-     '#collapsed' => $collapsed,
+     '#collapsed' => TRUE,
   );
 
   $form['prime']['cu_class_import_api_use_prime'] = array(
@@ -103,6 +125,20 @@ function class_import_admin_settings() {
     '#default_value' => variable_get('cu_class_import_prime_url', 0),
     '#title' => t('Base URL of site running cu_class_primer_bundle'),
     '#description' => t(''),
+  );
+
+  $form['adv'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('Advanced'),
+     '#collapsible' => TRUE,
+     '#collapsed' => TRUE,
+  );
+
+  $form['adv']['cu_class_import_debug'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_debug', 0),
+    '#title' => t('Show Debug Messages'),
+    '#description' => t('You may want to trun this off when using batch imports of large data sets'),
   );
 
   return system_settings_form($form);
@@ -212,7 +248,9 @@ function cu_course_import_curl($institution, $term, $subject) {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
 
-  drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  if (variable_get('cu_class_import_debug', 0)) {
+    drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  }
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
   // Return the transfer as a string of the values if the curl succeeds.
@@ -321,8 +359,10 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // if doesn't exist, add it
   $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
 
-
-  drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  // update course with
+  if (variable_get('cu_class_import_debug', 0)) {
+    drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  }
 
   // Set path
   curl_setopt($curl, CURLOPT_URL, $request_path);
@@ -407,7 +447,7 @@ function cu_class_import_batch_process($course, &$context) {
 
   cu_class_import($institution, $term, $subject, $course_id);
   // this is so we don't overwhelm the servers
-  sleep(1);
+  sleep(variable_get('cu_class_import_delay', '2'));
 }
 
 /**
@@ -460,13 +500,14 @@ function cu_class_import_course_batch_process($subjects, &$context) {
 
   // Do heavy lifting here...
   // Display a progress message...
-  $context['message'] = "Now processing Course: $subjects[0]...";
+  $context['message'] = "Now processing Course: $subjects...";
 
   $term = '2164';
   $institution = 'CUBLD';
 
-  cu_course_import($institution, $term, $subjects[0]);
-
+  cu_course_import($institution, $term, $subjects);
+  // this is so we don't overwhelm the servers
+  sleep(variable_get('cu_class_import_delay', '2'));
 }
 
 /**
@@ -497,6 +538,15 @@ function cu_class_import($institution, $term, $subject, $course_id) {
   if (!isset($subject)) {
     $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
     $subject = $course->subject;
+
+    // any time we import classes for a course, update the course
+    // this will change the sort order of the next batch
+    $result = db_update('cu_course')
+    ->fields(array(
+        'changed' => REQUEST_TIME,
+      ))
+    ->condition('course_id', $course_id, '=')
+    ->execute();
   }
 
   $response = cu_class_import_curl($institution, $term, $subject, $course_id);
@@ -596,8 +646,9 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 			    $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
           $updated = entity_save('cu_class', $existing_class);
-
-          drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+          if (variable_get('cu_class_import_debug', 0)) {
+            drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+          }
         }
         else {
 
@@ -650,9 +701,9 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 
         $class = entity_create('cu_class', $values);
         $created = entity_save('cu_class', $class);
-
-        drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
-
+        if (variable_get('cu_class_import_debug', 0)) {
+          drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+        }
         }
       }
     } // isset
@@ -697,7 +748,8 @@ function cu_course_import($institution, $term, $subject) {
           $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
           if($result->rowCount() > 0) {
 
-            //UPDATE
+            //UPDATE?  Are courses actually removed from the API?
+
           }
           else {
 
@@ -716,8 +768,9 @@ function cu_course_import($institution, $term, $subject) {
 
             // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
             //$course = entity_create('cu_course', $values);
-            drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
-
+            if (variable_get('cu_class_import_debug', 0)) {
+              drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
+            }
           }
         }
       } // isset
@@ -729,14 +782,25 @@ function cu_course_import($institution, $term, $subject) {
 /**
  * Deletes all classes
  */
-function cu_class_import_purge() {
-  $output = array();
+function cu_class_import_purge_classes() {
+
   $classes = entity_load('cu_class');
   foreach ($classes as $key => $class) {
+   // Delete attached field values.
+   field_attach_delete('cu_class', $key);
    entity_delete('cu_class', $key);
   }
   drupal_set_message('All Classes have been deleted.');
-  return $output;
+  return '';
+}
+
+/**
+ * Deletes all courses
+ */
+function cu_class_import_purge_courses() {
+  db_truncate('cu_course')->execute();
+  drupal_set_message('All Courses have been deleted.');
+  return '';
 }
 
 /**
