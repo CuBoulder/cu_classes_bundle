@@ -148,6 +148,24 @@ function cu_course_menu() {
     'weight' => -50,
   );
 
+  $items['courses/%/%'] = array(
+    'page callback' => 'cu_course_classes_display',
+    'page arguments' => array(1,2),
+    'access arguments' => array('access content'),
+    'file' => 'cu_course.pages.inc',
+    'title callback' => 'cu_course_title_from_catalog_number',
+    'title arguments' => array(1,2),
+  );
+
+  $items['courses/subject/%'] = array(
+    'page callback' => 'cu_course_by_subject_display',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'file' => 'cu_course.pages.inc',
+    'title callback' => 'cu_course_list_title_from_subject',
+    'title arguments' => array(2),
+  );
+
   return $items;
 }
 

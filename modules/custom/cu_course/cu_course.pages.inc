@@ -120,3 +120,109 @@ function cu_course_title($course) {
   $title[] = $course->title;
   return join(' ', $title);
 }
+
+
+/**
+ * Display classes from course at courses/SUBJECT/catalog_number*/
+function cu_course_classes_display($subject, $catalog_number) {
+  $output = array();
+
+  $query = db_select('cu_course', 'courses');
+  $query->fields('courses', array('course_id', 'subject', 'catalog_nbr'));
+  $query->condition('courses.subject', $subject, '=');
+  $query->condition('courses.catalog_nbr', $catalog_number, '=');
+  $course = $query->execute()->fetchCol();
+  $course_id = $course[0];
+
+  // Query course id table
+  $query = db_select('field_data_field_class_crse_id', 'courseid');
+  $query->fields('courseid', array('entity_id'));
+
+  // Join to get class entities that match course id
+  $query->join('cu_class', 'class', 'class.class_id = courseid.entity_id');
+  $query->fields('class', array('class_id'));
+
+  // Get only class entities
+  $query->condition('class.type', 'class', '=');
+  $query->condition('courseid.field_class_crse_id_value', $course_id, '=');
+  $query->orderBy('courseid.field_class_crse_id_value', 'DESC');
+  $class_ids = $query->execute()->fetchCol();
+
+
+
+
+  // Put loaded class entities into an array for viewing
+  $classes = array();
+  foreach ($class_ids as $class_id) {
+    $classes[$class_id] = entity_load_single('cu_class', $class_id);
+  }
+  // Remove highlighted class from list
+  if (!empty($highlight_class_ids)) {
+    $current_class = current($highlight_class_ids);
+    unset($classes[$current_class]);
+  }
+  $class_multiple = !empty($classes) ? TRUE : FALSE;
+  $output = array();
+
+  if ($class_multiple) {
+    $output['classes'] = entity_view('cu_class', $classes, 'short');
+    $output['classes']['#weight'] = 100;
+    $output['classes']['#prefix'] = '<div class="course-classes">';
+    $output['classes']['#suffix'] = '</div>';
+    // if multiple classes get description here
+    $class = current($output['classes']['cu_class']);
+    $output['description']['credits']['#markup'] = number_format($class['field_class_units_acad_prog'][0]['#markup'], 1, '.', '') . ' Credit Hours';
+    $output['description']['credits']['#prefix'] = '<h3 class="course-credits">';
+    $output['description']['credits']['#suffix'] = '</h3>';
+    $output['description']['text'] = $class['field_class_ssr_descrlong'];
+  }
+
+
+  $output['#prefix'] = '<div class="course-class-list">';
+  $output['#suffix'] = '</div>';
+
+
+  return $output;
+}
+
+function cu_course_title_from_catalog_number($subject, $catalog_number) {
+  $query = db_select('cu_course', 'courses');
+  $query->fields('courses', array('title', 'subject', 'catalog_nbr'));
+  $query->condition('courses.subject', $subject, '=');
+  $query->condition('courses.catalog_nbr', $catalog_number, '=');
+  $course = $query->execute()->fetchAssoc();
+  $title = array();
+  $title[] = $course['subject'];
+  $title[] = $course['catalog_nbr'];
+  $title[] = $course['title'];
+  return join(' ', $title);
+}
+
+function cu_course_by_subject_display($subject) {
+  $output = array();
+
+  $query = db_select('cu_course', 'courses');
+  $query->fields('courses', array('title','subject', 'catalog_nbr'));
+  $query->condition('courses.subject', $subject, '=');
+  $query->orderBy('catalog_nbr', 'ASC');
+  $result = $query->execute();
+  $courses = array();
+  while($course = $result->fetchAssoc()) {
+    $catalog_number = $course['catalog_nbr'];
+    $courses[$catalog_number] = $course;
+    $title = array();
+    $title[] = $course['subject'];
+    $title[] = $course['catalog_nbr'];
+    $title[] = $course['title'];
+    $course_title =  join(' ', $title);
+    $output['courses'][$catalog_number]['#markup'] = l($course_title, 'courses/' . $course['subject']. '/' . $catalog_number);
+    $output['courses'][$catalog_number]['#prefix'] = '<div class="course-class-list-item">';
+    $output['courses'][$catalog_number]['#suffix'] = '</div>';
+  }
+
+  return $output;
+}
+
+function cu_course_list_title_from_subject($subject) {
+  return cu_class_subject_translate(strtoupper($subject)) . ' Courses';
+}
