@@ -215,7 +215,7 @@ function cu_course_by_subject_display($subject) {
     $title[] = $course['catalog_nbr'];
     $title[] = $course['title'];
     $course_title =  join(' ', $title);
-    $output['courses'][$catalog_number]['#markup'] = l($course_title, 'courses/' . $course['subject']. '/' . $catalog_number);
+    $output['courses'][$catalog_number]['#markup'] = l($course_title, 'courses/subject/' . $course['subject']. '/' . $catalog_number);
     $output['courses'][$catalog_number]['#prefix'] = '<div class="course-class-list-item">';
     $output['courses'][$catalog_number]['#suffix'] = '</div>';
   }
