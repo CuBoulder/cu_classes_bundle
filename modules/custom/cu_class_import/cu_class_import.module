@@ -65,7 +65,31 @@ function cu_class_import_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['import/api-preview'] = array(
+    'title' => 'Print respnse from the API',
+    'description' =>  'for debugging',
+    'page callback' => 'class_import_api_preview',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
+}
+
+/**
+ * A detailed class listing
+ */
+function class_import_api_preview($arg2, $arg3, $arg4, $arg5) {
+  drupal_add_http_header('Content-Type', 'text/xml');
+  $inst = $arg2;
+  $term = $arg3;
+  $subject_cd = $arg4;
+  $course_id = $arg5;
+  $subject_count = 0;
+  $class_count = 0;
+
+  print cu_class_import_curl($institution, $term, $subject, $course_id);
+
 }
 
 function class_import_admin_settings() {
@@ -115,7 +139,7 @@ function class_import_admin_settings() {
 
   $form['prime']['cu_class_import_api_use_prime'] = array(
     '#type' => 'checkbox',
-    '#default_value' => variable_get('cu_class_import_api_use_prime', 'http://express.local/express14/'),
+    '#default_value' => variable_get('cu_class_import_api_use_prime', FALSE),
     '#title' => t('Use Primer'),
     '#description' => t(''),
   );
@@ -786,8 +810,8 @@ function cu_class_import_purge_classes() {
 
   $classes = entity_load('cu_class');
   foreach ($classes as $key => $class) {
-   // Delete attached field values.
-   field_attach_delete('cu_class', $key);
+   // Delete attached field values... shouldn't be necessary?
+   // field_attach_delete('cu_class', $key);
    entity_delete('cu_class', $key);
   }
   drupal_set_message('All Classes have been deleted.');
@@ -907,6 +931,22 @@ function cu_class_import_get_subjects() {
 	'TMUS' => 'TMUS',
   );
 }
+
+function cu_class_import_entity_view_alter(&$build, $type){
+
+  if ($type == 'cu_class' && isset($build['#entity']) && variable_get('cu_class_import_debug', 0)){
+
+    $url_api = 'import/api-preview/CUBLD/2164/' . $build['field_class_subject'][0]['#markup'] . '/' . $build['field_class_crse_id'][0]['#markup'];
+    $url_primer = variable_get('cu_class_import_prime_url', 0) . 'primer/class/CUBLD/2164/' . $build['field_class_subject'][0]['#markup'] . '/' . $build['field_class_crse_id'][0]['#markup'];
+
+    //class/CUBLD/2164/HIST/108161
+    $links = ' Debug XML: ' . l('API', $url_api) . ' | ' . l('Primer', $url_primer);
+
+    $build['field_class_class_nbr'][0]['#markup'] = $build['field_class_class_nbr'][0]['#markup'] . $links;
+
+  }
+}
+
 // NEED CRON FUNCTION THAT WILL UPDATE PERIODICALY
 // WITHOUT EXCEEDING THE UIS API LIMITS
 
