@@ -1,7 +1,7 @@
 <div class="class-view-mode-short class-entity-wrapper">
   <div class="class-wrapper">
     <div class="class-title-wrapper">
-      <h2 class="class-format">Section <?php print $content['field_class_class_section'][0]['#markup']; ?> - <?php print $format; ?></h2>
+      <h2 class="class-format">Section <?php print sprintf("%03s", $content['field_class_class_section'][0]['#markup']); ?> - <?php print $format; ?></h2>
     </div>
     <div class="class-content">
       <div class="row clearfix">
