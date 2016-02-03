@@ -10,7 +10,7 @@
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
               <div class="class-section">
                 <h3>Section</h3>
-                <?php print $content['field_class_class_section'][0]['#markup']; ?>
+                <?php print sprintf("%03s", $content['field_class_class_section'][0]['#markup']); ?>
               </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">

@@ -4,7 +4,8 @@
 $class_title = array();
 $class_title[] = '<h2 class="class-title">' .  html_entity_decode($fields['field_class_course_title_long']->content) . '</h2>';
 $class_title[] = '<h3 class="class-number">' .  $fields['field_class_subject']->content . ' ' . $fields['field_class_catalog_nbr']->content . '</h3>';
-$class_title[] =  '<h3 class="class-section">Section ' . $fields['field_class_class_section']->content . '</h3>';
+$section_number = sprintf("%03s", $fields['field_class_class_section']->content);
+$class_title[] =  '<h3 class="class-section">Section ' . $section_number . '</h3>';
 
 if (isset($fields['field_class_instruction_mode']->content)) {
   $mode = $fields['field_class_instruction_mode']->content;
