@@ -1,5 +1,5 @@
 <?php
-//dpm($fields);
+
 // Create class title
 $class_title = array();
 $class_title[] = '<h2 class="class-title">' .  html_entity_decode($fields['field_class_course_title_long']->content) . '</h2>';
@@ -31,6 +31,7 @@ if ($available == 1) {
 } else {
   $available_seats = $available . ' seats available';
 }
+// Core requirements
 if ($fields['field_class_crse_attr']->content == 'BCRQ') {
   $reqs = $fields['field_class_crse_attr_value']->content;
   $course_requirements = cu_class_core_requirements($reqs);
@@ -38,6 +39,23 @@ if ($fields['field_class_crse_attr']->content == 'BCRQ') {
 $session = cu_class_session_translator($fields['field_class_session_code']->content);
 
 $format = cu_class_format_translate($fields['field_class_instruction_mode']->content);
+
+// Meeting time
+$meeting_time_raw = $fields['field_class_ssr_mtg_sched_long']->content;
+$meeting_time_parts = explode(' ', $meeting_time_raw);
+// Meeting schedule display
+foreach ($meeting_time_parts as $key => $part) {
+  // Add spaces to days
+  if (ctype_alpha($part)) {
+    $regex = '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/';
+    $meeting_time_parts[$key] = preg_replace( $regex, ' $1', $part ) . '<br />';
+  }
+  // Convert to 12hour time
+  if (strpos($part, ':') !== FALSE) {
+    $meeting_time_parts[$key] = date('g:i a', strtotime($part));
+  }
+}
+$meeting_time = join(' ',$meeting_time_parts);
 ?>
 <div class="class-view-mode-list class-entity-wrapper">
   <div class="class-row-wrapper">
@@ -53,8 +71,8 @@ $format = cu_class_format_translate($fields['field_class_instruction_mode']->con
 
             <div class="class-meeting-time">
               <?php
-                if (strlen($fields['field_class_ssr_mtg_sched_long']->content) > 4) {
-                  print $fields['field_class_ssr_mtg_sched_long']->content;
+                if (strlen($fields['field_class_ssr_mtg_sched_long']->content) > 5) {
+                  print $meeting_time;
                 }
               ?>
             </div>

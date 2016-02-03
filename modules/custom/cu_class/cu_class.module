@@ -351,6 +351,23 @@ function cu_class_preprocess_entity(&$vars) {
 
     $session = $vars['content']['field_class_session_code'][0]['#markup'];
     $vars['session'] = cu_class_session_translator($session);
+
+    // Meeting time
+    $meeting_time_raw = $vars['content']['field_class_ssr_mtg_sched_long'][0]['#markup'];
+    $meeting_time_parts = explode(' ', $meeting_time_raw);
+    // Meeting schedule display
+    foreach ($meeting_time_parts as $key => $part) {
+      // Add spaces to days
+      if (ctype_alpha($part)) {
+        $regex = '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/';
+        $meeting_time_parts[$key] = preg_replace( $regex, ' $1', $part ) . '<br />';
+      }
+      // Convert to 12hour time
+      if (strpos($part, ':') !== FALSE) {
+        $meeting_time_parts[$key] = date('g:i a', strtotime($part));
+      }
+    }
+    $vars['meeting_time'] = join(' ',$meeting_time_parts);
   }
 }
 

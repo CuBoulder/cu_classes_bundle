@@ -46,7 +46,7 @@
           <div class="class-section">
             <h3>Meeting Time</h3>
             <div class=" ">
-               <?php print render($content['field_class_ssr_mtg_sched_long']); ?>
+               <?php print $meeting_time; ?>
             </div>
           </div>
         <?php endif; ?>
