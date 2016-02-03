@@ -40,7 +40,11 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       'operator' => 'college_school_op',
     );
     $form['#info'] = array('filter_college_school' => $info) + $form['#info'];
-    $form['#info'] = array('filter-combine' => $combine) + $form['#info'];
+
+    // Remove line below and uncomment following two lines to display keyword search
+    unset($form['#info']['filter-combine']);
+    //$combine = $form['#info']['filter-combine'];
+    //$form['#info'] = array('filter-combine' => $combine) + $form['#info'];
     $form['#submit'][] = 'cu_class_views_colleges_schools_filter';
 
     // Subject
