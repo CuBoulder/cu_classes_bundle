@@ -95,11 +95,23 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['actions']['#suffix'] =  '</div>';
     unset($form['submit']);
     unset($form['reset']);
+
+    // Adding hidden value so we can tell if form has been submitted or not
+    $form['submitted'] = array(
+      '#type' => 'hidden',
+      '#value' => TRUE,
+    );
   }
 }
 
 function cu_class_views_views_pre_render(&$view) {
   if ($view->name == 'cu_classes') {
+
+    // Do not show result count on default view
+    if (!$_GET['submitted']) {
+      unset($view->query->pager->display->handler->handlers['header']['result']);
+    }
+
     $view_headers = '<div class="class-view-column-headers">
       <div class="row clearfix">
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
