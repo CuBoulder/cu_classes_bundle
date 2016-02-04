@@ -1,0 +1,952 @@
+<?php
+
+// because the details aren't available from cu_master,
+// first import the courses to
+
+/**
+ * Implements hook_menu().
+ */
+function cu_class_import_menu() {
+  $items['admin/config/system/class-import'] = array(
+    'title' => 'Class Import',
+    'description' =>  'Configure Class Import.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('class_import_admin_settings'),
+    'access arguments' => array('administer modules'),
+  );
+
+  // COURSES MUST BE IMPORTED FIRST
+  $items['course/import'] = array(
+    'title' => 'Course Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_course_import_form'),
+    'access arguments' => array('administer modules'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  // IMPORTS ALL CLASSES OF A COURSE
+  $items['class/import'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_import_form'),
+    'access arguments' => array('administer modules'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  // IMPORTS ALL CLASSES OF A COURSE
+  $items['class/import/batch'] = array(
+    'title' => 'Batch Update Classes',
+    'page callback' => 'cu_class_import_batch_update',
+    'access arguments' => array('administer modules'),
+  );
+
+  // IMPORTS ALL COURSE FOR EACH SUBJECT
+  $items['course/import/batch'] = array(
+    'title' => 'Batch Update Classes',
+    'page callback' => 'cu_class_import_course_batch_update',
+    'access arguments' => array('administer modules'),
+  );
+
+  // DELETES ALL CLASSES
+  $items['class/import/purge'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'cu_class_import_purge_classes',
+    'access arguments' => array('administer modules'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // DELETES ALL COURSES
+  $items['course/import/purge'] = array(
+    'title' => 'Class Import',
+    'page callback' => 'cu_class_import_purge_courses',
+    'access arguments' => array('administer modules'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['import/api-preview'] = array(
+    'title' => 'Print respnse from the API',
+    'description' =>  'for debugging',
+    'page callback' => 'class_import_api_preview',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * A detailed class listing
+ */
+function class_import_api_preview($arg2, $arg3, $arg4, $arg5) {
+  drupal_add_http_header('Content-Type', 'text/xml');
+  $inst = $arg2;
+  $term = $arg3;
+  $subject_cd = $arg4;
+  $course_id = $arg5;
+  $subject_count = 0;
+  $class_count = 0;
+
+  print cu_class_import_curl($institution, $term, $subject, $course_id);
+
+}
+
+function class_import_admin_settings() {
+  $form = array();
+
+  $form['cu_class_import_api_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/'),
+    '#title' => t('Base URL of API'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+  $form['cu_class_import_api_username'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_username', ''),
+    '#title' => t('API Username'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+   $form['cu_class_import_api_password'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_password', ''),
+    '#title' => t('API Password'),
+    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+  );
+
+  $form['cu_class_import_delay'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_delay', '2'),
+    '#title' => t('Import Delay'),
+    '#description' => t('Batch imports can overwhelm a primer.  Use this to slow it down.'),
+  );
+
+   $form['prime']['cu_class_import_api_use_prime'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_api_use_prime', 'http://express.local/express14/'),
+    '#title' => t('Use Primer'),
+    '#description' => t(''),
+  );
+
+  $form['prime'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('Primer Settings'),
+     '#collapsible' => TRUE,
+     '#collapsed' => TRUE,
+  );
+
+  $form['prime']['cu_class_import_api_use_prime'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_api_use_prime', FALSE),
+    '#title' => t('Use Primer'),
+    '#description' => t(''),
+  );
+
+  $form['prime']['cu_class_import_prime_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_prime_url', 0),
+    '#title' => t('Base URL of site running cu_class_primer_bundle'),
+    '#description' => t(''),
+  );
+
+  $form['adv'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('Advanced'),
+     '#collapsible' => TRUE,
+     '#collapsed' => TRUE,
+  );
+
+  $form['adv']['cu_class_import_debug'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_debug', 0),
+    '#title' => t('Show Debug Messages'),
+    '#description' => t('You may want to trun this off when using batch imports of large data sets'),
+  );
+
+  return system_settings_form($form);
+}
+/**
+ * Updates all Classes that match the course.
+ */
+function cu_class_import_update($class) {
+
+  // Query the detail
+  // Compare to existing entities
+  // Save entities with diffs
+
+}
+
+/**
+ * Access callback for ??
+ */
+function cu_class_import_access() {
+  // switch to a custom permission?
+  return TRUE;
+}
+
+/**
+ * Process form
+ */
+function cu_course_import_form() {
+  // @TODO: Save imports a something... ctool exportable?
+
+
+  // @TODO: Look these up
+  $term_options = array(
+    '2154' => t('2015 Summer'),
+    '2157' => t('2015 Fall'),
+	  '2161' => t('2016 Spring'),
+	  '2164' => t('2016 Summer'),
+    '2167' => t('2016 Fall'),
+  );
+
+	$form['term'] = array(
+	  '#type' => 'select',
+	  '#default_value' => '2164',
+	  '#title' => t('Term'),
+	  '#options' => $term_options,
+	  '#description' => t('Terms are available X days before enrollment opens'),
+	);
+
+
+  $subject_options = cu_class_import_get_subjects();
+
+  asort($subject_options);
+  $form['subject'] = array(
+	  '#type' => 'select',
+	  '#default_value' => 'HIST',
+	  '#title' => t('Subject'),
+	  '#options' => $subject_options,
+	  '#description' => t(''),
+	);
+
+  //$form['course_id'] = array(
+  //  '#type' => 'textfield', //you can find a list of available types in the form api
+  //  '#title' => 'Course ID',
+  //  '#size' => 10,
+  //  '#maxlength' => 10,
+  //);
+
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+
+  return $form;
+}
+
+/**
+ * Process form
+ */
+function cu_course_import_form_submit($form, &$form_state) {
+  //@TODO: Term and Institution should come from form.
+  $term = '2164';
+  $institution = 'CUBLD';
+
+  $subject = $form['subject']['#value'];
+
+  cu_course_import($institution, $term, $subject);
+
+  return '';
+
+}
+
+
+/**
+ * Setup the cURL, run it, and write the result to a _latest file.
+ * If there is an error it will be logged to the normal php error log.
+ */
+function cu_course_import_curl($institution, $term, $subject) {
+
+  // Setup the cURL
+  $curl = curl_init();
+  // Empty out the error message.
+  $error_message = NULL;
+
+  if (variable_get('cu_class_import_api_use_prime', 0)) {
+    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/courses/$institution/$term/$subject";
+  }
+  else {
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
+  }
+
+  if (variable_get('cu_class_import_debug', 0)) {
+    drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  }
+  // Set path
+  curl_setopt($curl, CURLOPT_URL, $request_path);
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+  // when priming courses and classes, we aren't using a post and don't require a username and password
+  if (!variable_get('cu_class_import_api_use_prime', 0)) {
+
+    $request_auth_string = variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '');
+
+    // Use a POST rather than a GET
+    curl_setopt($curl, CURLOPT_POST, true);
+    // This allows us to access the endpoint without verifying the SSL cert.
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    // Use Basic Auth
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+    // <CRSE_ID>' . $course_id .'</CRSE_ID>
+
+    // Additional data that the API takes
+    $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+    //dsm($curl_request_body);
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+
+  }
+
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$curl_response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+  // Close the curl to free resources
+  curl_close($curl);
+  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form() {
+  // @TODO: Save imports a something... ctool exportable?
+
+  // query courses?
+  $course_options = array();
+  $results = db_query('SELECT subject, course_id, title FROM {cu_course}');
+
+  foreach($results as $course) {
+    $course_options[$course->course_id] = $course->subject . ' -  ' . $course->course_id . ' - ' . $course->title;
+  }
+
+  asort($course_options);
+
+  $form['course'] = array(
+    '#type' => 'select',
+	  '#title' => t('Course'),
+	  '#options' => $course_options,
+	  '#description' => t(''),
+  );
+
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+
+  return $form;
+}
+
+/**
+ * Process form
+ */
+function cu_class_import_form_submit($form, &$form_state) {
+  //@TODO: Term and Institution should come from form.
+  $term = '2164';
+  $institution = 'CUBLD';
+
+  $course_id = $form['course']['#value'];
+
+  cu_class_import($institution, $term, $subject, $course_id);
+
+  return '';
+}
+
+/**
+ * Setup the cURL, run it, and write the result to a _latest file.
+ * If there is an error it will be logged to the normal php error log.
+ */
+function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
+
+  if (variable_get('cu_class_import_api_use_prime', 0)) {
+    $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject/$course_id";
+  }
+  else {
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
+  }
+
+  // Setup the cURL
+  $curl = curl_init();
+  // Empty out the error message.
+  $error_message = NULL;
+
+  // if doesn't exist, add it
+  $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
+
+  // update course with
+  if (variable_get('cu_class_import_debug', 0)) {
+    drupal_set_message('Attempting to import from ' . $request_path, 'status');
+  }
+
+  // Set path
+  curl_setopt($curl, CURLOPT_URL, $request_path);
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    // when priming courses and classes, we aren't using a post and don't require a username and password
+  if (!variable_get('cu_class_import_api_use_prime', 0)) {
+
+    $request_auth_string = variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '');
+
+    // Use a POST rather than a GET
+    curl_setopt($curl, CURLOPT_POST, true);
+    // This allows us to access the endpoint without verifying the SSL cert.
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    // Use Basic Auth
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
+
+    // Additional data that the API takes
+    $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+    //dsm($curl_request_body);
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
+  }
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$curl_response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+  // Close the curl to free resources
+  curl_close($curl);
+  //dsm($curl_response);
+  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+}
+
+
+
+/**
+ * The batch callback.
+ */
+function cu_class_import_batch_update() {
+  $batch = array(
+    'operations' => array(),
+    'finished' => 'cu_class_import_batch_finished',
+    'title' => t('Batch update'),
+    'init_message' => t('update is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Update has encountered an error.')
+  );
+
+  // get all courses
+  $results = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
+
+  // @TODO: Check to see when the last time this course was updated?
+  // Currently the changed timestamp is only updated when the course
+  // is created
+
+  foreach ($results as $result) {
+    $batch['operations'][] = array('cu_class_import_batch_process', array($result));
+  }
+
+  batch_set($batch);
+  batch_process('courses/search'); // The path to redirect to when done.
+}
+
+/**
+ * The batch processor.
+ */
+function cu_class_import_batch_process($course, &$context) {
+  // Do heavy lifting here...
+  // Display a progress message...
+  $context['message'] = "Now processing Classes in Course: $course->title...";
+
+  $term = $course->term_id;
+  $institution = $course->inst;
+  $subject = $course->subject;
+  $course_id = $course->course_id;
+
+  cu_class_import($institution, $term, $subject, $course_id);
+  // this is so we don't overwhelm the servers
+  sleep(variable_get('cu_class_import_delay', '2'));
+}
+
+/**
+ * The batch finish handler.
+ */
+function cu_class_import_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message('Update is complete!');
+  }
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE)
+    ));
+    drupal_set_message($message, 'error');
+  }
+  drupal_set_message(l('Attempt to run again', 'class/import/batch'));
+}
+
+/**
+ * The batch callback.
+ */
+function cu_class_import_course_batch_update() {
+  $batch = array(
+    'operations' => array(),
+    'finished' => 'cu_class_import_course_batch_finished',
+    'title' => t('Batch update'),
+    'init_message' => t('update is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Update has encountered an error.')
+  );
+
+  // get all courses
+  //$results = db_query('SELECT * FROM {cu_course}');
+  $subjects = cu_class_import_get_subjects();
+
+  foreach ($subjects as $subject) {
+    $batch['operations'][] = array('cu_class_import_course_batch_process', array($subject));
+  }
+
+  batch_set($batch);
+  batch_process('courses/search'); // The path to redirect to when done.
+}
+
+/**
+ * The batch processor.
+ */
+function cu_class_import_course_batch_process($subjects, &$context) {
+
+  // Do heavy lifting here...
+  // Display a progress message...
+  $context['message'] = "Now processing Course: $subjects...";
+
+  $term = '2164';
+  $institution = 'CUBLD';
+
+  cu_course_import($institution, $term, $subjects);
+  // this is so we don't overwhelm the servers
+  sleep(variable_get('cu_class_import_delay', '2'));
+}
+
+/**
+ * The batch finish handler.
+ */
+function cu_class_import_course_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message('Update is complete!');
+  }
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE)
+    ));
+    drupal_set_message($message, 'error');
+  }
+  drupal_set_message(l('Attempt to run again', 'course/import/batch'));
+}
+
+/**
+ * process the import
+ */
+function cu_class_import($institution, $term, $subject, $course_id) {
+
+  //need the subject... could be passing this from form since the course has it
+  // go get it from course if it is NULL
+  if (!isset($subject)) {
+    $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
+    $subject = $course->subject;
+
+    // any time we import classes for a course, update the course
+    // this will change the sort order of the next batch
+    $result = db_update('cu_course')
+    ->fields(array(
+        'changed' => REQUEST_TIME,
+      ))
+    ->condition('course_id', $course_id, '=')
+    ->execute();
+  }
+
+  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+
+  //strip ser namespace for now
+  $response  = str_replace("ser:", "", $response);
+
+  $xml = simplexml_load_string($response);
+  //$ns = $xml->getNamespaces(true);
+
+  if (is_object($xml)) {
+
+    if ($xml->IS_FAULT) {
+
+      $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
+      drupal_set_message($error, 'error');
+      return;
+    }
+
+    if(isset($xml->SEARCH_RESULT->SUBJECTS)){
+      foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
+
+        //dsm(xml2array_parse($class));
+
+        $class_id = (string) $class->CLASS_NBR;
+        $course_id = (string) $class->CRSE_ID;
+        $catalog_number = (string) $class->CATALOG_NBR;
+        $title = (string) $class->CRSE_ID_LOVDescr;
+        $catalog_nbr = (string) $class->CATALOG_NBR;
+        $subject = (string) $class->SUBJECT;
+        $session_code = (string) $class->SESSION_CODE;
+        $section = (string) $class->CLASS_SECTION;
+        $descrlong = (string) $class->SSR_DESCRLONG;
+
+        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
+          $start = (string) $meeting->START_DT;
+          $end = (string) $meeting->END_DT;
+
+          //convert date to Y-m-d
+          $start = date('Y-m-d', strtotime($start));
+          $end = date('Y-m-d', strtotime($end));
+
+          $instructor = (string) $meeting->SSR_INSTR_LONG;
+
+          $start_time = (string) $meeting->MEETING_TIME_START;
+          $end_time = (string) $meeting->MEETING_TIME_END;
+
+          $schedule_long = (string) $meeting->SSR_MTG_SCHED_LONG;
+
+          $location_long = (string) $meeting->SSR_MTG_LOC_LONG;
+        }
+
+        // check to see if already exists...
+        // if doesn't exist, add it
+        // @TODO: Need to check specific sections?
+        $result = db_query('SELECT * FROM {cu_class} WHERE class_id = :class_id', array(':class_id' => $class_id));
+        if($result->rowCount()) {
+
+          //UPDATE
+          $existing_class = entity_load_single('cu_class', $class_id);
+
+          //@TODO: diff fields for changes... only save update if there is a difference
+
+          $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
+          $existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
+          $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
+          $existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
+          $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+          $existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
+          $existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
+          $existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
+          $existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
+
+          $existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+          $existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+          $existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+          $existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+
+          $existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+          $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+
+          $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
+
+          $existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
+          $existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
+          $existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
+          $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
+
+          $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
+          $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
+
+          $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+          $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+          // expecting format to be 2016-01-08 22:45:45
+          $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+			    $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+
+          $updated = entity_save('cu_class', $existing_class);
+          if (variable_get('cu_class_import_debug', 0)) {
+            drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+          }
+        }
+        else {
+
+          $values = array(
+            'class_id' => $class_id,
+            'title' => $title,
+            'course_id' => $course_id,
+            'type' => 'class',
+          );
+
+          // field_class_ssr_component
+
+          // field_class_scc_latitude
+          // field_class_scc_longitude
+
+        $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
+        $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
+        $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
+        $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
+        $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
+        $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
+
+        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+
+        $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+
+        $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+
+        $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
+        $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
+        $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+        $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
+
+        $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
+        $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
+
+        $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+        $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+        // expecting format to be 2016-01-08 22:45:45
+        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+        $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+
+        $class = entity_create('cu_class', $values);
+        $created = entity_save('cu_class', $class);
+        if (variable_get('cu_class_import_debug', 0)) {
+          drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+        }
+        }
+      }
+    } // isset
+  }
+}
+
+/**
+ * process the import
+ */
+function cu_course_import($institution, $term, $subject) {
+
+  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
+  //dsm($response);
+  $xml = simplexml_load_string($response);
+
+  if (is_object($xml)) {
+
+      //dsm(xml2array_parse($xml));
+
+      if ($xml->IS_FAULT) {
+
+        $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
+        drupal_set_message($error, 'error');
+        return;
+      }
+
+      if(isset($xml->SEARCH_RESULT->SUBJECTS)){
+        foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
+
+          //dsm($subject);
+
+          $course_id = (string) $subject->CRSE_ID;
+          $catalog_number = (string) $subject->CATALOG_NBR;
+          $title = (string) $subject->COURSE_TITLE_LONG;
+
+          $output .= $title . '<br />';
+
+          // check to see if already exists...
+
+
+          // if doesn't exist, add it
+          $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
+          if($result->rowCount() > 0) {
+
+            //UPDATE?  Are courses actually removed from the API?
+
+          }
+          else {
+
+            $result = db_insert('cu_course')
+              ->fields(array(
+                'course_id' => (string) $subject->CRSE_ID,
+                'title' => (string) $subject->COURSE_TITLE_LONG,
+                'type' => 'course',
+                'changed' => REQUEST_TIME,
+                'subject' => (string) $subject->SUBJECT,
+                'term_id' => $term,
+                'inst' => $institution,
+                'catalog_nbr' => (string) $subject->CATALOG_NBR,
+              ))
+              ->execute();
+
+            // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
+            //$course = entity_create('cu_course', $values);
+            if (variable_get('cu_class_import_debug', 0)) {
+              drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
+            }
+          }
+        }
+      } // isset
+    }
+
+  return $ouput;
+}
+
+/**
+ * Deletes all classes
+ */
+function cu_class_import_purge_classes() {
+
+  $classes = entity_load('cu_class');
+  foreach ($classes as $key => $class) {
+   // Delete attached field values... shouldn't be necessary?
+   // field_attach_delete('cu_class', $key);
+   entity_delete('cu_class', $key);
+  }
+  drupal_set_message('All Classes have been deleted.');
+  return '';
+}
+
+/**
+ * Deletes all courses
+ */
+function cu_class_import_purge_courses() {
+  db_truncate('cu_course')->execute();
+  drupal_set_message('All Courses have been deleted.');
+  return '';
+}
+
+/**
+ * Helpful function that transforms all elements of than XML object into
+ * an array that can easily be displayed
+ * NOTE! This is expensive so only use whie debugging
+ */
+function xml2array_parse($xml){
+  foreach ($xml->children() as $parent => $child){
+    $return["$parent"] = xml2array_parse($child)?xml2array_parse($child):"$child";
+  }
+  return $return;
+}
+
+function cu_class_import_get_subjects() {
+  return array(
+  'ENVD' => 'ENVD',
+  'ARTF' => 'ARTF',
+	'ARTH' => 'ARTH',
+	'ARTS' => 'ARTS',
+	'JPNS' => 'JPNS',
+	'KREN' => 'KREN',
+	'ANTH' => 'ANTH',
+	'APPM' => 'APPM',
+	'ASIA' => 'ASIA',
+	'ASTR' => 'ASTR',
+	'ATOC' => 'ATOC',
+	'CHEM' => 'CHEM',
+	'CLAS' => 'CLAS',
+	'LATN' => 'LATN',
+	'COML' => 'COML',
+	'EBIO' => 'EBIO',
+	'ECON' => 'ECON',
+	'ENGL' => 'ENGL',
+	'ENVS' => 'ENVS',
+	'ETHN' => 'ETHN',
+	'FILM' => 'FILM',
+	'FREN' => 'FREN',
+	'ITAL' => 'ITAL',
+	'GEOG' => 'GEOG',
+	'GEOL' => 'GEOL',
+	'GRMN' => 'GRMN',
+	'RUSS' => 'RUSS',
+	'SCAN' => 'SCAN',
+	'HIST' => 'HIST',
+	'HONR' => 'HONR',
+	'HUMN' => 'HUMN',
+	'IAFS' => 'IAFS',
+	'IPHY' => 'IPHY',
+	'JWST' => 'JWST',
+	'LING' => 'LING',
+	'MATH' => 'MATH',
+	'MCDB' => 'MCDB',
+	'MUSM' => 'MUSM',
+	'PHIL' => 'PHIL',
+	'PHYS' => 'PHYS',
+	'PSCI' => 'PSCI',
+	'NRSC' => 'NRSC',
+	'PSYC' => 'PSYC',
+	'WRTG' => 'WRTG',
+	'RLST' => 'RLST',
+	'SLHS' => 'SLHS',
+	'SOCY' => 'SOCY',
+	'SPAN' => 'SPAN',
+	'DNCE' => 'DNCE',
+	'THTR' => 'THTR',
+	'WMST' => 'WMST',
+	'ACCT' => 'ACCT',
+	'BADM' => 'BADM',
+	'BCOR' => 'BCOR',
+	'BPOL' => 'BPOL',
+	'CESR' => 'CESR',
+	'ESBM' => 'ESBM',
+	'FNCE' => 'FNCE',
+	'INBU' => 'INBU',
+	'MGMT' => 'MGMT',
+	'MKTG' => 'MKTG',
+	'REAL' => 'REAL',
+	'APRD' => 'APRD',
+	'COMM' => 'COMM',
+	'CMDP' => 'CMDP',
+	'JRNL' => 'JRNL',
+	'MDST' => 'MDST',
+	'LDSP' => 'LDSP',
+	'PRLC' => 'PRLC',
+	'EDUC' => 'EDUC',
+	'LEAD' => 'LEAD',
+	'ASEN' => 'ASEN',
+	'ATLS' => 'ATLS',
+	'CHEN' => 'CHEN',
+	'CSCI' => 'CSCI',
+	'AREN' => 'AREN',
+	'CVEN' => 'CVEN',
+	'ECEN' => 'ECEN',
+	'EMEN' => 'EMEN',
+	'COEN' => 'COEN',
+	'GEEN' => 'GEEN',
+	'HUEN' => 'HUEN',
+	'MCEN' => 'MCEN',
+	'TLEN' => 'TLEN',
+	'LAWS' => 'LAWS',
+	'MUEL' => 'MUEL',
+	'MUSC' => 'MUSC',
+	'TMUS' => 'TMUS',
+  );
+}
+
+function cu_class_import_entity_view_alter(&$build, $type){
+
+  if ($type == 'cu_class' && isset($build['#entity']) && variable_get('cu_class_import_debug', 0)){
+
+    $url_api = 'import/api-preview/CUBLD/2164/' . $build['field_class_subject'][0]['#markup'] . '/' . $build['field_class_crse_id'][0]['#markup'];
+    $url_primer = variable_get('cu_class_import_prime_url', 0) . 'primer/class/CUBLD/2164/' . $build['field_class_subject'][0]['#markup'] . '/' . $build['field_class_crse_id'][0]['#markup'];
+
+    //class/CUBLD/2164/HIST/108161
+    $links = ' Debug XML: ' . l('API', $url_api) . ' | ' . l('Primer', $url_primer);
+
+    $build['field_class_class_nbr'][0]['#markup'] = $build['field_class_class_nbr'][0]['#markup'] . $links;
+
+  }
+}
+
+// NEED CRON FUNCTION THAT WILL UPDATE PERIODICALY
+// WITHOUT EXCEEDING THE UIS API LIMITS
+

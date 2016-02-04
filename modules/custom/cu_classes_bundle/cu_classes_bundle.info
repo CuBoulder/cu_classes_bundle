@@ -1,0 +1,8 @@
+name = Classes
+description = This bundle includes class, class import and other advanced class related features.
+core = 7.x
+package = CU-Classes
+
+dependencies[] = cu_course
+dependencies[] = cu_class
+dependencies[] = cu_class_fields

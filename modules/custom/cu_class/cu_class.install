@@ -1,0 +1,54 @@
+<?php
+
+function cu_class_schema() {
+  $schema = array();
+  // Optional cache table for entitycache support.
+  //$schema['cache_class'] = drupal_get_schema_unprocessed('system', 'cache');
+  //$schema['cache_class']['description'] = 'Cache table used to store layout entity records.';
+
+  $schema['cu_class'] = array(
+    'description' => 'The base table for Class.',
+    'fields' => array(
+      'class_id' => array(
+        'description' => 'Primary key for Class.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'Name of the Class',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'course_id' => array(
+        'description' => 'Course ID',
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'type' => array(
+        'description' => 'The type (bundle) of this class',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('class_id'),
+  );
+
+  return $schema;
+}
+
+function cu_class_install() {
+  
+  //Add fields here?
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function cu_class_uninstall() {
+  // Delete field instances related to Class entity
+  field_attach_delete_bundle('cu_class', 'cu_class');
+}
