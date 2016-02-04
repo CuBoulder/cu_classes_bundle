@@ -326,8 +326,8 @@ function cu_class_preprocess_entity(&$vars) {
     $vars['course_link'] = l($course_link_title, 'course/' . $vars['content']['field_class_crse_id'][0]['#markup'], array('query' => array('class_id' => $vars['content']['field_class_class_nbr'][0]['#markup'])));
 
     // Dates
-    $vars['start_date'] = format_date(strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']), 'cu_medium_date');
-    $vars['end_date'] = format_date(strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']), 'cu_medium_date');
+    $vars['start_date'] = cu_class_date_format(strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']));
+    $vars['end_date'] = cu_class_date_format(strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']));
     $vars['updated'] = 'Updated: ' . format_date(strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']), 'cu_short_date');
 
     // Available seats
@@ -810,4 +810,22 @@ function cu_class_session_values() {
   }
 
   return $sessions;
+}
+
+function cu_class_date_format($date) {
+
+  $date_month = date('F', $date);
+  $date_day_year = date('j, Y', $date);
+
+  if($date_month == "September"){
+      $ap_date_sept = "Sept. " . $date_day_year;
+      $formatted_date = $ap_date_sept;
+  } elseif (strlen($date_month) > 5){
+      $ap_date_short = substr($date_month, 0,3) . "." . " " . $date_day_year;
+      $formatted_date = $ap_date_short;
+  } else {
+      $ap_date_long = $date_month . " " . $date_day_year;
+      $formatted_date = $ap_date_long;
+  }
+  return $formatted_date;
 }
