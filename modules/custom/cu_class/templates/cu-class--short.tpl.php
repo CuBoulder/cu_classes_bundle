@@ -1,7 +1,7 @@
 <div class="class-view-mode-short class-entity-wrapper">
   <div class="class-wrapper">
     <div class="class-title-wrapper">
-      <h2 class="class-format">Section <?php print $content['field_class_class_section'][0]['#markup']; ?> - <?php print $format; ?></h2>
+      <h2 class="class-format">Section <?php print sprintf("%03s", $content['field_class_class_section'][0]['#markup']); ?> - <?php print $format; ?></h2>
     </div>
     <div class="class-content">
       <div class="row clearfix">
@@ -10,7 +10,7 @@
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
               <div class="class-section">
                 <h3>Section</h3>
-                <?php print $content['field_class_class_section'][0]['#markup']; ?>
+                <?php print sprintf("%03s", $content['field_class_class_section'][0]['#markup']); ?>
               </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
@@ -46,7 +46,7 @@
           <div class="class-section">
             <h3>Meeting Time</h3>
             <div class=" ">
-               <?php print render($content['field_class_ssr_mtg_sched_long']); ?>
+               <?php print $meeting_time; ?>
             </div>
           </div>
         <?php endif; ?>

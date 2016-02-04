@@ -52,8 +52,8 @@
     flex-direction: column;
     margin-bottom: 10px;
     .class-title {
-      -webkit-order:2;
-      order:2;
+      -webkit-order:3;
+      order:3;
       margin:0;
       padding: 5px 0;
     }
@@ -64,8 +64,8 @@
       padding: 0;
     }
     .class-section {
-      -webkit-order:3;
-      order:3;
+      -webkit-order:2;
+      order:2;
       margin:0;
       padding: 0;
       text-transform: uppercase;
