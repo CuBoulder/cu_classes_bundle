@@ -12,6 +12,14 @@ The Classes Bundle incldes a few different components:
 
 Configure importer at admin/config/system/class-import
 
+![import ui](https://github.com/CuBoulder/cu_classes_bundle/blob/master/cu_class_import_ui.png)
+
+- **Base URL of API** - Used to switch between dev and test instances of API.
+- **API Username and Password** - Provided by UIS. This is not a restful API and requires a POST that includes authentication. This is also used to track concurrent requests. UIS reserves the option of disabling API requests for any account disrupting the service, but it is unclear how this is monitored, who would be contacted, or what steps would be required before an account would be unblocked.
+- **Import Delay** - This adds a delay between each request during batch import. This is necessary for both the API and Primer, but for different reasons.  On the initial import, saving each course or class to the database adds a delay. But when the import is only diff'ing a cached class entity with the API or Primer response, it can process these fast enough to exceed the rate limits set by UIS for the API or OIT for the Primer running on Express.
+- **Use Primer** - A Primer can be created for any class data using PSQuery export by enabling the CU Class Primer Bundle on a Drupal site.  The Primer bundle can be enabled on the same site as the Classes bundle, but that is NOT recommended.  The option to toggle between the Primer and API allows both to remain configured.
+- **Show Debug Messages** - When enabled, the location the import is trying to pull from is shown as well as whether a course or class was created or updated. During batch imports, this can generate thousands of messages.
+
 Regarldess of whether you are using the UIS API or a Primer, you start the process of importing with courses.  Import courses by subject and term at courses/import
 
 Once courses are populated, you can import classes for every course Drupal is aware of at class/import
@@ -20,9 +28,8 @@ Both class and course provide batch imports at courses/import/batch and class/im
 
 # Published vs. Unpublished
 
+*NEEDS DOCUMENTATION*
+
 # Cancelled Classes
 
-
-
-
-
+*NEEDS TESTING AND DOCUMENTATION*
