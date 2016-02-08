@@ -232,13 +232,17 @@ function cu_class_views_colleges_schools() {
   );
   $groups['media']['title'] = 'Media, Communication & Information';
   $groups['media']['subjects'] = array(
-    'MUEL' => 'MUEL',
-    'MUSC' => 'MUSC',
-    'TMUS' => 'TMUS',
+    'CMDP' => 'CMDP',
+    'COMM' => 'COMM',
+    'JRNL' => 'JRNL',
+    'MDST' => 'MDST',
+    'MGMT' => 'MGMT',
   );
   $groups['music']['title'] = 'Music';
   $groups['music']['subjects'] = array(
-    'LAWS' => 'LAWS',
+    'MUEL' => 'MUEL',
+    'MUSC' => 'MUSC',
+    'TMUS' => 'TMUS',
   );
   $groups['envd']['title'] = 'Environmental Design';
   $groups['envd']['subjects'] = array(
