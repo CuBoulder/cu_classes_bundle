@@ -10,6 +10,11 @@ function cu_course_view($course) {
 }
 
 function cu_course_display($course) {
+  $breadcrumb = array();
+  $breadcrumb[] = l('Home', '<front>');
+  $breadcrumb[] = l('Courses', 'courses');
+  $breadcrumb[] = l('Course Search', 'courses/search');
+  drupal_set_breadcrumb($breadcrumb);
   // If there is a class number in the url, highlight that class
   if ($_GET['class_id'] && is_numeric($_GET['class_id'])) {
     $class_number = $_GET['class_id'];
@@ -123,8 +128,13 @@ function cu_course_title($course) {
 
 
 /**
- * Display classes from course at courses/SUBJECT/catalog_number*/
+ * Display classes from course at courses/SUBJECT/catalog_number
+ */
 function cu_course_classes_display($subject, $catalog_number) {
+  $breadcrumb[] = l('Home', '<front>');
+  $breadcrumb[] = l('Courses', 'courses');
+  $breadcrumb[] = l(cu_course_list_title_from_subject($subject), 'courses/subject/' . $subject);
+  drupal_set_breadcrumb($breadcrumb);
   $output = array();
 
   $query = db_select('cu_course', 'courses');
@@ -199,6 +209,9 @@ function cu_course_title_from_catalog_number($subject, $catalog_number) {
 }
 
 function cu_course_by_subject_display($subject) {
+  $breadcrumb[] = l('Home', '<front>');
+  $breadcrumb[] = l('Courses', 'courses');
+  drupal_set_breadcrumb($breadcrumb);
   $output = array();
 
   $query = db_select('cu_course', 'courses');
