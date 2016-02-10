@@ -377,6 +377,7 @@ function cu_class_page_alter(&$page) {
 
 function cu_class_core_requirements($reqs) {
   $keys = explode(', ', $reqs);
+  $keys = array_unique($keys, SORT_REGULAR);
   $requirements = array(
     'AD' => 'Human Diversity',
     'AF' => 'Foreign Language',
