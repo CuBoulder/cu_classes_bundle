@@ -17,18 +17,45 @@ function cu_class_views_menu() {
   return $items;
 }
 
+function cu_class_views_block_info() {
+  $blocks = array();
+  $blocks['course_search_form'] = array(
+    'info' => t('Course Search Form'),
+  );
+  return $blocks;
+}
+function cu_class_views_block_view($delta = '') {
+  switch ($delta) {
+    case 'course_search_form':
+
+      $view = views_get_view('cu_classes');
+      $view->set_display('page');
+      $view->init_handlers();
+      $exposed_form = $view->display_handler->get_plugin('exposed_form');
+      $form =  $exposed_form->render_exposed_form(true);
+
+      $block['content']['#markup'] = $form;
+      $block['content']['#prefix'] = '<div class="view-cu-classes">';
+      $block['content']['#suffix'] = '</div>';
+      dpm($block);
+      break;
+  }
+  return $block;
+}
+
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
+    dpm($form_id);
     // Add College/School filter
     $groups = cu_class_views_colleges_schools();
     $options = array();
+    $options['all'] = '-None-';
     foreach ($groups as $key => $group) {
       $options[$key] = $group['title'];
     }
     $form['college_school_filter']['#type'] = 'select';
     $form['college_school_filter']['#options'] = $options;
     $form['college_school_filter']['#multiple'] = FALSE;
-    $form['college_school_filter']['#empty_value'] = '';
     $filter = isset($_GET['college_school']) ? $_GET['college_school'] : NULL;
     if ($filter) {
       $form['college_school_filter']['#default_value'] = $filter;
