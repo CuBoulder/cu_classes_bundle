@@ -28,6 +28,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Search';
   $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
@@ -38,7 +39,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['header']['result']['id'] = 'result';
   $handler->display->display_options['header']['result']['table'] = 'views';
   $handler->display->display_options['header']['result']['field'] = 'result';
-  $handler->display->display_options['header']['result']['content'] = 'Your search has returned @total classes.';
+  $handler->display->display_options['header']['result']['content'] = '<div class="results-counter">Your search has returned @total classes.</div>';
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['area']['id'] = 'area';
   $handler->display->display_options['empty']['area']['table'] = 'views';
@@ -292,6 +293,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['arguments']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
   $handler->display->display_options['arguments']['field_class_subject_value']['field'] = 'field_class_subject_value';
   $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_options']['argument'] = 'all';
   $handler->display->display_options['arguments']['field_class_subject_value']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['field_class_subject_value']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['field_class_subject_value']['summary_options']['items_per_page'] = '25';
