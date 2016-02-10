@@ -51,7 +51,14 @@ function cu_course_display($course) {
   // Get only class entities
   $query->condition('class.type', 'class', '=');
   $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
-  $query->orderBy('courseid.field_class_crse_id_value', 'DESC');
+
+  // Join for section number
+  $query->join('field_data_field_class_class_section', 'section', 'section.entity_id = courseid.entity_id');
+  $query->fields('section', array('field_class_class_section_value'));
+
+  $query->orderBy('courseid.field_class_crse_id_value', 'ASC');
+  $query->orderBy('section.field_class_class_section_value', 'ASC');
+
   $class_ids = $query->execute()->fetchCol();
 
 
