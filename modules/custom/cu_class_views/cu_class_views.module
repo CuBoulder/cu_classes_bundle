@@ -37,7 +37,6 @@ function cu_class_views_block_view($delta = '') {
       $block['content']['#markup'] = $form;
       $block['content']['#prefix'] = '<div class="view-cu-classes">';
       $block['content']['#suffix'] = '</div>';
-      dpm($block);
       break;
   }
   return $block;
@@ -45,7 +44,6 @@ function cu_class_views_block_view($delta = '') {
 
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
-    dpm($form_id);
     // Add College/School filter
     $groups = cu_class_views_colleges_schools();
     $options = array();
