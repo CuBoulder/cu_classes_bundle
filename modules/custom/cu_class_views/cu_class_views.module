@@ -258,6 +258,7 @@ function cu_class_views_colleges_schools() {
   );
   $groups['media']['title'] = 'Media, Communication & Information';
   $groups['media']['subjects'] = array(
+    'APRD' => 'APRD',
     'CMDP' => 'CMDP',
     'COMM' => 'COMM',
     'JRNL' => 'JRNL',
