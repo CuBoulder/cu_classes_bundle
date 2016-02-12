@@ -228,6 +228,7 @@ function cu_class_views_colleges_schools() {
     'ESBM' => 'ESBM',
     'FNCE' => 'FNCE',
     'INBU' => 'INBU',
+    'MGMT' => 'MGMT',
     'MKTG' => 'MKTG',
     'REAL' => 'REAL',
   );
@@ -261,7 +262,6 @@ function cu_class_views_colleges_schools() {
     'COMM' => 'COMM',
     'JRNL' => 'JRNL',
     'MDST' => 'MDST',
-    'MGMT' => 'MGMT',
   );
   $groups['music']['title'] = 'Music';
   $groups['music']['subjects'] = array(
