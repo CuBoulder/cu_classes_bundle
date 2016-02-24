@@ -1,8 +1,5 @@
 <?php
 
-// because the details aren't available from cu_master,
-// first import the courses to
-
 /**
  * Implements hook_menu().
  */
@@ -109,7 +106,7 @@ function class_import_admin_settings() {
     '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
   );
 
-   $form['cu_class_import_api_password'] = array(
+  $form['cu_class_import_api_password'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_password', ''),
     '#title' => t('API Password'),
@@ -119,15 +116,36 @@ function class_import_admin_settings() {
   $form['cu_class_import_delay'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_delay', '2'),
-    '#title' => t('Import Delay'),
+    '#title' => t('Import Delay (in seconds)'),
     '#description' => t('Batch imports can overwhelm a primer.  Use this to slow it down.'),
   );
 
-   $form['prime']['cu_class_import_api_use_prime'] = array(
-    '#type' => 'checkbox',
-    '#default_value' => variable_get('cu_class_import_api_use_prime', 'http://express.local/express14/'),
-    '#title' => t('Use Primer'),
-    '#description' => t(''),
+
+
+  //@TODO: Move terms to view setting?
+  $form['terms'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('Active Terms'),
+     '#collapsible' => TRUE,
+     '#collapsed' => FALSE,
+  );
+
+  $terms = cu_class_import_get_terms();
+
+  $form['terms']['cu_class_import_active_terms'] = array(
+    '#title' => t('Active Terms'),
+    '#type' => 'checkboxes',
+    '#description' => t('This controls the terms that will be import'),
+    '#default_value' => variable_get('cu_class_import_active_terms'),
+    '#options' => $terms,
+  );
+
+  $form['terms']['cu_class_import_default_term'] = array(
+    '#title' => t('Default Term'),
+    '#type' => 'radios',
+    '#description' => t('This sets the default term tab'),
+    '#default_value' => variable_get('cu_class_import_default_term'),
+    '#options' => $terms,
   );
 
   $form['prime'] = array(
@@ -151,6 +169,8 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
+  //@TODO: Add option to only update enrollment from API
+
   $form['adv'] = array(
      '#type' => 'fieldset',
      '#title' => t('Advanced'),
@@ -165,17 +185,21 @@ function class_import_admin_settings() {
     '#description' => t('You may want to trun this off when using batch imports of large data sets'),
   );
 
+  $form['adv']['cu_class_import_online_only'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_online_only', 0),
+    '#title' => t('Limit to Online Classes'),
+    '#description' => t(''),
+  );
+
+  $form['adv']['cu_class_import_session_cd'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_session_cd', ''),
+    '#title' => t('Session Codes to Ignore'),
+    '#description' => t('Comma seperated list of session codes. Classes with these codes will not be imported.'),
+  );
+
   return system_settings_form($form);
-}
-/**
- * Updates all Classes that match the course.
- */
-function cu_class_import_update($class) {
-
-  // Query the detail
-  // Compare to existing entities
-  // Save entities with diffs
-
 }
 
 /**
@@ -190,17 +214,21 @@ function cu_class_import_access() {
  * Process form
  */
 function cu_course_import_form() {
-  // @TODO: Save imports a something... ctool exportable?
-
-
-  // @TODO: Look these up
-  $term_options = array(
-    '2154' => t('2015 Summer'),
-    '2157' => t('2015 Fall'),
-	  '2161' => t('2016 Spring'),
-	  '2164' => t('2016 Summer'),
-    '2167' => t('2016 Fall'),
+  $institution_options = array(
+    'CUBLD' => t('Boulder'),
+    'CUSPG' => t('Colorado Springs'),
+	  'CUDEV' => t('Denver'),
   );
+
+  $form['institution'] = array(
+	  '#type' => 'select',
+	  '#default_value' => '2164',
+	  '#title' => t('Institution'),
+	  '#options' => $institution_options,
+	  '#description' => t(''),
+	);
+
+  $term_options = cu_class_import_get_terms();
 
 	$form['term'] = array(
 	  '#type' => 'select',
@@ -209,7 +237,6 @@ function cu_course_import_form() {
 	  '#options' => $term_options,
 	  '#description' => t('Terms are available X days before enrollment opens'),
 	);
-
 
   $subject_options = cu_class_import_get_subjects();
 
@@ -221,13 +248,6 @@ function cu_course_import_form() {
 	  '#options' => $subject_options,
 	  '#description' => t(''),
 	);
-
-  //$form['course_id'] = array(
-  //  '#type' => 'textfield', //you can find a list of available types in the form api
-  //  '#title' => 'Course ID',
-  //  '#size' => 10,
-  //  '#maxlength' => 10,
-  //);
 
   $form['submit_button'] = array(
     '#type' => 'submit',
@@ -241,10 +261,9 @@ function cu_course_import_form() {
  * Process form
  */
 function cu_course_import_form_submit($form, &$form_state) {
-  //@TODO: Term and Institution should come from form.
-  $term = '2164';
-  $institution = 'CUBLD';
 
+  $institution = $form['institution']['#value'];
+  $term = $form['term']['#value'];
   $subject = $form['subject']['#value'];
 
   cu_course_import($institution, $term, $subject);
@@ -294,11 +313,8 @@ function cu_course_import_curl($institution, $term, $subject) {
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
 
-    // <CRSE_ID>' . $course_id .'</CRSE_ID>
-
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-    //dsm($curl_request_body);
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
 
@@ -336,6 +352,7 @@ function cu_class_import_form() {
     '#type' => 'select',
 	  '#title' => t('Course'),
 	  '#options' => $course_options,
+	  '#default_value' => variable_get('class_import_current_course', ''),
 	  '#description' => t(''),
   );
 
@@ -343,7 +360,6 @@ function cu_class_import_form() {
     '#type' => 'submit',
     '#value' => t('Import'),
   );
-
   return $form;
 }
 
@@ -351,13 +367,15 @@ function cu_class_import_form() {
  * Process form
  */
 function cu_class_import_form_submit($form, &$form_state) {
-  //@TODO: Term and Institution should come from form.
-  $term = '2164';
-  $institution = 'CUBLD';
 
   $course_id = $form['course']['#value'];
 
-  cu_class_import($institution, $term, $subject, $course_id);
+  variable_set('class_import_current_course', $course_id);
+
+  //@TODO: Term and Institution could come from form.
+  $course = db_query('SELECT subject, inst, term_id FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchObject();
+
+  cu_class_import($course->inst, $course->term_id, $course->subject, $course_id);
 
   return '';
 }
@@ -408,8 +426,15 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
 
     // Additional data that the API takes
-    $curl_request_body = '<CLASS_SEARCH_REQUEST><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-    //dsm($curl_request_body);
+    $curl_request_body = '<CLASS_SEARCH_REQUEST>';
+    $curl_request_body .= '<CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><ACAD_CAREER>UGRD</ACAD_CAREER><SUBJECT>' . $subject . '</SUBJECT>';
+
+
+    if(variable_get('cu_class_import_online_only', 0)) {
+      $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
+    }
+
+    $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
   }
@@ -422,7 +447,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   }
   // Close the curl to free resources
   curl_close($curl);
-  //dsm($curl_response);
   return str_replace('<?xml version="1.0"?>', '', $curl_response);
 }
 
@@ -526,10 +550,16 @@ function cu_class_import_course_batch_process($subjects, &$context) {
   // Display a progress message...
   $context['message'] = "Now processing Course: $subjects...";
 
-  $term = '2164';
+  //$term = '2164';
+
+  $terms = variable_get('cu_class_import_active_terms');
   $institution = 'CUBLD';
 
-  cu_course_import($institution, $term, $subjects);
+  foreach ($terms as $term) {
+    if ($term) {
+      cu_course_import($institution, $term, $subjects);
+    }
+  }
   // this is so we don't overwhelm the servers
   sleep(variable_get('cu_class_import_delay', '2'));
 }
@@ -590,7 +620,8 @@ function cu_class_import($institution, $term, $subject, $course_id) {
       return;
     }
 
-    if(isset($xml->SEARCH_RESULT->SUBJECTS)){
+    if(isset($xml->SEARCH_RESULT->SUBJECTS) && isset($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY)){
+
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
         //dsm(xml2array_parse($class));
@@ -605,7 +636,16 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         $section = (string) $class->CLASS_SECTION;
         $descrlong = (string) $class->SSR_DESCRLONG;
 
-        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
+        // Check Elements to Ignore
+        // Session Codes
+        $session_code_ids = str_replace(" ", "", variable_get('cu_class_import_session_cd', ''));
+        $session_code_to_ignore = explode(",", $session_code_ids);
+
+        if (in_array($session_code, $session_code_to_ignore)) {
+          $ignore = TRUE;
+        }
+
+       foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
           $start = (string) $meeting->START_DT;
           $end = (string) $meeting->END_DT;
 
@@ -627,7 +667,8 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         // if doesn't exist, add it
         // @TODO: Need to check specific sections?
         $result = db_query('SELECT * FROM {cu_class} WHERE class_id = :class_id', array(':class_id' => $class_id));
-        if($result->rowCount()) {
+
+        if(!$ignore && $result->rowCount()) {
 
           //UPDATE
           $existing_class = entity_load_single('cu_class', $class_id);
@@ -675,59 +716,56 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           }
         }
         else {
+          if (!$ignore) {
+            $values = array(
+              'class_id' => $class_id,
+              'title' => $title,
+              'course_id' => $course_id,
+              'type' => 'class',
+            );
 
-          $values = array(
-            'class_id' => $class_id,
-            'title' => $title,
-            'course_id' => $course_id,
-            'type' => 'class',
-          );
+            $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
+            $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
+            $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
+            $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
+            $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+            $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
+            $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+            $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+            $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
 
-          // field_class_ssr_component
+            $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+            $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+            $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+            $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 
-          // field_class_scc_latitude
-          // field_class_scc_longitude
+            $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+            $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
 
-        $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
-        $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
-        $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
-        $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
-        $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
-        $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
-        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
-        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
+            $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
 
-        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+            $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
+            $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
+            $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+            $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
 
-        $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+            $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
+            $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
 
-        $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+            $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+            $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+            // expecting format to be 2016-01-08 22:45:45
+            $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
-        $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
-        $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
-        $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
-        $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
+            $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
-        $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
-        $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
+            $class = entity_create('cu_class', $values);
+            $created = entity_save('cu_class', $class);
 
-        $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-        $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-        // expecting format to be 2016-01-08 22:45:45
-        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
-
-        $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
-
-        $class = entity_create('cu_class', $values);
-        $created = entity_save('cu_class', $class);
-        if (variable_get('cu_class_import_debug', 0)) {
-          drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
-        }
+            if (variable_get('cu_class_import_debug', 0)) {
+              drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+            }
+          }
         }
       }
     } // isset
@@ -740,7 +778,6 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 function cu_course_import($institution, $term, $subject) {
 
   $response = cu_course_import_curl($institution, $term, $subject, $course_id);
-  //dsm($response);
   $xml = simplexml_load_string($response);
 
   if (is_object($xml)) {
@@ -757,17 +794,13 @@ function cu_course_import($institution, $term, $subject) {
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
 
-          //dsm($subject);
-
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
           $title = (string) $subject->COURSE_TITLE_LONG;
 
           $output .= $title . '<br />';
 
-          // check to see if already exists...
-
-
+          // check to see if already exists...˝
           // if doesn't exist, add it
           $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
           if($result->rowCount() > 0) {
@@ -932,7 +965,7 @@ function cu_class_import_get_subjects() {
   );
 }
 
-function cu_class_import_entity_view_alter(&$build, $type){
+function cu_class_import_entity_view_alter(&$build, $type) {
 
   if ($type == 'cu_class' && isset($build['#entity']) && variable_get('cu_class_import_debug', 0)){
 
@@ -947,6 +980,16 @@ function cu_class_import_entity_view_alter(&$build, $type){
   }
 }
 
+function cu_class_import_get_terms(){
+  // @TODO: Look these up
+  return array(
+    '2154' => t('2015 Summer'),
+    '2157' => t('2015 Fall'),
+	  '2161' => t('2016 Spring'),
+	  '2164' => t('2016 Summer'),
+    '2167' => t('2016 Fall'),
+  );
+}
+
 // NEED CRON FUNCTION THAT WILL UPDATE PERIODICALY
 // WITHOUT EXCEEDING THE UIS API LIMITS
-

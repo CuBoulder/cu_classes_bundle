@@ -32,6 +32,12 @@ function cu_class_schema() {
         'length' => 255,
         'not null' => FALSE,
       ),
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => '1',
+      ),
     ),
     'primary key' => array('class_id'),
   );
@@ -39,10 +45,18 @@ function cu_class_schema() {
   return $schema;
 }
 
-function cu_class_install() {
-  
-  //Add fields here?
-
+/**
+ * Add a second destination to schedules.
+ */
+function cu_class_update_7001() {
+  db_add_field('cu_class', 'status',
+    array(
+        'description' => 'Status',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => '1',
+      )
+  );
 }
 
 /**
