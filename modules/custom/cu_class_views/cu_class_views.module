@@ -121,12 +121,19 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     unset($form['submit']);
     unset($form['reset']);
 
+    // added to strip altered -None-
+    $form['#validate'][] = 'cu_class_views_form_views_exposed_validation';
+
     // Adding hidden value so we can tell if form has been submitted or not
     $form['submitted'] = array(
       '#type' => 'hidden',
       '#value' => TRUE,
     );
   }
+}
+
+function cu_class_views_form_views_exposed_validation($form, &$form_state) {
+  unset($form['college_school_filter']);
 }
 
 function cu_class_views_views_pre_render(&$view) {
