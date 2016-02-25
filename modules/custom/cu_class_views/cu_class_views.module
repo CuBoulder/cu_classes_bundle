@@ -132,20 +132,13 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       '#type' => 'hidden',
       '#value' => TRUE,
     );
-
-    if (!isset($form_state['input']['college_school_filter'])) {
-      $form_state['view']->display_handler->handlers['empty']['area']->options['content'] = 'Use the course search filters above to find courses available during all eight sessions offered over the summer.';
-    }
   }
 }
 
 function cu_class_views_form_views_exposed_validation($form, &$form_state) {
-  //unset($form['college_school_filter']);
-  //unset($form_state['input']['college_school_filter']);
-  //unset($form_state['complete form']['college_school_filter']);
-  //unset($form['#validate'][0]);
-  //dsm($form);
-  //dsm($form_state);
+  if (empty($form_state['values']['college_school_filter'])) {
+    $form_state['values']['college_school_filter'] = 'all';
+  }
 }
 
 function cu_class_views_views_pre_render(&$view) {
