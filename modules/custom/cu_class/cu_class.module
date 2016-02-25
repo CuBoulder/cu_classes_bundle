@@ -106,7 +106,8 @@ function cu_class_menu() {
     'title arguments' => array('cu_class', $class_uri_argument_position),
     'page callback' => 'cu_class_view',
     'page arguments' => array($class_uri_argument_position),
-    'access callback' => array('administer class content'),
+    'access arguments' => array($class_uri_argument_position),
+    'access callback' => 'cu_class_access',
     'file' => 'cu_class.pages.inc',
   );
 
@@ -122,7 +123,7 @@ function cu_class_menu() {
     'title arguments' => array($class_uri_argument_position),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_delete_form', $class_uri_argument_position),
-    'access callback' => array('administer class content'),
+    'access arguments' => array('administer class content'),
     'file' => 'cu_class.admin.inc',
   );
 
@@ -130,31 +131,41 @@ function cu_class_menu() {
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_form', $class_uri_argument_position),
-    'access callback' => array('administer class content'),
+    'access arguments' => array('administer class content'),
     'file' => 'cu_class.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
-  // Layout settings
-  $items['admin/config/content/class-bulk-unpublish'] = array(
-    'title' => 'Classes',
-    'description' => 'Class related tools',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cu_class_bulk_unpublish_form'),
-    'access arguments' => array('administer class content'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-
    // This provides a place for Field API to hang its own
   // interface and has to be the same as what was defined
   // in class_entity_info() above.
-  $items['admin/structure/class/manage'] = array(
+  $items['admin/settings/class/manage'] = array(
     'title' => 'Class',
     'description' => 'Manage Class Entity Structure',
     'page callback' => 'cu_class_admin_page',
     'access arguments' => array('administer class content'),
     'weight' => -50,
+  );
+
+  // Class related settings users can access
+  $items['admin/settings/classes'] = array(
+    'title' => 'Classes',
+    'position' => 'right',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer express settings'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+    'weight' => -20,
+  );
+
+  $items['admin/settings/classes/class-bulk-unpublish'] = array(
+    'title' => 'Bulk Unpublish Classes',
+    'description' => 'Entering a list of classes will unpubish them',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_bulk_unpublish_form'),
+    'access arguments' => array('administer class content'),
+    'type' => MENU_NORMAL_ITEM,
   );
 
   return $items;
@@ -163,8 +174,12 @@ function cu_class_menu() {
 /**
  * Access callback for ???
  */
-function cu_class_access() {
-  // switch to a custom permission?
+function cu_class_access($class) {
+
+  if ($class->status == 0 && !user_access('view unpublished classes')) {
+    return FALSE;
+  }
+
   return TRUE;
 }
 
@@ -175,7 +190,7 @@ function cu_class_permission() {
   return array(
     'administer class content' => array(
       'title' => 'Administer Class Content',
-      'description' => 'Configure import settings',
+      'description' => 'Full access to classes',
     ),
     'import classes' => array(
       'title' => 'Import Class Content',
@@ -200,6 +215,8 @@ function cu_class_permission() {
 function cu_class_entity_view($entity, $type, $view_mode) {
   if ($type == 'cu_class') {
     // alter it here
+    //dsm($entity);
+    //view unpublished classes
   }
 }
 
