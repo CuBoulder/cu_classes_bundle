@@ -419,6 +419,11 @@ function cu_class_views_views_default_views() {
     3 => 0,
     5 => 0,
   );
+  /* Filter criterion: Class: Status */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'cu_class';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value']['value'] = '1';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
