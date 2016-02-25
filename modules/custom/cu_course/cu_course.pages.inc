@@ -47,8 +47,9 @@ function cu_course_display($course) {
   $query->join('cu_class', 'class', 'class.class_id = courseid.entity_id');
   $query->fields('class', array('class_id'));
 
-  // Get only class entities
+  // Get only published class entities
   $query->condition('class.type', 'class', '=');
+  $query->condition('class.status', 1, '=');
   $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
 
   // Join for section number

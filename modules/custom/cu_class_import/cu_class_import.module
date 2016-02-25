@@ -546,14 +546,12 @@ function cu_class_import_course_batch_update() {
  */
 function cu_class_import_course_batch_process($subjects, &$context) {
 
-  // Do heavy lifting here...
-  // Display a progress message...
+  //@TODO: set active insitutions
+  $institution = 'CUBLD';
+
   $context['message'] = "Now processing Course: $subjects...";
 
-  //$term = '2164';
-
   $terms = variable_get('cu_class_import_active_terms');
-  $institution = 'CUBLD';
 
   foreach ($terms as $term) {
     if ($term) {
@@ -586,6 +584,8 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
  * process the import
  */
 function cu_class_import($institution, $term, $subject, $course_id) {
+  //used to unpublish classes as when they are removed
+  $classes = array();
 
   //need the subject... could be passing this from form since the course has it
   // go get it from course if it is NULL
@@ -626,6 +626,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 
         //dsm(xml2array_parse($class));
 
+
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
         $catalog_number = (string) $class->CATALOG_NBR;
@@ -634,7 +635,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         $subject = (string) $class->SUBJECT;
         $session_code = (string) $class->SESSION_CODE;
         $section = (string) $class->CLASS_SECTION;
-        $descrlong = (string) $class->SSR_DESCRLONG;
+        $descrlong = (string) utf8_decode($class->SSR_DESCRLONG);
 
         // Check Elements to Ignore
         // Session Codes
@@ -644,6 +645,9 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         if (in_array($session_code, $session_code_to_ignore)) {
           $ignore = TRUE;
         }
+
+       //add to array to unpublish any additional classes in course
+       $classes[] = $class_id;
 
        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
           $start = (string) $meeting->START_DT;
@@ -768,6 +772,18 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           }
         }
       }
+
+      // remove classes for this course that are no longer returned by API or Primer
+      $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE class_id = :course_id', array(':course_id' => $course_id));
+      foreach ($all_classes as $class) {
+        if (!in_array($class->class_id, $classes)) {
+          $existing_class = entity_load_single('cu_class', $class->class_id);
+          $existing_class->status = 0;
+          $updated = entity_save('cu_class', $existing_class);
+          drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
+        }
+      }
+
     } // isset
   }
 }
