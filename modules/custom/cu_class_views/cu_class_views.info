@@ -1,6 +1,6 @@
 name = CU Class Views
 core = 7.x
-package = Features
+package = CU-Classes
 dependencies[] = entity
 dependencies[] = views
 scripts[] = js/cu-class-views.js
