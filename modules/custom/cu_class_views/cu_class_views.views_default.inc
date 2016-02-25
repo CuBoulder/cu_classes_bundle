@@ -45,7 +45,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['empty'] = TRUE;
-  $handler->display->display_options['empty']['area']['content'] = 'There are no courses that match your search.';
+  $handler->display->display_options['empty']['area']['content'] = 'There are no courses that match your search.  Please update the search criteria and search again.';
   $handler->display->display_options['empty']['area']['format'] = 'wysiwyg';
   /* Field: Class: Class ID */
   $handler->display->display_options['fields']['class_id']['id'] = 'class_id';
@@ -292,6 +292,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['arguments']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['arguments']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
   $handler->display->display_options['arguments']['field_class_subject_value']['field'] = 'field_class_subject_value';
+  $handler->display->display_options['arguments']['field_class_subject_value']['default_action'] = 'empty';
   $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_options']['argument'] = 'all';
   $handler->display->display_options['arguments']['field_class_subject_value']['summary']['number_of_records'] = '0';

@@ -93,7 +93,7 @@ function cu_class_menu() {
   $items['class/add'] = array(
     'title' => 'Add Class',
     'page callback' => 'cu_class_add',
-    'access callback' => 'cu_class_access',
+    'access callback' => array('administer class content'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
@@ -106,7 +106,7 @@ function cu_class_menu() {
     'title arguments' => array('cu_class', $class_uri_argument_position),
     'page callback' => 'cu_class_view',
     'page arguments' => array($class_uri_argument_position),
-    'access callback' => 'cu_class_access',
+    'access callback' => array('administer class content'),
     'file' => 'cu_class.pages.inc',
   );
 
@@ -122,7 +122,7 @@ function cu_class_menu() {
     'title arguments' => array($class_uri_argument_position),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_delete_form', $class_uri_argument_position),
-    'access callback' => cu_class_access,
+    'access callback' => array('administer class content'),
     'file' => 'cu_class.admin.inc',
   );
 
@@ -130,21 +130,20 @@ function cu_class_menu() {
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_form', $class_uri_argument_position),
-    'access callback' => 'cu_class_access',
+    'access callback' => array('administer class content'),
     'file' => 'cu_class.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
   // Layout settings
-  $items['admin/config/content/class'] = array(
-    'title' => 'Classes Import Settings',
-    'description' => 'Configure Class settings.',
+  $items['admin/config/content/class-bulk-unpublish'] = array(
+    'title' => 'Classes',
+    'description' => 'Class related tools',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('cu_class_settings_form'),
-    'access arguments' => array('administer classes'),
+    'page arguments' => array('cu_class_bulk_unpublish_form'),
+    'access arguments' => array('administer class content'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'cu_class.admin.inc',
   );
 
    // This provides a place for Field API to hang its own
@@ -258,6 +257,44 @@ function cu_class_form_submit($form, &$form_state) {
   $form_state['redirect'] = $class_uri['path'];
 
   drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $class))));
+}
+
+/**
+ * Class Bulk Unpublish Form.
+ */
+function cu_class_bulk_unpublish_form($form, &$form_state) {
+
+  $form['cu_class_bulk_unpublish_class_ids'] = array(
+    '#type' => 'textarea',
+    '#default_value' => variable_get('cu_class_bulk_unpublish_class_ids', ''),
+    '#title' => t('Class IDs to Unpublish'),
+    '#description' => t('Comma seperated list of class ids to unpublish'),
+  );
+
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Unpublish'),
+  );
+
+  return $form;
+}
+
+/**
+ * Process form
+ */
+function cu_class_bulk_unpublish_form_submit($form, &$form_state) {
+  //remove spaces
+  $cu_class_bulk_unpublish_class_ids = str_replace(" ", "", $form['cu_class_bulk_unpublish_class_ids']['#value']);
+  variable_set('cu_class_bulk_unpublish_class_ids', $cu_class_bulk_unpublish_class_ids);
+  $classes = explode(",", $form['cu_class_bulk_unpublish_class_ids']['#value']);
+
+  foreach ($classes as $class_id) {
+    $class = entity_load_single('cu_class', $class_id);
+    $class->status = 0;
+    $updated = entity_save('cu_class', $class);
+    drupal_set_message('Unpublished ' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $class->title , 'status');
+  }
+
 }
 
 /**

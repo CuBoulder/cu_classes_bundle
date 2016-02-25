@@ -1,6 +1,22 @@
 <?php
 
 /**
+ * Define site roles in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @return
+ *   An array defining all the roles for the site.
+ */
+function cu_classes_bundle_secure_permissions_roles() {
+  return array(
+    'class_editor',
+    'class_owner',
+  );
+}
+
+/**
  * Define site permissions in code.
  *
  * Create a secure_permissions_data module directory and place this function
@@ -12,7 +28,7 @@
  * @return
  *   An array defining all the permissions for the site.
  */
-  
+
 function cu_classes_bundle_secure_permissions($role) {
   $permissions = array(
     'administrator' => array(
@@ -33,6 +49,13 @@ function cu_classes_bundle_secure_permissions($role) {
     ),
     'site_owner' => array(
       'import classes',
+      'override class fields',
+      'view unpublished classes',
+    ),
+    'class_owner' => array(
+      'administer class content',
+      'import classes',
+      'administer class import settings',
       'override class fields',
       'view unpublished classes',
     ),
