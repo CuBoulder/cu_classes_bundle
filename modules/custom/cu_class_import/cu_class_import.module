@@ -750,7 +750,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
             $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
             $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
 
-            $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_INSTR_LONG;
+            $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
 
             $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
             $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
