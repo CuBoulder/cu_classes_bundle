@@ -4,12 +4,16 @@
  * Class view callback.
  */
 function cu_course_view($course) {
-  //dsm($course);
   drupal_set_title(entity_label('cu_course', $course));
   return entity_view('cu_course', array(entity_id('cu_course', $course) => $course), 'full');
 }
 
 function cu_course_display($course) {
+
+  //@TODO: wrap this is cache check
+  //before a course is display, check to see if we need to udpate
+  cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
+
   $breadcrumb = array();
   $breadcrumb[] = l('Home', '<front>');
   $breadcrumb[] = l('Courses', 'courses/search');
