@@ -12,7 +12,9 @@ function cu_course_display($course) {
 
   //@TODO: wrap this is cache check
   //before a course is display, check to see if we need to udpate
-  cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
+  if (module_exists('cu_class_import')) {
+    cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
+  }
 
   $breadcrumb = array();
   $breadcrumb[] = l('Home', '<front>');
