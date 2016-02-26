@@ -646,6 +646,11 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           $ignore = TRUE;
         }
 
+        // temporary
+        if ($class_id == 16755) {
+          $ignore = TRUE;
+        }
+
        //add to array to unpublish any additional classes in course
        $classes[] = $class_id;
 

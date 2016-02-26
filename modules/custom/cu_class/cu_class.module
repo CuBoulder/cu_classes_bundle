@@ -256,6 +256,32 @@ function cu_class_form($form, &$form_state, $class) {
     '#submit' => $submit + array('cu_class_form_submit'),
   );
 
+  $form['additional_settings'] = array(
+      '#type' => 'vertical_tabs',
+      '#weight' => 99,
+  );
+
+  // Create a fieldset that will be included in the vertical tab.
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Publishing options'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+    // Send this tab to the top of the list.
+    '#weight' => -99,
+    // The #group value must match the name of the vertical tabs element.
+    // In most cases, this is 'additional_settings'.
+    '#group' => 'additional_settings',
+    '#attributes' => array('class' => array('node-form-options')),
+  );
+
+  $form['options']['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Published'),
+    '#default_value' => $class->status,
+  );
+
   return $form;
 }
 
@@ -263,15 +289,19 @@ function cu_class_form($form, &$form_state, $class) {
  * Class submit handler.
  */
 function cu_class_form_submit($form, &$form_state) {
+
   $class = $form_state['class'];
 
   entity_form_submit_build_entity('cu_class', $class, $form, $form_state);
 
+  $class->status = $class->options['status'];
+
   entity_save('cu_class', $class);
 
-  $class_uri = entity_uri('cu_class', $class);
-  dsm($class_uri);
-  $form_state['redirect'] = $class_uri['path'];
+  //$class_uri = entity_uri('cu_class', $class);
+  //$form_state['redirect'] = $class_uri['path'];
+
+  $form_state['redirect'] = 'class/' . $class->class_id;
 
   drupal_set_message(t('Class %title saved.', array('%title' => entity_label('cu_class', $class))));
 }
