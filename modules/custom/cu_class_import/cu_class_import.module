@@ -604,7 +604,6 @@ function cu_class_import($institution, $term, $subject, $course_id) {
   }
 
   $response = cu_class_import_curl($institution, $term, $subject, $course_id);
-
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
 
@@ -777,20 +776,22 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           }
         }
       }
-
-      // remove classes for this course that are no longer returned by API or Primer
-      $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE class_id = :course_id', array(':course_id' => $course_id));
-      foreach ($all_classes as $class) {
-        if (!in_array($class->class_id, $classes)) {
-          $existing_class = entity_load_single('cu_class', $class->class_id);
-          $existing_class->status = 0;
-          $updated = entity_save('cu_class', $existing_class);
-          drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
-        }
-      }
-
     } // isset
   }
+
+  // remove classes for this course that are no longer returned by API or Primer
+  //  $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
+  $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
+
+  foreach ($all_classes as $class) {
+    if (!in_array($class->class_id, $classes)) {
+      $existing_class = entity_load_single('cu_class', $class->class_id);
+      $existing_class->status = 0;
+      $updated = entity_save('cu_class', $existing_class);
+      drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
+    }
+  }
+
 }
 
 /**
