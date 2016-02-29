@@ -337,9 +337,13 @@ function cu_class_bulk_unpublish_form_submit($form, &$form_state) {
 
   foreach ($classes as $class_id) {
     $class = entity_load_single('cu_class', $class_id);
-    $class->status = 0;
-    $updated = entity_save('cu_class', $class);
-    drupal_set_message('Unpublished ' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $class->title , 'status');
+    if ($class) {
+      $class->status = 0;
+      $updated = entity_save('cu_class', $class);
+      drupal_set_message('Unpublished ' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $class->title , 'status');
+    } else {
+      drupal_set_message('Class number  ' . $class_id . ' was not found and could not be unpublished', 'warning');
+    }
   }
 
 }

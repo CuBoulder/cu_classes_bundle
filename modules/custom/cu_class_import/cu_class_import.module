@@ -286,7 +286,7 @@ function cu_course_import_curl($institution, $term, $subject) {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
 
-  if (variable_get('cu_class_import_debug', 0)) {
+  if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
   // Set path
@@ -399,7 +399,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
 
   // update course with
-  if (variable_get('cu_class_import_debug', 0)) {
+  if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
 
@@ -679,7 +679,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
 
           if ($time_difference < $cache_duration) {
-            if (variable_get('cu_class_import_debug', 0)) {
+            if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
               drupal_set_message('Cache Still Valid for Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
             }
           }
@@ -723,7 +723,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
            $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
            $updated = entity_save('cu_class', $existing_class);
-           if (variable_get('cu_class_import_debug', 0)) {
+           if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
              drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
            }
           }
@@ -776,7 +776,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
             $class = entity_create('cu_class', $values);
             $created = entity_save('cu_class', $class);
 
-            if (variable_get('cu_class_import_debug', 0)) {
+            if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
               drupal_set_message('Created local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
             }
           }
@@ -794,10 +794,11 @@ function cu_class_import($institution, $term, $subject, $course_id) {
       $existing_class = entity_load_single('cu_class', $class->class_id);
       $existing_class->status = 0;
       $updated = entity_save('cu_class', $existing_class);
-      drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
+      if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
+        drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
+      }
     }
   }
-
 }
 
 /**
@@ -853,7 +854,7 @@ function cu_course_import($institution, $term, $subject) {
 
             // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
             //$course = entity_create('cu_course', $values);
-            if (variable_get('cu_class_import_debug', 0)) {
+            if (variable_get('cu_class_import_debug', 0) && user_access('class_owner')) {
               drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
             }
           }
@@ -1001,7 +1002,7 @@ function cu_class_import_entity_view_alter(&$build, $type) {
     $url_primer = variable_get('cu_class_import_prime_url', 0) . 'primer/class/CUBLD/2164/' . $build['field_class_subject'][0]['#markup'] . '/' . $build['field_class_crse_id'][0]['#markup'];
 
     //class/CUBLD/2164/HIST/108161
-    $links = ' Debug XML: ' . l('API', $url_api) . ' | ' . l('Primer', $url_primer);
+    //$links = ' Debug XML: ' . l('API', $url_api) . ' | ' . l('Primer', $url_primer);
 
     $build['field_class_class_nbr'][0]['#markup'] = $build['field_class_class_nbr'][0]['#markup'] . $links;
 
@@ -1019,5 +1020,43 @@ function cu_class_import_get_terms(){
   );
 }
 
-// NEED CRON FUNCTION THAT WILL UPDATE PERIODICALY
-// WITHOUT EXCEEDING THE UIS API LIMITS
+/**
+ * Implements hook_cron_queue_info()
+ */
+function cu_class_import_cron_queue_info() {
+  $queues['cu_class_update'] = array(
+    'worker callback' => 'cu_class_import_queue_process',
+    'time' => 60*120,  // allow this to run for 2 hours in the background?
+  );
+  return $queues;
+}
+
+/**
+ * Worker callback defined in hook_cron_queue_info()
+ */
+function cu_class_import_queue_process($course) {
+
+  $term = $course->term_id;
+  $institution = $course->inst;
+  $subject = $course->subject;
+  $course_id = $course->course_id;
+
+  //watchdog('cu_class_import', 'Queue update of %course_id', array('%course_id' => $course_id), WATCHDOG_INFO);
+
+  cu_class_import($institution, $term, $subject, $course_id);
+  // this is so we don't overwhelm the servers
+  sleep(variable_get('cu_class_import_delay', '2'));
+}
+
+/**
+ * Implements hook_cron()
+ */
+function cu_class_import_cron() {
+  $queue = DrupalQueue::get('cu_class_update');
+  // get all courses
+  $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
+
+  foreach ($courses as $course) {
+    $queue->createItem($course);
+  }
+}
