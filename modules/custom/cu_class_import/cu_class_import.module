@@ -113,6 +113,13 @@ function class_import_admin_settings() {
     '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
   );
 
+  $form['cu_class_import_cache_duration'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_cache_duration', '3600'),
+    '#title' => t('Cache Duration (in seconds)'),
+    '#description' => t('How long before import attempts to update a class'),
+  );
+
   $form['cu_class_import_delay'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_delay', '2'),
@@ -120,9 +127,7 @@ function class_import_admin_settings() {
     '#description' => t('Batch imports can overwhelm a primer.  Use this to slow it down.'),
   );
 
-
-
-  //@TODO: Move terms to view setting?
+  //@TODO: Add configuration for active institutions, terms, and subjects
   $form['terms'] = array(
      '#type' => 'fieldset',
      '#title' => t('Active Terms'),
@@ -137,14 +142,6 @@ function class_import_admin_settings() {
     '#type' => 'checkboxes',
     '#description' => t('This controls the terms that will be import'),
     '#default_value' => variable_get('cu_class_import_active_terms'),
-    '#options' => $terms,
-  );
-
-  $form['terms']['cu_class_import_default_term'] = array(
-    '#title' => t('Default Term'),
-    '#type' => 'radios',
-    '#description' => t('This sets the default term tab'),
-    '#default_value' => variable_get('cu_class_import_default_term'),
     '#options' => $terms,
   );
 
@@ -168,8 +165,6 @@ function class_import_admin_settings() {
     '#title' => t('Base URL of site running cu_class_primer_bundle'),
     '#description' => t(''),
   );
-
-  //@TODO: Add option to only update enrollment from API
 
   $form['adv'] = array(
      '#type' => 'fieldset',
@@ -386,6 +381,8 @@ function cu_class_import_form_submit($form, &$form_state) {
  */
 function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
 
+  watchdog('cu_class_import', 'API Request for Course %course_id', array('%course_id' => $course_id), WATCHDOG_INFO);
+
   if (variable_get('cu_class_import_api_use_prime', 0)) {
     $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject/$course_id";
   }
@@ -586,6 +583,7 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
 function cu_class_import($institution, $term, $subject, $course_id) {
   //used to unpublish classes as when they are removed
   $classes = array();
+  $ignore = FALSE;
 
   //need the subject... could be passing this from form since the course has it
   // go get it from course if it is NULL
@@ -624,7 +622,6 @@ function cu_class_import($institution, $term, $subject, $course_id) {
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
         //dsm(xml2array_parse($class));
-
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
@@ -671,59 +668,68 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           $location_long = (string) $meeting->SSR_MTG_LOC_LONG;
         }
 
-        // check to see if already exists...
-        // if doesn't exist, add it
-        // @TODO: Need to check specific sections?
-        $result = db_query('SELECT * FROM {cu_class} WHERE class_id = :class_id', array(':class_id' => $class_id));
+        // check to see if class already exists...
+        $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
 
-        if(!$ignore && $result->rowCount()) {
+        if(!$ignore && $last_updated) {
 
-          //UPDATE
-          $existing_class = entity_load_single('cu_class', $class_id);
+          // When was the calss last udated?  2016-02-25 01:05:34
+          $last_updated = strtotime($last_updated);
+          $time_difference = strtotime("now") - $last_updated;
+          $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
 
-          //@TODO: diff fields for changes... only save update if there is a difference
+          if ($time_difference < $cache_duration) {
+            if (variable_get('cu_class_import_debug', 0)) {
+              drupal_set_message('Cache Still Valid for Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+            }
+          }
+          else {
+           //FORMAT THE ENTITY BEING UPDATED
+           $existing_class = entity_load_single('cu_class', $class_id);
 
-          $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
-          $existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
-          $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
-          $existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
-          $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-          $existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
-          $existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
-          $existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
-          $existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
+           $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
+           $existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
+           $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
+           $existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
+           $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+           $existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
+           $existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
+           $existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
+           $existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
 
-          $existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-          $existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-          $existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-          $existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+           $existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+           $existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+           $existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+           $existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 
-          $existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-          $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+           $existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+           $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
 
-          $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
+           $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
 
-          $existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
-          $existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
-          $existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
-          $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
+           $existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
+           $existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
+           $existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
+           $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
 
-          $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
-          $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
+           $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
+           $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
 
-          $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-          $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-          // expecting format to be 2016-01-08 22:45:45
-          $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+           $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+           $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+           // expecting format to be 2016-01-08 22:45:45
+           $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
-			    $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+           $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
-          $updated = entity_save('cu_class', $existing_class);
-          if (variable_get('cu_class_import_debug', 0)) {
-            drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+           $updated = entity_save('cu_class', $existing_class);
+           if (variable_get('cu_class_import_debug', 0)) {
+             drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+           }
           }
         }
         else {
+          // if doesn't exist, add it if it's not in the list to ignore
           if (!$ignore) {
             $values = array(
               'class_id' => $class_id,
