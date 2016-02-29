@@ -517,6 +517,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['title']['table'] = 'cu_class';
   $handler->display->display_options['filters']['title']['field'] = 'title';
   $handler->display->display_options['filters']['title']['operator'] = 'contains';
+  $handler->display->display_options['filters']['title']['group'] = 1;
   $handler->display->display_options['filters']['title']['exposed'] = TRUE;
   $handler->display->display_options['filters']['title']['expose']['operator_id'] = 'title_op';
   $handler->display->display_options['filters']['title']['expose']['label'] = 'Title';
@@ -537,6 +538,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_class_nbr_value']['id'] = 'field_class_class_nbr_value';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['table'] = 'field_data_field_class_class_nbr';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['field'] = 'field_class_class_nbr_value';
+  $handler->display->display_options['filters']['field_class_class_nbr_value']['group'] = 1;
   $handler->display->display_options['filters']['field_class_class_nbr_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['operator_id'] = 'field_class_class_nbr_value_op';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['label'] = 'Class Number';
@@ -557,6 +559,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_crse_id_value']['id'] = 'field_class_crse_id_value';
   $handler->display->display_options['filters']['field_class_crse_id_value']['table'] = 'field_data_field_class_crse_id';
   $handler->display->display_options['filters']['field_class_crse_id_value']['field'] = 'field_class_crse_id_value';
+  $handler->display->display_options['filters']['field_class_crse_id_value']['group'] = 1;
   $handler->display->display_options['filters']['field_class_crse_id_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_crse_id_value']['expose']['operator_id'] = 'field_class_crse_id_value_op';
   $handler->display->display_options['filters']['field_class_crse_id_value']['expose']['label'] = 'Course ID';
@@ -573,11 +576,33 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
+  /* Filter criterion: Class: CATALOG_NBR (field_class_catalog_nbr) */
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['id'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['table'] = 'field_data_field_class_catalog_nbr';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['field'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['group'] = 1;
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator_id'] = 'field_class_catalog_nbr_value_op';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['label'] = 'Catalog Number';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator'] = 'field_class_catalog_nbr_value_op';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['identifier'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: Last Updated (field_class_last_updated) */
   $handler->display->display_options['filters']['field_class_last_updated_value']['id'] = 'field_class_last_updated_value';
   $handler->display->display_options['filters']['field_class_last_updated_value']['table'] = 'field_data_field_class_last_updated';
   $handler->display->display_options['filters']['field_class_last_updated_value']['field'] = 'field_class_last_updated_value';
   $handler->display->display_options['filters']['field_class_last_updated_value']['operator'] = '<=';
+  $handler->display->display_options['filters']['field_class_last_updated_value']['group'] = 1;
   $handler->display->display_options['filters']['field_class_last_updated_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['operator_id'] = 'field_class_last_updated_value_op';
   $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['label'] = 'Last Updated (less than)';
@@ -594,12 +619,13 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
-  $handler->display->display_options['filters']['field_class_last_updated_value']['granularity'] = 'hour';
+  $handler->display->display_options['filters']['field_class_last_updated_value']['form_type'] = 'date_popup';
   $handler->display->display_options['filters']['field_class_last_updated_value']['year_range'] = '-1:+1';
   /* Filter criterion: Class: Status */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'cu_class';
   $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['exposed'] = TRUE;
   $handler->display->display_options['filters']['status']['expose']['operator_id'] = 'status_op';
   $handler->display->display_options['filters']['status']['expose']['label'] = 'Published';
