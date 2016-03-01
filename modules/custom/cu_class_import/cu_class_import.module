@@ -180,6 +180,13 @@ function class_import_admin_settings() {
     '#description' => t('You may want to trun this off when using batch imports of large data sets'),
   );
 
+  $form['adv']['cu_class_import_adv_debug'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_adv_debug', 0),
+    '#title' => t('Show Detailed Debug Messages'),
+    '#description' => t('IMPORTANT! This Requires Devel'),
+  );
+
   $form['adv']['cu_class_import_online_only'] = array(
     '#type' => 'checkbox',
     '#default_value' => variable_get('cu_class_import_online_only', 0),
@@ -238,7 +245,7 @@ function cu_course_import_form() {
   asort($subject_options);
   $form['subject'] = array(
 	  '#type' => 'select',
-	  '#default_value' => 'HIST',
+	  '#default_value' => variable_get('class_import_current_subject', ''),
 	  '#title' => t('Subject'),
 	  '#options' => $subject_options,
 	  '#description' => t(''),
@@ -260,6 +267,8 @@ function cu_course_import_form_submit($form, &$form_state) {
   $institution = $form['institution']['#value'];
   $term = $form['term']['#value'];
   $subject = $form['subject']['#value'];
+
+  variable_set('class_import_current_subject', $subject);
 
   cu_course_import($institution, $term, $subject);
 
@@ -286,7 +295,7 @@ function cu_course_import_curl($institution, $term, $subject) {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
 
-  if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
+  if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
   // Set path
@@ -310,9 +319,9 @@ function cu_course_import_curl($institution, $term, $subject) {
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
-
-    //dsm(array($curl_request_body));
-
+    if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+      dsm(array($curl_request_body));
+    }
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
 
   }
@@ -374,6 +383,7 @@ function cu_class_import_form_submit($form, &$form_state) {
 
   cu_class_import($course->inst, $course->term_id, $course->subject, $course_id);
 
+  cache_clear_all('cu_class_search_subjects_available', 'cache');
   return '';
 }
 
@@ -401,7 +411,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
 
   // update course with
-  if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
+  if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
 
@@ -502,6 +512,7 @@ function cu_class_import_batch_process($course, &$context) {
  */
 function cu_class_import_batch_finished($success, $results, $operations) {
   if ($success) {
+    cache_clear_all('cu_class_search_subjects_available', 'cache');
     drupal_set_message('Update is complete!');
   }
   else {
@@ -623,7 +634,9 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
-        //dsm(xml2array_parse($class));
+        if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+          dsm(xml2array_parse($class));
+        }
 
         $class_id = (string) $class->CLASS_NBR;
         $course_id = (string) $class->CRSE_ID;
@@ -824,7 +837,11 @@ function cu_course_import($institution, $term, $subject) {
 
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
-          //dsm(xml2array_parse($subject));
+
+          if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+            dsm(xml2array_parse($subject));
+          }
+
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
           $title = (string) $subject->COURSE_TITLE_LONG;
