@@ -70,6 +70,24 @@ function cu_class_import_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['admin/content/classes/import-courses'] = array(
+    'title' => 'Import Courses',
+    'type' => MENU_LOCAL_ACTION,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_course_import_form'),
+    'access arguments' => array('administer modules'),
+    'weight' => 0,
+  );
+
+  $items['admin/content/classes/import-classes'] = array(
+    'title' => 'Import Classes',
+    'type' => MENU_LOCAL_ACTION,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_import_form'),
+    'access arguments' => array('administer modules'),
+    'weight' => 5,
+  );
+
   return $items;
 }
 

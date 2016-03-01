@@ -451,6 +451,67 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '25';
   $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'class_id' => 'class_id',
+    'field_class_class_section' => 'field_class_class_section',
+    'field_class_catalog_nbr' => 'field_class_catalog_nbr',
+    'field_class_subject' => 'field_class_subject',
+    'title' => 'title',
+    'field_class_ssr_instr_long' => 'field_class_ssr_instr_long',
+    'field_class_last_updated' => 'field_class_last_updated',
+  );
+  $handler->display->display_options['style_options']['default'] = 'class_id';
+  $handler->display->display_options['style_options']['info'] = array(
+    'class_id' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_class_class_section' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_class_catalog_nbr' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_class_subject' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_class_ssr_instr_long' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_class_last_updated' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
   /* Field: Class: Class ID */
   $handler->display->display_options['fields']['class_id']['id'] = 'class_id';
   $handler->display->display_options['fields']['class_id']['table'] = 'cu_class';
@@ -512,6 +573,64 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_ssr_instr_long']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_ssr_instr_long']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['field_class_ssr_instr_long']['field_api_classes'] = TRUE;
+  /* Field: Class: Last Updated */
+  $handler->display->display_options['fields']['field_class_last_updated']['id'] = 'field_class_last_updated';
+  $handler->display->display_options['fields']['field_class_last_updated']['table'] = 'field_data_field_class_last_updated';
+  $handler->display->display_options['fields']['field_class_last_updated']['field'] = 'field_class_last_updated';
+  $handler->display->display_options['fields']['field_class_last_updated']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_last_updated']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_last_updated']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_class_last_updated']['settings'] = array(
+    'format_type' => 'cu_short_date_time',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+    'show_remaining_days' => 0,
+  );
+  $handler->display->display_options['fields']['field_class_last_updated']['field_api_classes'] = TRUE;
+  /* Filter criterion: Class: SUBJECT (field_class_subject) */
+  $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
+  $handler->display->display_options['filters']['field_class_subject_value']['field'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['group'] = 1;
+  $handler->display->display_options['filters']['field_class_subject_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator_id'] = 'field_class_subject_value_op';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['label'] = 'Subject';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator'] = 'field_class_subject_value_op';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['identifier'] = 'field_class_subject_value';
+  $handler->display->display_options['filters']['field_class_subject_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
+  /* Filter criterion: Class: CATALOG_NBR (field_class_catalog_nbr) */
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['id'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['table'] = 'field_data_field_class_catalog_nbr';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['field'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['group'] = 1;
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator_id'] = 'field_class_catalog_nbr_value_op';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['label'] = 'Catalog Number';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator'] = 'field_class_catalog_nbr_value_op';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['identifier'] = 'field_class_catalog_nbr_value';
+  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: Title */
   $handler->display->display_options['filters']['title']['id'] = 'title';
   $handler->display->display_options['filters']['title']['table'] = 'cu_class';
@@ -541,7 +660,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_class_nbr_value']['group'] = 1;
   $handler->display->display_options['filters']['field_class_class_nbr_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['operator_id'] = 'field_class_class_nbr_value_op';
-  $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['label'] = 'Class Number';
+  $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['label'] = 'Class ID';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['operator'] = 'field_class_class_nbr_value_op';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['identifier'] = 'field_class_class_nbr_value';
   $handler->display->display_options['filters']['field_class_class_nbr_value']['expose']['remember_roles'] = array(
@@ -576,51 +695,6 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
-  /* Filter criterion: Class: CATALOG_NBR (field_class_catalog_nbr) */
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['id'] = 'field_class_catalog_nbr_value';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['table'] = 'field_data_field_class_catalog_nbr';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['field'] = 'field_class_catalog_nbr_value';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['group'] = 1;
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator_id'] = 'field_class_catalog_nbr_value_op';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['label'] = 'Catalog Number';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['operator'] = 'field_class_catalog_nbr_value_op';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['identifier'] = 'field_class_catalog_nbr_value';
-  $handler->display->display_options['filters']['field_class_catalog_nbr_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    6 => 0,
-    4 => 0,
-    7 => 0,
-    3 => 0,
-    5 => 0,
-    8 => 0,
-    9 => 0,
-  );
-  /* Filter criterion: Class: Last Updated (field_class_last_updated) */
-  $handler->display->display_options['filters']['field_class_last_updated_value']['id'] = 'field_class_last_updated_value';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['table'] = 'field_data_field_class_last_updated';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['field'] = 'field_class_last_updated_value';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['operator'] = '<=';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['group'] = 1;
-  $handler->display->display_options['filters']['field_class_last_updated_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['operator_id'] = 'field_class_last_updated_value_op';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['label'] = 'Last Updated (less than)';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['operator'] = 'field_class_last_updated_value_op';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['identifier'] = 'field_class_last_updated_value';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    6 => 0,
-    4 => 0,
-    7 => 0,
-    3 => 0,
-    5 => 0,
-    8 => 0,
-    9 => 0,
-  );
-  $handler->display->display_options['filters']['field_class_last_updated_value']['form_type'] = 'date_popup';
-  $handler->display->display_options['filters']['field_class_last_updated_value']['year_range'] = '-1:+1';
   /* Filter criterion: Class: Status */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'cu_class';
@@ -629,6 +703,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['status']['exposed'] = TRUE;
   $handler->display->display_options['filters']['status']['expose']['operator_id'] = 'status_op';
   $handler->display->display_options['filters']['status']['expose']['label'] = 'Published';
+  $handler->display->display_options['filters']['status']['expose']['description'] = '1 = published';
   $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
   $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
   $handler->display->display_options['filters']['status']['expose']['remember_roles'] = array(
