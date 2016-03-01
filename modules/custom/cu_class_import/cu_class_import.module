@@ -17,7 +17,7 @@ function cu_class_import_menu() {
     'title' => 'Course Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_course_import_form'),
-    'access arguments' => array('administer modules'),
+    'access arguments' => array('import classes'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
@@ -27,7 +27,7 @@ function cu_class_import_menu() {
     'title' => 'Class Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_import_form'),
-    'access arguments' => array('administer modules'),
+    'access arguments' => array('import classes'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
@@ -75,7 +75,7 @@ function cu_class_import_menu() {
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_course_import_form'),
-    'access arguments' => array('administer modules'),
+    'access arguments' => array('import classes'),
     'weight' => 0,
   );
 
@@ -84,7 +84,7 @@ function cu_class_import_menu() {
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_class_import_form'),
-    'access arguments' => array('administer modules'),
+    'access arguments' => array('import classes'),
     'weight' => 5,
   );
 
@@ -203,6 +203,20 @@ function class_import_admin_settings() {
     '#default_value' => variable_get('cu_class_import_adv_debug', 0),
     '#title' => t('Show Detailed Debug Messages'),
     '#description' => t('IMPORTANT! This Requires Devel'),
+  );
+
+  $form['adv']['cu_class_import_on_cron'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_on_cron', 1),
+    '#title' => t('Update on Cron'),
+    '#description' => t('This will update all classes for all courses when cron is run'),
+  );
+
+  $form['adv']['cu_class_import_on_load'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_on_load', 1),
+    '#title' => t('Update When Viewed'),
+    '#description' => t('Update all classes in a course when course is viewed'),
   );
 
   $form['adv']['cu_class_import_online_only'] = array(
@@ -462,6 +476,10 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
+
+    if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+      dsm(array($curl_request_body));
+    }
 
     curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_request_body);
   }
@@ -1089,11 +1107,13 @@ function cu_class_import_queue_process($course) {
  * Implements hook_cron()
  */
 function cu_class_import_cron() {
-  $queue = DrupalQueue::get('cu_class_update');
-  // get all courses
-  $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
+  if (variable_get('cu_class_import_on_cron', 1)) {
+    $queue = DrupalQueue::get('cu_class_update');
+    // get all courses
+    $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
 
-  foreach ($courses as $course) {
-    $queue->createItem($course);
+    foreach ($courses as $course) {
+      $queue->createItem($course);
+    }
   }
 }

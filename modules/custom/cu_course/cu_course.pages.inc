@@ -12,7 +12,7 @@ function cu_course_display($course) {
 
   //@TODO: wrap this is cache check
   //before a course is display, check to see if we need to udpate
-  if (module_exists('cu_class_import')) {
+  if (module_exists('cu_class_import') && variable_get('cu_class_import_on_load', 1)) {
     cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
   }
 

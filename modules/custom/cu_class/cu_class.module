@@ -140,7 +140,7 @@ function cu_class_menu() {
    // This provides a place for Field API to hang its own
   // interface and has to be the same as what was defined
   // in class_entity_info() above.
-  $items['admin/settings/class/manage'] = array(
+  $items['admin/structure/class/manage'] = array(
     'title' => 'Class',
     'description' => 'Manage Class Entity Structure',
     'page callback' => 'cu_class_admin_page',
