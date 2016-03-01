@@ -298,11 +298,13 @@ function cu_class_views_colleges_schools_filter($form, $form_state) {
     $filter = $form_state['values']['college_school_filter'];
     $groups = cu_class_views_colleges_schools();
     $subjects = array();
-    foreach ($groups[$filter]['subjects'] as $subject) {
-      $subjects[] = $subject;
+    if (isset($groups[$filter]['subjects'])) {
+      foreach ($groups[$filter]['subjects'] as $subject) {
+        $subjects[] = $subject;
+      }
     }
     $url = 'courses/search/' . join(',', $subjects);
-    if (!$_GET['college_school']) {
+    if (empty($_GET['college_school'])) {
       drupal_goto($url, array('query' => $url_parts));
     }
   }
