@@ -88,6 +88,15 @@ function cu_class_import_menu() {
     'weight' => 5,
   );
 
+  $items['admin/settings/classes/import-filters'] = array(
+    'title' => 'Import Filters',
+    'description' => 'Entering a list of classes will unpubish them',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_class_import_filter_settings'),
+    'access arguments' => array('administer class content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   return $items;
 }
 
@@ -105,6 +114,26 @@ function class_import_api_preview($arg2, $arg3, $arg4, $arg5) {
 
   print cu_class_import_curl($institution, $term, $subject, $course_id);
 
+}
+
+function cu_class_import_filter_settings() {
+  $form = array();
+
+  $form['cu_class_import_session_cd'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_session_cd', ''),
+    '#title' => t('Session Codes to Ignore'),
+    '#description' => t('Comma seperated list of session codes. Classes with these codes will not be imported.'),
+  );
+
+  $form['cu_class_import_campus'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_campus', ''),
+    '#title' => t('Campus Codes to Ignore'),
+    '#description' => t('Comma seperated list of campus codes. Classes with these codes will not be imported.'),
+  );
+
+  return system_settings_form($form);
 }
 
 function class_import_admin_settings() {
@@ -224,13 +253,6 @@ function class_import_admin_settings() {
     '#default_value' => variable_get('cu_class_import_online_only', 0),
     '#title' => t('Limit to Online Classes'),
     '#description' => t(''),
-  );
-
-  $form['adv']['cu_class_import_session_cd'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_class_import_session_cd', ''),
-    '#title' => t('Session Codes to Ignore'),
-    '#description' => t('Comma seperated list of session codes. Classes with these codes will not be imported.'),
   );
 
   return system_settings_form($form);
@@ -378,10 +400,10 @@ function cu_class_import_form() {
 
   // query courses?
   $course_options = array();
-  $results = db_query('SELECT subject, course_id, title FROM {cu_course}');
+  $results = db_query('SELECT subject, catalog_nbr, title, course_id FROM {cu_course}');
 
   foreach($results as $course) {
-    $course_options[$course->course_id] = $course->subject . ' -  ' . $course->course_id . ' - ' . $course->title;
+    $course_options[$course->course_id] = $course->subject . ' ' . $course->catalog_nbr . ' - ' . $course->title . ' (' . $course->course_id . ')';
   }
 
   asort($course_options);
@@ -683,23 +705,30 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         $session_code = (string) $class->SESSION_CODE;
         $section = (string) $class->CLASS_SECTION;
         $descrlong = (string) utf8_decode($class->SSR_DESCRLONG);
+        $campus_code = (string) $class->CAMPUS;
 
         // Check Elements to Ignore
-        // Session Codes
+        // Prepare Session Codes
         $session_code_ids = str_replace(" ", "", variable_get('cu_class_import_session_cd', ''));
         $session_code_to_ignore = explode(",", $session_code_ids);
+
+        // Prepare Campus Codes
+        $campus_codes = str_replace(" ", "", variable_get('cu_class_import_campus', ''));
+        $campus_codes_to_ignore = explode(",", $campus_codes);
 
         if (in_array($session_code, $session_code_to_ignore)) {
           $ignore = TRUE;
         }
 
-        // temporary
-        if ($class_id == 16755) {
+        if (in_array($campus_code, $campus_codes_to_ignore)) {
           $ignore = TRUE;
         }
 
+       // @TODO: Clean this up!
        //add to array to unpublish any additional classes in course
-       $classes[] = $class_id;
+       if (!$ignore) {
+         $classes[] = $class_id;
+       }
 
        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
           $start = (string) $meeting->START_DT;
