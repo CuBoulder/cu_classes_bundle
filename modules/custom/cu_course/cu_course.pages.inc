@@ -10,8 +10,7 @@ function cu_course_view($course) {
 
 function cu_course_display($course) {
 
-  //@TODO: wrap this is cache check
-  //before a course is display, check to see if we need to udpate
+  //before a course is displayed, check to see if we need to udpate the classes
   if (module_exists('cu_class_import') && variable_get('cu_class_import_on_load', 1)) {
     cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
   }
@@ -67,8 +66,6 @@ function cu_course_display($course) {
 
   $class_ids = $query->execute()->fetchCol();
 
-
-
   // Put loaded class entities into an array for viewing
   $classes = array();
   foreach ($class_ids as $class_id) {
@@ -104,6 +101,16 @@ function cu_course_display($course) {
     $classes = array();
     foreach ($highlight_class_ids as $class_id) {
       $classes[$class_id] = entity_load_single('cu_class', $class_id);
+
+      // Check to see if the requested class is published
+      if ($classes[$class_id]->status < 1) {
+        if ($class_multiple) {
+          drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
+        }
+        else {
+          drupal_set_message("This section of this course is no longer available. No other sections of this course are currently being offered.", 'error');
+        }
+      }
     }
     // Highlighted class
     $output['classes_highlighted'] = entity_view('cu_class', $classes, 'short');

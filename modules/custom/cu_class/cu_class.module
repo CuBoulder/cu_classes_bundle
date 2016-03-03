@@ -176,7 +176,7 @@ function cu_class_menu() {
  */
 function cu_class_access($class) {
 
-  if ($class->status == 0 && !user_access('view unpublished classes')) {
+  if ($class->status < 1 && !user_access('view unpublished classes')) {
     return FALSE;
   }
 
@@ -338,7 +338,7 @@ function cu_class_bulk_unpublish_form_submit($form, &$form_state) {
   foreach ($classes as $class_id) {
     $class = entity_load_single('cu_class', $class_id);
     if ($class) {
-      $class->status = 0;
+      $class->status = -2;
       $updated = entity_save('cu_class', $class);
       drupal_set_message('Unpublished ' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $class->title , 'status');
     } else {
@@ -416,7 +416,7 @@ function cu_class_preprocess_entity(&$vars) {
     // Dates
     $vars['start_date'] = cu_class_date_format(strtotime($vars['content']['field_class_start_dt']['#items'][0]['value']));
     $vars['end_date'] = cu_class_date_format(strtotime($vars['content']['field_class_end_dt']['#items'][0]['value']));
-    $vars['updated'] = 'Updated: ' . format_date(strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']), 'cu_short_date');
+    $vars['updated'] = 'Updated: ' . format_date(strtotime($vars['content']['field_class_last_updated']['#items'][0]['value']), 'cu_short_date_time');
 
     // Available seats
     $cap = intval($vars['content']['field_class_enrl_cap'][0]['#markup']);
@@ -634,6 +634,8 @@ function cu_class_subject_translate($subject) {
     'MDST' => 'Media Studies',
     'MGMT' => 'Management',
     'MKTG' => 'Marketing',
+    'MSBX' => 'Business Elective',
+    'MSBC' => 'Business Core',
     'MUEL' => 'Music',
     'MUSC' => 'Music',
     'MUSM' => 'Museum Studies',
@@ -758,6 +760,8 @@ function cu_class_subject_values() {
     'MDST' => 'Media Studies',
     'MGMT' => 'Management',
     'MKTG' => 'Marketing',
+    'MSBX' => 'Business Elective',
+    'MSBC' => 'Business Core',
     'MUEL' => 'Music',
     'MUSC' => 'Music',
     'MUSM' => 'Museum Studies',
@@ -902,7 +906,10 @@ function cu_class_session_values() {
 }
 
 function cu_class_date_format($date) {
-
+  // to deal with 12/31/1969 being saved when the import process has no date
+  if ($date == -61200) {
+    return NULL;
+  }
   $date_month = date('F', $date);
   $date_day_year = date('j, Y', $date);
 

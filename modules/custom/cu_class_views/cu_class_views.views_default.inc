@@ -460,11 +460,13 @@ function cu_class_views_views_default_views() {
     'title' => 'title',
     'field_class_ssr_instr_long' => 'field_class_ssr_instr_long',
     'field_class_last_updated' => 'field_class_last_updated',
+    'status' => 'status',
+    'course_id' => 'course_id',
   );
   $handler->display->display_options['style_options']['default'] = 'class_id';
   $handler->display->display_options['style_options']['info'] = array(
     'class_id' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
@@ -485,21 +487,21 @@ function cu_class_views_views_default_views() {
       'empty_column' => 0,
     ),
     'field_class_subject' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'title' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_class_ssr_instr_long' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
@@ -507,6 +509,20 @@ function cu_class_views_views_default_views() {
     ),
     'field_class_last_updated' => array(
       'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'course_id' => array(
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
@@ -562,7 +578,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_subject']['id'] = 'field_class_subject';
   $handler->display->display_options['fields']['field_class_subject']['table'] = 'field_data_field_class_subject';
   $handler->display->display_options['fields']['field_class_subject']['field'] = 'field_class_subject';
-  $handler->display->display_options['fields']['field_class_subject']['label'] = '';
+  $handler->display->display_options['fields']['field_class_subject']['label'] = 'Catalog Number';
   $handler->display->display_options['fields']['field_class_subject']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['field_class_subject']['alter']['text'] = '[field_class_subject] [field_class_catalog_nbr] - [field_class_class_section]';
   $handler->display->display_options['fields']['field_class_subject']['alter']['trim_whitespace'] = TRUE;
@@ -602,6 +618,20 @@ function cu_class_views_views_default_views() {
     'show_remaining_days' => 0,
   );
   $handler->display->display_options['fields']['field_class_last_updated']['field_api_classes'] = TRUE;
+  /* Field: Class: Status */
+  $handler->display->display_options['fields']['status']['id'] = 'status';
+  $handler->display->display_options['fields']['status']['table'] = 'cu_class';
+  $handler->display->display_options['fields']['status']['field'] = 'status';
+  $handler->display->display_options['fields']['status']['separator'] = '';
+  /* Field: Class: Course_id */
+  $handler->display->display_options['fields']['course_id']['id'] = 'course_id';
+  $handler->display->display_options['fields']['course_id']['table'] = 'cu_class';
+  $handler->display->display_options['fields']['course_id']['field'] = 'course_id';
+  $handler->display->display_options['fields']['course_id']['label'] = 'Course ID';
+  $handler->display->display_options['fields']['course_id']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['course_id']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['course_id']['alter']['path'] = 'course/[course_id]';
+  $handler->display->display_options['fields']['course_id']['separator'] = '';
   /* Filter criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';

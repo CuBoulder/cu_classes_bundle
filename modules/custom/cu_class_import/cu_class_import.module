@@ -445,7 +445,7 @@ function cu_class_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) {
+function cu_class_import_curl($institution, $term, $subject, $course_id) {
 
   watchdog('cu_class_import', 'API Request for Course %course_id', array('%course_id' => $course_id), WATCHDOG_INFO);
 
@@ -461,8 +461,8 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
   // Empty out the error message.
   $error_message = NULL;
 
-  // if doesn't exist, add it
-  $subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
+  // if doesn't exist, add it... is this even possible now?
+  //$subject = db_query('SELECT subject FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchField();
 
   // update course with
   if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
@@ -491,7 +491,6 @@ function cu_class_import_curl($institution, $term, $subject, $course_id = NULL) 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
     $curl_request_body .= '<CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
-
 
     if(variable_get('cu_class_import_online_only', 0)) {
       $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
@@ -560,7 +559,7 @@ function cu_class_import_batch_process($course, &$context) {
   $subject = $course->subject;
   $course_id = $course->course_id;
 
-  cu_class_import($institution, $term, $subject, $course_id);
+  cu_class_import($institution, $term, $subject, $course_id, 1);
   // this is so we don't overwhelm the servers
   sleep(variable_get('cu_class_import_delay', '2'));
 }
@@ -651,16 +650,22 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
 /**
  * process the import
  */
-function cu_class_import($institution, $term, $subject, $course_id) {
+function cu_class_import($institution, $term, $subject, $course_id, $cache_duration = FALSE) {
   //used to unpublish classes as when they are removed
   $classes = array();
   $ignore = FALSE;
+
+  // if a specific duration isn't passed, use default
+  if (!$cache_duration) {
+    $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
+  }
 
   //need the subject... could be passing this from form since the course has it
   // go get it from course if it is NULL
   if (!isset($subject)) {
     $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
     $subject = $course->subject;
+
 
     // any time we import classes for a course, update the course
     // this will change the sort order of the next batch
@@ -673,11 +678,11 @@ function cu_class_import($institution, $term, $subject, $course_id) {
   }
 
   $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
 
   $xml = simplexml_load_string($response);
-  //$ns = $xml->getNamespaces(true);
 
   if (is_object($xml)) {
 
@@ -688,7 +693,7 @@ function cu_class_import($institution, $term, $subject, $course_id) {
       return;
     }
 
-    if(isset($xml->SEARCH_RESULT->SUBJECTS) && isset($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY)){
+    if (isset($xml->SEARCH_RESULT->SUBJECTS) && isset($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY)) {
 
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
 
@@ -718,15 +723,21 @@ function cu_class_import($institution, $term, $subject, $course_id) {
 
         if (in_array($session_code, $session_code_to_ignore)) {
           $ignore = TRUE;
+          if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+            dsm('ignoring becuase of session');
+          }
         }
 
         if (in_array($campus_code, $campus_codes_to_ignore)) {
           $ignore = TRUE;
+          if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+            dsm('ignoring becuase of campus');
+          }
         }
 
-       // @TODO: Clean this up!
-       //add to array to unpublish any additional classes in course
+       // ignored classes need to
        if (!$ignore) {
+         //add to array to unpublish any additional classes in course
          $classes[] = $class_id;
        }
 
@@ -751,12 +762,11 @@ function cu_class_import($institution, $term, $subject, $course_id) {
         // check to see if class already exists...
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
 
-        if(!$ignore && $last_updated) {
+        if (!$ignore && $last_updated) {
 
-          // When was the calss last udated?  2016-02-25 01:05:34
+          // When was the class last udated?  2016-02-25 01:05:34
           $last_updated = strtotime($last_updated);
           $time_difference = strtotime("now") - $last_updated;
-          $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
 
           if ($time_difference < $cache_duration) {
             if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
@@ -764,7 +774,8 @@ function cu_class_import($institution, $term, $subject, $course_id) {
             }
           }
           else {
-           //FORMAT THE ENTITY BEING UPDATED
+           // FORMAT THE ENTITY BEING UPDATED
+           // @TODO use $array = (array) $object to reuse same set up for both existing and new
            $existing_class = entity_load_single('cu_class', $class_id);
 
            $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
@@ -862,23 +873,27 @@ function cu_class_import($institution, $term, $subject, $course_id) {
           }
         }
       }
-    } // isset
-  }
 
-  // remove classes for this course that are no longer returned by API or Primer
-  //  $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
-  $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
+      // remove classes for this course that are no longer returned by API or Primer
+      //  $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
+      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
 
-  foreach ($all_classes as $class) {
-    if (!in_array($class->class_id, $classes)) {
-      $existing_class = entity_load_single('cu_class', $class->class_id);
-      $existing_class->status = 0;
-      $updated = entity_save('cu_class', $existing_class);
-      if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
-        drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title , 'status');
+      foreach ($all_classes as $class) {
+        if (!in_array($class->class_id, $classes)) {
+          $existing_class = entity_load_single('cu_class', $class->class_id);
+          if ($existing_class->status != -1) {
+            $existing_class->status = -1;
+            $updated = entity_save('cu_class', $existing_class);
+            if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
+              drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title . ' (' .$class->class_id .')', 'status');
+            }
+          }
+        }
       }
-    }
-  }
+
+    } // isset
+
+  } //is_object($xml)
 }
 
 /**
@@ -890,8 +905,6 @@ function cu_course_import($institution, $term, $subject) {
   $xml = simplexml_load_string($response);
 
   if (is_object($xml)) {
-
-      //dsm(xml2array_parse($xml));
 
       if ($xml->IS_FAULT) {
 
@@ -917,8 +930,6 @@ function cu_course_import($institution, $term, $subject) {
           // if doesn't exist, add it
           $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
           if($result->rowCount() > 0) {
-
-            //UPDATE?  Are courses actually removed from the API?
 
           }
           else {
@@ -1074,6 +1085,8 @@ function cu_class_import_get_subjects() {
 	'LAWS' => 'LAWS',
 	'MUEL' => 'MUEL',
 	'MUSC' => 'MUSC',
+	'MSBX' => 'MSBX',
+  'MSBC' => 'MSBC',
 	'TMUS' => 'TMUS',
   );
 }
