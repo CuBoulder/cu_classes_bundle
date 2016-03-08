@@ -31,12 +31,8 @@
               </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-              <?php if (!empty($course_requirements)): ?>
-                <div class="class-section">
-                  <h3>Core Requirements</h3>
-                  <?php print $course_requirements; ?>
-                </div>
-              <?php endif; ?>
+
+              
             </div>
           </div>
         </div>

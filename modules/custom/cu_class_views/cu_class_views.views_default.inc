@@ -360,26 +360,6 @@ function cu_class_views_views_default_views() {
     3 => 0,
     5 => 0,
   );
-  /* Filter criterion: Class: CRSE_ATTR_VALUE (field_class_crse_attr_value) */
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['id'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['table'] = 'field_data_field_class_crse_attr_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['field'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['operator'] = 'contains';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['group'] = 2;
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator_id'] = 'field_class_crse_attr_value_value_op';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['label'] = 'Core Requirements';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['operator'] = 'field_class_crse_attr_value_value_op';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['identifier'] = 'field_class_crse_attr_value_value';
-  $handler->display->display_options['filters']['field_class_crse_attr_value_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    8 => 0,
-    12 => 0,
-    6 => 0,
-    10 => 0,
-    16 => 0,
-  );
   /* Filter criterion: Class: INSTRUCTION_MODE (field_class_instruction_mode) */
   $handler->display->display_options['filters']['field_class_instruction_mode_value']['id'] = 'field_class_instruction_mode_value';
   $handler->display->display_options['filters']['field_class_instruction_mode_value']['table'] = 'field_data_field_class_instruction_mode';

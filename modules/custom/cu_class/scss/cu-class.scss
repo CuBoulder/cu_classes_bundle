@@ -259,6 +259,9 @@ $radius: 0px;
   input[type=submit]:focus {
     outline: #000 solid 2px;
   }
+  .views-exposed-form .views-exposed-widget .form-submit {
+    margin-top: 15px;
+  }
 
   @media screen and (min-width:960px) {
     .views-exposed-widgets {
