@@ -611,18 +611,18 @@ function cu_class_import_course_batch_update() {
 /**
  * The batch processor.
  */
-function cu_class_import_course_batch_process($subjects, &$context) {
+function cu_class_import_course_batch_process($subject, &$context) {
 
   //@TODO: set active insitutions
   $institution = 'CUBLD';
 
-  $context['message'] = "Now processing Course: $subjects...";
+  $context['message'] = "Now processing all Courses with Subject of $subject...";
 
   $terms = variable_get('cu_class_import_active_terms');
 
   foreach ($terms as $term) {
     if ($term) {
-      cu_course_import($institution, $term, $subjects);
+      cu_course_import($institution, $term, $subject);
     }
   }
   // this is so we don't overwhelm the servers
