@@ -46,7 +46,7 @@ function cu_class_schema() {
 }
 
 /**
- * Add a second destination to schedules.
+ * Add status to class entity
  */
 function cu_class_update_7001() {
   db_add_field('cu_class', 'status',
