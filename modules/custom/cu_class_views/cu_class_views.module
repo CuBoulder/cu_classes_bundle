@@ -83,14 +83,6 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_subject_value']['#prefix'] = '<span id="class-search-subject-list">';
     $form['field_class_subject_value']['#suffix'] = '</span>';
 
-
-    // Core Requirements
-    $form['field_class_crse_attr_value_value']['#type'] = 'select';
-    $form['field_class_crse_attr_value_value']['#options'] = cu_class_core_requirements_values();
-    unset($form['field_class_crse_attr_value_value']['#size']);
-    $form['field_class_crse_attr_value_value']['#multiple'] = FALSE;
-    $form['field_class_crse_attr_value_value']['#empty_value'] = '';
-
     // Format
     $form['field_class_instruction_mode_value']['#type'] = 'select';
     $form['field_class_instruction_mode_value']['#options'] = cu_class_format_values();
@@ -137,7 +129,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
 
 function cu_class_views_form_views_exposed_validation($form, &$form_state) {
   if (empty($form_state['values']['college_school_filter'])) {
-    $form_state['values']['college_school_filter'] = 'all';
+    //$form_state['values']['college_school_filter'] = 'all';
   }
 }
 
