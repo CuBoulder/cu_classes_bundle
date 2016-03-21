@@ -125,6 +125,30 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       '#value' => TRUE,
     );
   }
+
+
+
+  if ($form['#id'] == 'views-exposed-form-cu-classes-admin-page') {
+
+    $form['field_class_subject_value']['#size'] = 7;
+    $form['field_class_catalog_nbr_value']['#size'] = 10;
+
+    //$form['field_class_subject_value']['#type'] = 'select';
+    //$form['field_class_subject_value']['#options'] = cu_class_import_get_subjects();
+
+    $status_options = array(
+      '' => 'All',
+      '1' => 'Published',
+      '0' => 'Manually Unpublished',
+      '-1' => 'Unpublished by API',
+      '-2' => 'Bulk Unpublished',
+      '-3' => 'Needs Review',
+    );
+    $form['status']['#size'] = 5;
+    $form['status']['#type'] = 'select';
+    $form['status']['#options'] = $status_options;
+  }
+
 }
 
 function cu_class_views_form_views_exposed_validation($form, &$form_state) {
@@ -221,6 +245,7 @@ function cu_class_views_colleges_schools() {
     'SPAN' => 'SPAN',
     'WMST' => 'WMST',
     'WRTG' => 'WRTG',
+    'HIND' => 'HIND',
   );
   $groups['business']['title'] = 'Business';
   $groups['business']['subjects'] = array(

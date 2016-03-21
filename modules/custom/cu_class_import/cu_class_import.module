@@ -143,21 +143,29 @@ function class_import_admin_settings() {
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/'),
     '#title' => t('Base URL of API'),
-    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+    '#description' => t(''),
+  );
+
+
+  $form['cu_class_import_api_version'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_version', '2a1'),
+    '#title' => t('Version'),
+    '#description' => t(''),
   );
 
   $form['cu_class_import_api_username'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_username', ''),
     '#title' => t('API Username'),
-    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+    '#description' => t('Provided by UIS'),
   );
 
   $form['cu_class_import_api_password'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_password', ''),
     '#title' => t('API Password'),
-    '#description' => t('Disables the lock on ability enable or disable modules required by install profile through the user interface.  This also impacts drush.'),
+    '#description' => t('Provided by UIS'),
   );
 
   $form['cu_class_import_cache_duration'] = array(
@@ -220,6 +228,13 @@ function class_import_admin_settings() {
      '#collapsed' => TRUE,
   );
 
+  $form['adv']['cu_class_import_as_needs_review'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_as_needs_review', 0),
+    '#title' => t('Import as Needs Review'),
+    '#description' => t('These will be unpublished until manually published.'),
+  );
+
   $form['adv']['cu_class_import_debug'] = array(
     '#type' => 'checkbox',
     '#default_value' => variable_get('cu_class_import_debug', 0),
@@ -227,11 +242,18 @@ function class_import_admin_settings() {
     '#description' => t('You may want to trun this off when using batch imports of large data sets'),
   );
 
+  if (module_exists('devel')) {
+    $disabled = FALSE;
+  } else {
+    $disabled = TRUE;
+  }
+
   $form['adv']['cu_class_import_adv_debug'] = array(
     '#type' => 'checkbox',
     '#default_value' => variable_get('cu_class_import_adv_debug', 0),
     '#title' => t('Show Detailed Debug Messages'),
-    '#description' => t('IMPORTANT! This Requires Devel'),
+    '#disabled' => $disabled,
+    '#description' => t('IMPORTANT! This Requires access to Devel output'),
   );
 
   $form['adv']['cu_class_import_on_cron'] = array(
@@ -273,37 +295,37 @@ function cu_course_import_form() {
   $institution_options = array(
     'CUBLD' => t('Boulder'),
     'CUSPG' => t('Colorado Springs'),
-	  'CUDEV' => t('Denver'),
+    'CUDEV' => t('Denver'),
   );
 
   $form['institution'] = array(
-	  '#type' => 'select',
-	  '#default_value' => '2164',
-	  '#title' => t('Institution'),
-	  '#options' => $institution_options,
-	  '#description' => t(''),
-	);
+    '#type' => 'select',
+    '#default_value' => '2164',
+    '#title' => t('Institution'),
+    '#options' => $institution_options,
+    '#description' => t(''),
+  );
 
   $term_options = cu_class_import_get_terms();
 
-	$form['term'] = array(
-	  '#type' => 'select',
-	  '#default_value' => '2164',
-	  '#title' => t('Term'),
-	  '#options' => $term_options,
-	  '#description' => t('Terms are available X days before enrollment opens'),
-	);
+  $form['term'] = array(
+    '#type' => 'select',
+    '#default_value' => '2164',
+    '#title' => t('Term'),
+    '#options' => $term_options,
+    '#description' => t('Terms are available X days before enrollment opens'),
+  );
 
   $subject_options = cu_class_import_get_subjects();
 
   asort($subject_options);
   $form['subject'] = array(
-	  '#type' => 'select',
-	  '#default_value' => variable_get('class_import_current_subject', ''),
-	  '#title' => t('Subject'),
-	  '#options' => $subject_options,
-	  '#description' => t(''),
-	);
+    '#type' => 'select',
+    '#default_value' => variable_get('class_import_current_subject', ''),
+    '#title' => t('Subject'),
+    '#options' => $subject_options,
+    '#description' => t(''),
+  );
 
   $form['submit_button'] = array(
     '#type' => 'submit',
@@ -346,7 +368,7 @@ function cu_course_import_curl($institution, $term, $subject) {
     $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/courses/$institution/$term/$subject";
   }
   else {
-    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/' . variable_get('cu_class_import_api_version', '2a1') . '/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
 
   if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
@@ -410,10 +432,10 @@ function cu_class_import_form() {
 
   $form['course'] = array(
     '#type' => 'select',
-	  '#title' => t('Course'),
-	  '#options' => $course_options,
-	  '#default_value' => variable_get('class_import_current_course', ''),
-	  '#description' => t(''),
+    '#title' => t('Course'),
+    '#options' => $course_options,
+    '#default_value' => variable_get('class_import_current_course', ''),
+    '#description' => t(''),
   );
 
   $form['submit_button'] = array(
@@ -453,7 +475,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
     $request_path = variable_get('cu_class_import_prime_url', 'http://express.local/express14/') . "primer/class/$institution/$term/$subject/$course_id";
   }
   else {
-    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
+    $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/' . variable_get('cu_class_import_api_version', '2a1') . '/SSR_GET_CLASSES_R.v1/get/classes?type=cu_detail&languageCd=en';
   }
 
   // Setup the cURL
@@ -492,6 +514,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
     $curl_request_body .= '<CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
+    //@TODO:  THIS IS JUST FOR TESTING... we nee to loop through each online instructor mode
     if(variable_get('cu_class_import_online_only', 0)) {
       $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
     }
@@ -822,11 +845,17 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
         else {
           // if doesn't exist, add it if it's not in the list to ignore
           if (!$ignore) {
+            if (variable_get('cu_class_import_as_needs_review', 0)) {
+              $status = -3;
+            } else {
+              $status = 1;
+            }
             $values = array(
               'class_id' => $class_id,
               'title' => $title,
               'course_id' => $course_id,
               'type' => 'class',
+              'status' => $status,
             );
 
             $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
@@ -1000,94 +1029,95 @@ function cu_class_import_get_subjects() {
   return array(
   'ENVD' => 'ENVD',
   'ARTF' => 'ARTF',
-	'ARTH' => 'ARTH',
-	'ARTS' => 'ARTS',
-	'JPNS' => 'JPNS',
-	'KREN' => 'KREN',
-	'ANTH' => 'ANTH',
-	'APPM' => 'APPM',
-	'ASIA' => 'ASIA',
-	'ASTR' => 'ASTR',
-	'ATOC' => 'ATOC',
-	'CHEM' => 'CHEM',
-	'CLAS' => 'CLAS',
-	'LATN' => 'LATN',
-	'COML' => 'COML',
-	'EBIO' => 'EBIO',
-	'ECON' => 'ECON',
-	'ENGL' => 'ENGL',
-	'ENVS' => 'ENVS',
-	'ETHN' => 'ETHN',
-	'FILM' => 'FILM',
-	'FREN' => 'FREN',
-	'ITAL' => 'ITAL',
-	'GEOG' => 'GEOG',
-	'GEOL' => 'GEOL',
-	'GRMN' => 'GRMN',
-	'RUSS' => 'RUSS',
-	'SCAN' => 'SCAN',
-	'HIST' => 'HIST',
-	'HONR' => 'HONR',
-	'HUMN' => 'HUMN',
-	'IAFS' => 'IAFS',
-	'IPHY' => 'IPHY',
-	'JWST' => 'JWST',
-	'LING' => 'LING',
-	'MATH' => 'MATH',
-	'MCDB' => 'MCDB',
-	'MUSM' => 'MUSM',
-	'PHIL' => 'PHIL',
-	'PHYS' => 'PHYS',
-	'PSCI' => 'PSCI',
-	'NRSC' => 'NRSC',
-	'PSYC' => 'PSYC',
-	'WRTG' => 'WRTG',
-	'RLST' => 'RLST',
-	'SLHS' => 'SLHS',
-	'SOCY' => 'SOCY',
-	'SPAN' => 'SPAN',
-	'DNCE' => 'DNCE',
-	'THTR' => 'THTR',
-	'WMST' => 'WMST',
-	'ACCT' => 'ACCT',
-	'BADM' => 'BADM',
-	'BCOR' => 'BCOR',
-	'BPOL' => 'BPOL',
-	'CESR' => 'CESR',
-	'ESBM' => 'ESBM',
-	'FNCE' => 'FNCE',
-	'INBU' => 'INBU',
-	'MGMT' => 'MGMT',
-	'MKTG' => 'MKTG',
-	'REAL' => 'REAL',
-	'APRD' => 'APRD',
-	'COMM' => 'COMM',
-	'CMDP' => 'CMDP',
-	'JRNL' => 'JRNL',
-	'MDST' => 'MDST',
-	'LDSP' => 'LDSP',
-	'PRLC' => 'PRLC',
-	'EDUC' => 'EDUC',
-	'LEAD' => 'LEAD',
-	'ASEN' => 'ASEN',
-	'ATLS' => 'ATLS',
-	'CHEN' => 'CHEN',
-	'CSCI' => 'CSCI',
-	'AREN' => 'AREN',
-	'CVEN' => 'CVEN',
-	'ECEN' => 'ECEN',
-	'EMEN' => 'EMEN',
-	'COEN' => 'COEN',
-	'GEEN' => 'GEEN',
-	'HUEN' => 'HUEN',
-	'MCEN' => 'MCEN',
-	'TLEN' => 'TLEN',
-	'LAWS' => 'LAWS',
-	'MUEL' => 'MUEL',
-	'MUSC' => 'MUSC',
-	'MSBX' => 'MSBX',
+  'ARTH' => 'ARTH',
+  'ARTS' => 'ARTS',
+  'JPNS' => 'JPNS',
+  'KREN' => 'KREN',
+  'ANTH' => 'ANTH',
+  'APPM' => 'APPM',
+  'ASIA' => 'ASIA',
+  'ASTR' => 'ASTR',
+  'ATOC' => 'ATOC',
+  'CHEM' => 'CHEM',
+  'CLAS' => 'CLAS',
+  'LATN' => 'LATN',
+  'COML' => 'COML',
+  'EBIO' => 'EBIO',
+  'ECON' => 'ECON',
+  'ENGL' => 'ENGL',
+  'ENVS' => 'ENVS',
+  'ETHN' => 'ETHN',
+  'FILM' => 'FILM',
+  'FREN' => 'FREN',
+  'ITAL' => 'ITAL',
+  'GEOG' => 'GEOG',
+  'GEOL' => 'GEOL',
+  'GRMN' => 'GRMN',
+  'RUSS' => 'RUSS',
+  'SCAN' => 'SCAN',
+  'HIST' => 'HIST',
+  'HONR' => 'HONR',
+  'HUMN' => 'HUMN',
+  'IAFS' => 'IAFS',
+  'IPHY' => 'IPHY',
+  'JWST' => 'JWST',
+  'LING' => 'LING',
+  'MATH' => 'MATH',
+  'MCDB' => 'MCDB',
+  'MUSM' => 'MUSM',
+  'PHIL' => 'PHIL',
+  'PHYS' => 'PHYS',
+  'PSCI' => 'PSCI',
+  'NRSC' => 'NRSC',
+  'PSYC' => 'PSYC',
+  'WRTG' => 'WRTG',
+  'RLST' => 'RLST',
+  'SLHS' => 'SLHS',
+  'SOCY' => 'SOCY',
+  'SPAN' => 'SPAN',
+  'DNCE' => 'DNCE',
+  'THTR' => 'THTR',
+  'WMST' => 'WMST',
+  'ACCT' => 'ACCT',
+  'BADM' => 'BADM',
+  'BCOR' => 'BCOR',
+  'BPOL' => 'BPOL',
+  'CESR' => 'CESR',
+  'ESBM' => 'ESBM',
+  'FNCE' => 'FNCE',
+  'INBU' => 'INBU',
+  'MGMT' => 'MGMT',
+  'MKTG' => 'MKTG',
+  'REAL' => 'REAL',
+  'APRD' => 'APRD',
+  'COMM' => 'COMM',
+  'CMDP' => 'CMDP',
+  'JRNL' => 'JRNL',
+  'MDST' => 'MDST',
+  'LDSP' => 'LDSP',
+  'PRLC' => 'PRLC',
+  'EDUC' => 'EDUC',
+  'LEAD' => 'LEAD',
+  'ASEN' => 'ASEN',
+  'ATLS' => 'ATLS',
+  'CHEN' => 'CHEN',
+  'CSCI' => 'CSCI',
+  'AREN' => 'AREN',
+  'CVEN' => 'CVEN',
+  'ECEN' => 'ECEN',
+  'EMEN' => 'EMEN',
+  'COEN' => 'COEN',
+  'GEEN' => 'GEEN',
+  'HUEN' => 'HUEN',
+  'MCEN' => 'MCEN',
+  'TLEN' => 'TLEN',
+  'LAWS' => 'LAWS',
+  'MUEL' => 'MUEL',
+  'MUSC' => 'MUSC',
+  'MSBX' => 'MSBX',
   'MSBC' => 'MSBC',
-	'TMUS' => 'TMUS',
+  'TMUS' => 'TMUS',
+  'HIND' => 'HIND',
   );
 }
 
@@ -1111,8 +1141,8 @@ function cu_class_import_get_terms(){
   return array(
     '2154' => t('2015 Summer'),
     '2157' => t('2015 Fall'),
-	  '2161' => t('2016 Spring'),
-	  '2164' => t('2016 Summer'),
+    '2161' => t('2016 Spring'),
+    '2164' => t('2016 Summer'),
     '2167' => t('2016 Fall'),
   );
 }
