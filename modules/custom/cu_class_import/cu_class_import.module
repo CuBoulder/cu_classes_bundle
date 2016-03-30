@@ -370,7 +370,8 @@ function cu_course_import_curl($institution, $term, $subject) {
   else {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/' . variable_get('cu_class_import_api_version', '2a1') . '/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
-
+  //https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en
+  //https://osbtest.dev.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en
   if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
@@ -719,6 +720,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
     if (isset($xml->SEARCH_RESULT->SUBJECTS) && isset($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY)) {
 
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
+        //reset ignore to false
+        $ignore = FALSE;
 
         if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
           dsm(xml2array_parse($class));
