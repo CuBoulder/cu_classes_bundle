@@ -87,11 +87,11 @@ Additional values include:
 
 *STRM* - The name and numberic code of these are available from an LOV Service as they are available, but they use the following pattern:
 
-'2154' = '2015 Summer'
-'2157' = '2015 Fall'
-'2161' = '2016 Spring'
-'2164' = '2016 Summer'
-'2167' = '2016 Fall'
+*2154 = 2015 Summer
+*2157 = 2015 Fall
+*2161 = 2016 Spring
+*2164 = 2016 Summer
+*2167 = 2016 Fall
 
 *SUBJECT* - Available from an LOV Service
 
@@ -105,7 +105,7 @@ Additional values include:
 
 *CAMPUS* - Each institution has a main and continuing education campus.  The campus codes for Boulder are BLDR and CEPS.
 
-*INSTRUCTION_MODE* - 
+*INSTRUCTION_MODE* - See https://github.com/CuBoulder/cu_classes_bundle/issues/17
 
 EXAMPLE XML RESPONSE
 
