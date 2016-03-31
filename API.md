@@ -1,7 +1,7 @@
 
 This documentation is a combination of the official Oracle Enrollment Web Services Users Guide documentation, information provided by UIS, and what we've learned through trial and error.  
 
-It is vrey unlikely that this documenation is or will ever will be 100% accurate.  It is provided without warrantee to help anyone else attempting to work this API.  
+It is very unlikely that this documenation is or will ever will be 100% accurate.  It is provided without warranty to help anyone else attempting to work this API.  
 
 ##SSR_GET_CLASSES
 
