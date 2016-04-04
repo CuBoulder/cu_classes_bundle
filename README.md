@@ -1,3 +1,5 @@
+Before opening an issue, please review and sign this project's <a href="https://www.clahub.com/agreements/CuBoulder/cu_classes_bundle">Contributor License Agreement</a>.
+
 # CU Classes Bundle
 
 The Classes Bundle incldes a few different components:
