@@ -39,7 +39,8 @@ Additional values include:
 	<STRM></STRM>
 	<SUBJECT></SUBJECT>
 	<CRSE_ID></CRSE_ID> 
-	<CLASS_TYPE></CLASS_TYPE> 
+	<CLASS_TYPE></CLASS_TYPE>
+	<CU_CLASS_STAT></CU_CLASS_STAT>
 	<CRSE_ATTR></CRSE_ATTR> 
 	<CRSE_ATTR_VALUE></CRSE_ATTR_VALUE>
 	<SCHEDULE_PRINT></SCHEDULE_PRINT> 
@@ -96,6 +97,10 @@ Additional values include:
 *SUBJECT* - Available from an LOV Service
 
 *CRSE_ID* - Requests that include SUBJECT with no CRSE_ID will return all courses for the SUBJECT
+
+*CLASS_TYPE* - E or N (Enroll or Not Enroll)
+
+*CU_CLASS_STAT* - X Includes cancelled classes
 
 *SCHEDULE_PRINT* - Y or N
 
