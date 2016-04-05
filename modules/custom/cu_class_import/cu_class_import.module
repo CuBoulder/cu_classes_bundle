@@ -513,7 +513,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CRSE_ID><CLASS_STAT>X</CLASS_STAT>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CRSE_ID><CU_CLASS_STAT>X</CU_CLASS_STAT><CAMPUS>BLDR</CAMPUS><' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
     //@TODO:  THIS IS JUST FOR TESTING... we need to loop through each online instructor mode
     if(variable_get('cu_class_import_online_only', 0)) {
@@ -850,7 +850,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
            $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
-           $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+           $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = (string) $class->CANCEL_DT;
 
            $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
@@ -908,6 +908,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
             // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
             // expecting format to be 2016-01-08 22:45:45
             $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
+           $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = (string) $class->CANCEL_DT;
 
             $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
