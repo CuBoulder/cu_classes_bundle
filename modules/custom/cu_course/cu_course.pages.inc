@@ -111,7 +111,18 @@ function cu_course_display($course) {
           drupal_set_message("This section of this course is no longer available. No other sections of this course are currently being offered.", 'error');
         }
       }
+
+      // Check to see if the requested class cancelled
+      if ($classes[$class_id]->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
+        if ($class_multiple) {
+          drupal_set_message("This section of this course has been cancelled. Other sections listed bellow.", 'error');
+        }
+        else {
+          drupal_set_message("This section of this course has been cancelled. No other sections of this course are currently being offered.", 'error');
+        }
+      }
     }
+
     // Highlighted class
     $output['classes_highlighted'] = entity_view('cu_class', $classes, 'short');
     $output['classes_highlighted']['#weight'] = 99;
