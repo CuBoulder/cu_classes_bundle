@@ -96,8 +96,10 @@ function cu_course_display($course) {
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
 
+  dsm($classes[$class_id]);
+
   // Check to see if the requested class is published
-  if ($classes[$class_id]->status < 1) {
+  if (isset($classes[$class_id]->status) && $classes[$class_id]->status < 1) {
     if ($class_multiple) {
       drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
     }
