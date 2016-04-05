@@ -513,7 +513,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CRSE_ID><CU_CLASS_STAT>X</CU_CLASS_STAT>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CRSE_ID><CLASS_STAT>X</CLASS_STAT>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
     //@TODO:  THIS IS JUST FOR TESTING... we need to loop through each online instructor mode
     if(variable_get('cu_class_import_online_only', 0)) {
@@ -738,8 +738,6 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
         $descrlong = (string) utf8_decode($class->SSR_DESCRLONG);
         $campus_code = (string) $class->CAMPUS;
 
-        //CANCEL_DT
-
         // Check Elements to Ignore
         // Prepare Session Codes
         $session_code_ids = str_replace(" ", "", variable_get('cu_class_import_session_cd', ''));
@@ -794,10 +792,10 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
           $crse_attr_value_descr = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCR;
           $crse_attr_value_dscrformal = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCRFORMAL;
 
-          dsm($crse_attr);
-          dsm($crse_attr_value);
-          dsm($crse_attr_descr);
-          dsm($crse_attr_value_dscrformal);
+          //dsm($crse_attr);
+          //dsm($crse_attr_value);
+          //dsm($crse_attr_descr);
+          //dsm($crse_attr_value_dscrformal);
         }
         // check to see if class already exists...
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
@@ -850,6 +848,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
            // $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
            // expecting format to be 2016-01-08 22:45:45
            $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+           //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
+           $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
            $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
