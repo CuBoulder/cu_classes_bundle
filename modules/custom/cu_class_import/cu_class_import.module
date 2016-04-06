@@ -468,7 +468,7 @@ function cu_class_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_class_import_curl($institution, $term, $subject, $course_id) {
+function cu_class_import_curl($institution, $term, $subject, $course_id, $instuctor_mode = NULL) {
 
   watchdog('cu_class_import', 'API Request for Course %course_id', array('%course_id' => $course_id), WATCHDOG_INFO);
 
@@ -506,18 +506,16 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
     curl_setopt($curl, CURLOPT_POST, true);
     // This allows us to access the endpoint without verifying the SSL cert.
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
     // Use Basic Auth
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
-    //@TODO:  THIS IS JUST FOR TESTING... we need to loop through each online instructor mode
-    if(variable_get('cu_class_import_online_only', 0)) {
-      $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
+    if ($instuctor_mode) {
+      $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
@@ -537,7 +535,8 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
   }
   // Close the curl to free resources
   curl_close($curl);
-  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+
+  return str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $curl_response);
 }
 
 
@@ -674,7 +673,7 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
 /**
  * process the import
  */
-function cu_class_import($institution, $term, $subject, $course_id, $cache_duration = FALSE) {
+function cu_class_import($institution, $term, $subject, $course_id, $instructor_mode = NULL, $cache_duration = FALSE) {
   //used to unpublish classes as when they are removed
   $classes = array();
   $ignore = FALSE;
@@ -701,7 +700,15 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
     ->execute();
   }
 
-  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  if(variable_get('cu_class_import_online_only', 0)) {
+    // combine the resposes for each instructor mode
+    $response = cu_class_import_curl($institution, $term, $subject, $course_id, 'OL');
+    dsm(array($response));
+  }
+  else {
+    // get all the insructor modes
+    $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  }
 
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
@@ -850,9 +857,11 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
            $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
 
            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
+           // 2015-10-20T00:00:00.000-06:00
            $cancel_dt = (string) $class->CANCEL_DT;
            if ($cancel_dt) {
-             $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = $cancel_dt;
+             $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
+             $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = $cancel_date;
            }
 
            $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
@@ -916,7 +925,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
 
             $cancel_dt = (string) $class->CANCEL_DT;
             if ($cancel_dt) {
-              $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_dt;
+              $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
+              $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_date;
             }
 
             $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;

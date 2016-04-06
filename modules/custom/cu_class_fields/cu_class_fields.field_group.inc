@@ -13,6 +13,39 @@ function cu_class_fields_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_class_additional_values|cu_class|class|form';
+  $field_group->group_name = 'group_class_additional_values';
+  $field_group->entity_type = 'cu_class';
+  $field_group->bundle = 'class';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_class_api_values';
+  $field_group->data = array(
+    'label' => 'Additional Values',
+    'weight' => '12',
+    'children' => array(
+      0 => 'field_class_campus_des',
+      1 => 'field_class_ssr_component',
+      2 => 'field_class_units_acad_prog',
+      3 => 'field_class_cancel_dt',
+      4 => 'field_class_crs_topic_descr',
+      5 => 'field_class_crse_attr_value_brcq',
+    ),
+    'format_type' => 'fieldset',
+    'format_settings' => array(
+      'formatter' => 'collapsible',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => 'group-class-additional-values field-group-fieldset',
+        'required_fields' => 1,
+        'id' => '',
+      ),
+    ),
+  );
+  $field_groups['group_class_additional_values|cu_class|class|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_class_api_values|cu_class|class|form';
   $field_group->group_name = 'group_class_api_values';
   $field_group->entity_type = 'cu_class';
@@ -23,19 +56,14 @@ function cu_class_fields_field_group_info() {
     'label' => 'API Values',
     'weight' => '5',
     'children' => array(
-      0 => 'field_class_campus_des',
-      1 => 'field_class_class_nbr',
-      2 => 'field_class_crse_attr',
-      3 => 'field_class_crse_attr_value',
-      4 => 'field_class_crse_id',
-      5 => 'field_class_institution',
-      6 => 'field_class_session_code',
-      7 => 'field_class_ssr_component',
-      8 => 'field_class_strm',
-      9 => 'field_class_units_acad_prog',
-      10 => 'field_class_cancel_dt',
-      11 => 'group_class_enrollment',
-      12 => 'group_class_meeting',
+      0 => 'field_class_class_nbr',
+      1 => 'field_class_crse_id',
+      2 => 'field_class_institution',
+      3 => 'field_class_session_code',
+      4 => 'field_class_strm',
+      5 => 'group_class_enrollment',
+      6 => 'group_class_meeting',
+      7 => 'group_class_additional_values',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
@@ -122,6 +150,7 @@ function cu_class_fields_field_group_info() {
   // Translatables
   // Included for use with string extractors like potx.
   t('API Values');
+  t('Additional Values');
   t('Class Meeting');
   t('Enrollment');
 

@@ -39,7 +39,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 16,
+      'weight' => 15,
     ),
   );
 
@@ -86,7 +86,7 @@ function cu_class_fields_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 17,
+      'weight' => 16,
     ),
   );
 
@@ -241,8 +241,8 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'cu_class-class-field_class_crse_attr'.
-  $field_instances['cu_class-class-field_class_crse_attr'] = array(
+  // Exported field_instance: 'cu_class-class-field_class_crs_topic_descr'.
+  $field_instances['cu_class-class-field_class_crs_topic_descr'] = array(
     'bundle' => 'class',
     'default_value' => NULL,
     'deleted' => 0,
@@ -253,15 +253,20 @@ function cu_class_fields_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 22,
+        'weight' => 33,
       ),
     ),
     'entity_type' => 'cu_class',
     'fences_wrapper' => 'div_div_div',
-    'field_name' => 'field_class_crse_attr',
-    'label' => 'CRSE_ATTR',
+    'field_name' => 'field_class_crs_topic_descr',
+    'label' => 'CRS_TOPIC_DESCR',
     'required' => 0,
     'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
       'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
@@ -272,12 +277,12 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 12,
+      'weight' => 17,
     ),
   );
 
-  // Exported field_instance: 'cu_class-class-field_class_crse_attr_value'.
-  $field_instances['cu_class-class-field_class_crse_attr_value'] = array(
+  // Exported field_instance: 'cu_class-class-field_class_crse_attr_value_brcq'.
+  $field_instances['cu_class-class-field_class_crse_attr_value_brcq'] = array(
     'bundle' => 'class',
     'default_value' => NULL,
     'deleted' => 0,
@@ -288,15 +293,20 @@ function cu_class_fields_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 17,
+        'weight' => 34,
       ),
     ),
     'entity_type' => 'cu_class',
     'fences_wrapper' => 'div_div_div',
-    'field_name' => 'field_class_crse_attr_value',
-    'label' => 'CRSE_ATTR_VALUE',
+    'field_name' => 'field_class_crse_attr_value_brcq',
+    'label' => 'CRSE_ATTR_VALUE_BRCQ',
     'required' => 0,
     'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
       'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
@@ -307,7 +317,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 13,
+      'weight' => 18,
     ),
   );
 
@@ -880,7 +890,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 14,
+      'weight' => 13,
     ),
   );
 
@@ -1185,7 +1195,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 15,
+      'weight' => 14,
     ),
   );
 
@@ -1238,9 +1248,9 @@ function cu_class_fields_field_default_field_instances() {
   t('CLASS_NBR');
   t('CLASS_SECTION');
   t('COURSE_TITLE_LONG');
-  t('CRSE_ATTR');
-  t('CRSE_ATTR_VALUE');
+  t('CRSE_ATTR_VALUE_BRCQ');
   t('CRSE_ID');
+  t('CRS_TOPIC_DESCR');
   t('END_DT');
   t('ENRL_CAP');
   t('ENRL_STAT');
