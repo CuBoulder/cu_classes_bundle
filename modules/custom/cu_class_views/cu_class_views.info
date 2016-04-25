@@ -8,3 +8,5 @@ features[ctools][] = views:views_default:3.0
 features[features_api][] = api:2
 features[views_view][] = cu_classes
 features_exclude[dependencies][ctools] = ctools
+
+stylesheets[all][] = cu-class-views.css

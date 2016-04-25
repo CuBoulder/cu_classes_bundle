@@ -513,9 +513,9 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
-    //@TODO:  THIS IS JUST FOR TESTING... we nee to loop through each online instructor mode
+    //@TODO:  THIS IS JUST FOR TESTING... we need to loop through each online instructor mode
     if(variable_get('cu_class_import_online_only', 0)) {
       $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
     }
@@ -785,6 +785,18 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
           $location_long = (string) $meeting->SSR_MTG_LOC_LONG;
         }
 
+        foreach ($class->CRSE_ATTRIBUTES->children() as $crse_attribute) {
+          $crse_attr = (string) $crse_attribute->CRSE_ATTR;
+          $crse_attr_value = (string) $crse_attribute->CRSE_ATTR_VALUE;
+          $crse_attr_descr = (string) $crse_attribute->CRSE_ATTR_DESCR;
+          $crse_attr_value_descr = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCR;
+          $crse_attr_value_dscrformal = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCRFORMAL;
+
+          //dsm($crse_attr);
+          //dsm($crse_attr_value);
+          //dsm($crse_attr_descr);
+          //dsm($crse_attr_value_dscrformal);
+        }
         // check to see if class already exists...
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
 
@@ -832,10 +844,16 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
            $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
            $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
 
-           $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-           $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+           // $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+           // $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
            // expecting format to be 2016-01-08 22:45:45
            $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+           //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
+           $cancel_dt = (string) $class->CANCEL_DT;
+           if ($cancel_dt) {
+             $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = $cancel_dt;
+           }
 
            $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
@@ -889,10 +907,17 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
             $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
             $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
 
-            $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-            $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+            // $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+            // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
             // expecting format to be 2016-01-08 22:45:45
             $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
+
+            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
+
+            $cancel_dt = (string) $class->CANCEL_DT;
+            if ($cancel_dt) {
+              $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_dt;
+            }
 
             $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 

@@ -96,22 +96,35 @@ function cu_course_display($course) {
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
 
+  dsm($classes[$class_id]);
+
+  // Check to see if the requested class is published
+  if (isset($classes[$class_id]->status) && $classes[$class_id]->status < 1) {
+    if ($class_multiple) {
+      drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
+    }
+    else {
+      drupal_set_message("This section of this course is no longer available. No other sections of this course are currently being offered.", 'error');
+    }
+  }
+
+  // Check to see if the requested class cancelled
+  if ($classes[$class_id]->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
+    if ($class_multiple) {
+      drupal_set_message("This section of this course has been cancelled. Other sections listed bellow.", 'error');
+    }
+    else {
+      drupal_set_message("This section of this course has been cancelled. No other sections of this course are currently being offered.", 'error');
+    }
+  }
+
   // If there is a highlighted class, display page differently
   if (!empty($highlight_class_ids)) {
     $classes = array();
     foreach ($highlight_class_ids as $class_id) {
       $classes[$class_id] = entity_load_single('cu_class', $class_id);
-
-      // Check to see if the requested class is published
-      if ($classes[$class_id]->status < 1) {
-        if ($class_multiple) {
-          drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
-        }
-        else {
-          drupal_set_message("This section of this course is no longer available. No other sections of this course are currently being offered.", 'error');
-        }
-      }
     }
+
     // Highlighted class
     $output['classes_highlighted'] = entity_view('cu_class', $classes, 'short');
     $output['classes_highlighted']['#weight'] = 99;
