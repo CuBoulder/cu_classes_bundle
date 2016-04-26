@@ -676,6 +676,7 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
 function cu_class_import($institution, $term, $subject, $course_id, $instructor_mode = NULL, $cache_duration = FALSE) {
   //used to unpublish classes as when they are removed
   $classes = array();
+  $brcq_array = array();
   $ignore = FALSE;
 
   // if a specific duration isn't passed, use default
@@ -799,12 +800,79 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           $crse_attr_value_descr = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCR;
           $crse_attr_value_dscrformal = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCRFORMAL;
 
+          if ($crse_attr == 'BRCQ') {
+            $brcq_array[] = $crse_attr_value;
+          }
+
+          //@TODO add $crse_attr_value_descr and $crse_attr_value_dscrformal to cache
+
           //dsm($crse_attr);
           //dsm($crse_attr_value);
           //dsm($crse_attr_descr);
           //dsm($crse_attr_value_dscrformal);
+
         }
-        // check to see if class already exists...
+
+        // format assuming we are creating a new class and format in array
+        // use $class = (object) $values to reuse same set up for both existing and new
+
+        if (variable_get('cu_class_import_as_needs_review', 0)) {
+          $status = -3;
+        } else {
+          $status = 1;
+        }
+
+        // set defaults
+        $values = array(
+          'class_id' => $class_id,
+          'title' => $title,
+          'course_id' => $course_id,
+          'type' => 'class',
+          'status' => $status,
+        );
+
+        $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
+        $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
+        $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
+        $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
+        $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
+        $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
+
+        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+
+        $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+
+        $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
+
+        $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
+        $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
+        $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+        $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
+
+        $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
+        $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
+
+        // $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+        // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+        // expecting format to be 2016-01-08 22:45:45
+        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d H:i:s');
+
+        $cancel_dt = (string) $class->CANCEL_DT;
+        if ($cancel_dt) {
+          $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
+          $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_date;
+        }
+
+        $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+
+        // check to see if class already exists and when it was last updated
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
 
         if (!$ignore && $last_updated) {
@@ -819,54 +887,20 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
             }
           }
           else {
-           // FORMAT THE ENTITY BEING UPDATED
-           // @TODO use $array = (array) $object to reuse same set up for both existing and new
+
+           //
+
            $existing_class = entity_load_single('cu_class', $class_id);
 
-           $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
-           $existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
-           $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
-           $existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
-           $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-           $existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
-           $existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
-           $existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
-           $existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
+           $class = (object) $values;
 
-           $existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-           $existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-           $existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-           $existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+           dsm($class);
+           dsm($existing_class);
 
-           $existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-           $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+           // keep status and any other fields we give users control over
+           $class->status = $existing_class->status;
 
-           $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
-
-           $existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
-           $existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
-           $existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
-           $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
-
-           $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
-           $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
-
-           // $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-           // $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-           // expecting format to be 2016-01-08 22:45:45
-           $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
-
-           //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
-           // 2015-10-20T00:00:00.000-06:00
-           $cancel_dt = (string) $class->CANCEL_DT;
-           if ($cancel_dt) {
-             $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
-             $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = $cancel_date;
-           }
-
-           $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
-
-           $updated = entity_save('cu_class', $existing_class);
+           $updated = entity_save('cu_class', $class);
            if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
              drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
            }
@@ -875,61 +909,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         else {
           // if doesn't exist, add it if it's not in the list to ignore
           if (!$ignore) {
-            if (variable_get('cu_class_import_as_needs_review', 0)) {
-              $status = -3;
-            } else {
-              $status = 1;
-            }
-            $values = array(
-              'class_id' => $class_id,
-              'title' => $title,
-              'course_id' => $course_id,
-              'type' => 'class',
-              'status' => $status,
-            );
 
-            $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
-            $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
-            $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
-            $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
-            $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-            $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
-            $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
-            $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
-            $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
-
-            $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-            $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-            $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-            $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
-
-            $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-            $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
-
-            $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
-
-            $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
-            $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
-            $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
-            $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
-
-            $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
-            $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
-
-            // $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-            // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-            // expecting format to be 2016-01-08 22:45:45
-            $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
-
-            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
-
-            $cancel_dt = (string) $class->CANCEL_DT;
-            if ($cancel_dt) {
-              $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
-              $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_date;
-            }
-
-            $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
             $class = entity_create('cu_class', $values);
             $created = entity_save('cu_class', $class);
@@ -942,7 +922,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
       }
 
       // remove classes for this course that are no longer returned by API or Primer
-      //  $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
+      // $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
       $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
 
       foreach ($all_classes as $class) {
