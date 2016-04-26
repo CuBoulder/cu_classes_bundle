@@ -14,13 +14,12 @@
               </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-              <div class="class-section">
-                <h3>Session</h3>
-                <?php print $session; ?>
-                <div class="session-dates">
-                  <?php print $start_date; ?> - <?php print $end_date; ?>
+              <?php if(!empty($content['field_class_ssr_instr_long'][0]['#markup'])): ?>
+                <div class="class-section">
+                  <h3>Instructor</h3>
+                  <?php print render($content['field_class_ssr_instr_long']); ?>
                 </div>
-              </div>
+              <?php endif; ?>
             </div>
           </div>
           <div class="row clearfix">
@@ -32,7 +31,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 
-              
+
             </div>
           </div>
         </div>
@@ -52,12 +51,7 @@
               <?php print render($content['field_class_ssr_mtg_loc_long']); ?>
             </div>
           <?php endif; ?>
-          <?php if(!empty($content['field_class_ssr_instr_long'][0]['#markup'])): ?>
-            <div class="class-section">
-              <h3>Instructor</h3>
-              <?php print render($content['field_class_ssr_instr_long']); ?>
-            </div>
-          <?php endif; ?>
+
 
 
         </div>

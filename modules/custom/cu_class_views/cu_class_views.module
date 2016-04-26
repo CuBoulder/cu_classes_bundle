@@ -90,13 +90,6 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_instruction_mode_value']['#multiple'] = FALSE;
     $form['field_class_instruction_mode_value']['#empty_value'] = '';
 
-    // Session
-    $form['field_class_session_code_value']['#type'] = 'select';
-    $form['field_class_session_code_value']['#options'] = cu_class_session_values();
-    unset($form['field_class_session_code_value']['#size']);
-    $form['field_class_session_code_value']['#multiple'] = FALSE;
-    $form['field_class_session_code_value']['#empty_value'] = '';
-
     $form['submit']['#attributes']['class'][] = 'button button-blue';
     $form['reset']['#attributes']['class'][] = 'button button-gray';
 
@@ -171,7 +164,7 @@ function cu_class_views_views_pre_render(&$view) {
           Class
         </div>
         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-          Session
+          Schedule
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
           Credits
@@ -351,4 +344,21 @@ function cu_class_views_subject_callback($group) {
     }
   }
   return $all_subjects;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function cu_class_views_theme_registry_alter(&$theme_registry) {
+  $module_path = drupal_get_path('module', 'cu_class_views');
+  $theme_registry_copy = $theme_registry;
+  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'cu_class', $module_path);
+  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+  $hooks = array('cu_class');
+  foreach ($hooks as $h) {
+    if (isset($theme_registry[$h]['theme paths'])) {
+      $first_element = array_shift($theme_registry[$h]['theme paths']);
+      array_unshift($theme_registry[$h]['theme paths'], array_shift($theme_registry[$h]['theme paths']), $module_path);
+    }
+  }
 }
