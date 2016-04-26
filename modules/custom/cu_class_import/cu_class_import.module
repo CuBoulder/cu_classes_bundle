@@ -146,14 +146,6 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
-
-  $form['cu_class_import_api_version'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_class_import_api_version', '2a1'),
-    '#title' => t('Version'),
-    '#description' => t(''),
-  );
-
   $form['cu_class_import_api_username'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_username', ''),
@@ -171,43 +163,15 @@ function class_import_admin_settings() {
   $form['cu_college_import_api_url'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
-    '#title' => t('Base URL of API'),
+    '#title' => t('Base URL of Org LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
-  );
-
-  $form['cu_college_import_api_username'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_college_import_api_username', ''),
-    '#title' => t('API Username'),
-    '#description' => t('Provided by UIS'),
-  );
-
-  $form['cu_college_import_api_password'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_college_import_api_password', ''),
-    '#title' => t('API Password'),
-    '#description' => t('Provided by UIS'),
   );
 
   $form['cu_subject_import_api_url'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root='),
-    '#title' => t('Base URL of API'),
+    '#title' => t('Base URL of Subject LoV (Lookup of Value Service'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
-  );
-
-  $form['cu_subject_import_api_username'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_subject_import_api_username', ''),
-    '#title' => t('API Username'),
-    '#description' => t('Provided by UIS'),
-  );
-
-  $form['cu_subject_import_api_password'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_subject_import_api_password', ''),
-    '#title' => t('API Password'),
-    '#description' => t('Provided by UIS'),
   );
 
   $form['cu_class_import_cache_duration'] = array(
@@ -319,6 +283,12 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
+  $form['adv']['cu_class_import_api_version'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_version', '2a2'),
+    '#title' => t('Version'),
+    '#description' => t(''),
+  );
   return system_settings_form($form);
 }
 
@@ -1171,20 +1141,17 @@ function cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array
   if ($cache = cache_get('cu_class_import_subjects:' . $institution) && !empty($options)) {
     return $cache->data;
   }
-
   // Setup the cURL request.
   // Using basic authentication this way, instead of curl_setopt() because
   // authentication wasn't working with that method.
-  $curl = curl_init('https://' . variable_get('cu_college_import_api_username', '') . ':' . variable_get('cu_college_import_api_password', '') . '@' . variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
+  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
 
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 
   // Get the data! Also check and see if the curl worked and log the error if it did not.
   if (!$response = curl_exec($curl)) {
-    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-    error_log($error_message, 0);
-    print_r($error_message);
+    drupal_set_message('cURL to the College LoV Service failed.', 'error');
   }
   // Parse response.
   curl_close($curl);
@@ -1254,16 +1221,14 @@ function cu_class_import_get_subjects($colleges = array(), $institution = 'B-CUB
     // Setup the cURL request.
     // Using basic authentication this way, instead of curl_setopt() because
     // authentication wasn't working with that method.
-    $curl = curl_init('https://' . variable_get('cu_subject_import_api_username', '') . ':' . variable_get('cu_subject_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root=') . $key);
+    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root=') . $key);
 
     // Return the transfer as a string of the values if the curl succeeds.
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 
     // Get the data! Also check and see if the curl worked and log the error if it did not.
     if (!$response = curl_exec($curl)) {
-      $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-      error_log($error_message, 0);
-      print_r($error_message);
+      drupal_set_message('cURL to the Subject LoV Service failed.', 'error');
     }
     curl_close($curl);
     $p = xml_parser_create();
