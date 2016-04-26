@@ -52,10 +52,16 @@ function cu_course_display($course) {
   $query->join('cu_class', 'class', 'class.class_id = courseid.entity_id');
   $query->fields('class', array('class_id'));
 
+  // Join to get cancel_dt for classes
+  $query->join('field_data_field_class_cancel_dt', 'cancel_dt', 'class.class_id = cancel_dt.entity_id');
+  $query->fields('cancel_dt', array('field_class_cancel_dt_value'));
+
   // Get only published class entities
   $query->condition('class.type', 'class', '=');
   $query->condition('class.status', 1, '=');
   $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
+  $query->condition('cancel_dt.field_class_cancel_dt_value', '2015-10-23', '>');
+
 
   // Join for section number
   $query->join('field_data_field_class_class_section', 'section', 'section.entity_id = courseid.entity_id');
