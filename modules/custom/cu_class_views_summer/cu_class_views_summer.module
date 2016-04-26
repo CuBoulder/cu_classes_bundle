@@ -6,6 +6,36 @@
 
 include_once 'cu_class_views_summer.features.inc';
 
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function cu_class_views_summer_theme_registry_alter(&$theme_registry) {
+  $module_path = drupal_get_path('module', 'cu_class_views_summer');
+  $theme_registry_copy = $theme_registry;
+  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'cu_class', $module_path);
+  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+  $hooks = array('cu_class');
+  foreach ($hooks as $h) {
+    if (isset($theme_registry[$h]['theme paths'])) {
+      $first_element = array_shift($theme_registry[$h]['theme paths']);
+      array_unshift($theme_registry[$h]['theme paths'], array_shift($theme_registry[$h]['theme paths']), $module_path);
+    }
+  }
+}
+
+function cu_class_views_summer_preprocess_entity(&$vars) {
+  $entity_type = $vars['elements']['#entity_type'];
+  $bundle = $vars['elements']['#bundle'];
+  if (($entity_type == 'cu_class') && ($bundle == 'class')) {
+    if ($vars['view_mode'] == 'short') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__short_summer';
+    }
+    if ($vars['view_mode'] == 'list') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__list_summer';
+    }
+  }
+}
+
 function cu_class_views_summer_menu() {
   $items = array();
   $items['class-views/lookup/%'] = array(
@@ -43,7 +73,7 @@ function cu_class_views_summer_block_view($delta = '') {
 }
 
 function cu_class_views_summer_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
-  if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
+  if ($form['#id'] == 'views-exposed-form-cu-classes-summer-page') {
     // Add College/School filter
     $groups = cu_class_views_summer_colleges_schools();
     $options = array();

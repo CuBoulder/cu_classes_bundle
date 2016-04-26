@@ -15,7 +15,7 @@ function cu_class_views_summer_views_default_views() {
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'cu_class';
-  $view->human_name = 'Classes';
+  $view->human_name = 'Classes Summer';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
