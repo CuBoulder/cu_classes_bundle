@@ -138,13 +138,13 @@ function cu_class_fields_field_default_field_bases() {
     'type' => 'text',
   );
 
-  // Exported field_base: 'field_class_crse_attr'.
-  $field_bases['field_class_crse_attr'] = array(
+  // Exported field_base: 'field_class_crs_topic_descr'.
+  $field_bases['field_class_crs_topic_descr'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_class_crse_attr',
+    'field_name' => 'field_class_crs_topic_descr',
     'indexes' => array(
       'format' => array(
         0 => 'format',
@@ -159,13 +159,13 @@ function cu_class_fields_field_default_field_bases() {
     'type' => 'text',
   );
 
-  // Exported field_base: 'field_class_crse_attr_value'.
-  $field_bases['field_class_crse_attr_value'] = array(
+  // Exported field_base: 'field_class_crse_attr_value_brcq'.
+  $field_bases['field_class_crse_attr_value_brcq'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_class_crse_attr_value',
+    'field_name' => 'field_class_crse_attr_value_brcq',
     'indexes' => array(
       'format' => array(
         0 => 'format',
