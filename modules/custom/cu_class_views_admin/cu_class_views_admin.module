@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CU Class VIews Admin feature.
+ */
+
+include_once 'cu_class_views_admin.features.inc';

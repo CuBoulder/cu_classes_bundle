@@ -1,12 +1,9 @@
-name = CU Class Views
+name = CU Class Views Admin
+description = Admin views for classes
 core = 7.x
 package = CU-Classes
-dependencies[] = entity
 dependencies[] = views
-scripts[] = js/cu-class-views.js
 features[ctools][] = views:views_default:3.0
 features[features_api][] = api:2
-features[views_view][] = cu_classes
+features[views_view][] = cu_classes_admin
 features_exclude[dependencies][ctools] = ctools
-
-stylesheets[all][] = cu-class-views.css
