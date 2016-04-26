@@ -787,6 +787,14 @@ function cu_class_subject_values() {
     'WRTG' => 'Writing & Rhetoric',
   );
 
+  // Get class subjects from LOV service.
+  if ($cache = cache_get('cu_class_import_subjects_display:B-CUBLD')) {
+    $subjects = $cache->data;
+  }
+  else {
+    $subjects = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_subjects_display' => TRUE));
+  }
+
   // Cache available class subjects
   if ($cache = cache_get('cu_class_search_subjects_available')) {
     $subjects = $cache->data;
