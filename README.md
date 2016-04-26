@@ -30,9 +30,11 @@ Both class and course provide batch imports at courses/import/batch and class/im
 
 # Published vs. Unpublished
 
-*NEEDS DOCUMENTATION*
+[This documentation is avialable on Web Central](https://www.colorado.edu/webcentral/tutorials/managing-classes).
 
 # Cancelled Classes
 
-*NEEDS TESTING AND DOCUMENTATION*
+By default both active and cancelled classes are imported. Cancelled classes include a date in the CANCEL_DT value. Cancelled classes are still returned in the search for 7 days and available via direct links for 14 days. This is to prevent confusion when looking at a specific class one day and is no longer there the next.  There is also an option in both the course search (courses/search) and course management (admin/content/classes) interfaces to include or exclude cancelled classes.
+
+Cancelled classes can be unpublished manually or in bulk.
 

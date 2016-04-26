@@ -1,5 +1,5 @@
 
-This documentation is a combination of the official Oracle Enrollment Web Services Users Guide documentation, information provided by UIS, and what we've learned through trial and error.  
+This documentation is a combination of the official [Oracle Enrollment Web Services Users Guide documentation](https://github.com/CuBoulder/cu_classes_bundle/blob/2a2/Enrollment%20Web%20Services%20Users%20Guide.pdf), information provided by UIS, and what we've learned through trial and error.  
 
 It is very unlikely that this documenation is or will ever will be 100% accurate.  It is provided without warranty to help anyone else attempting to work this API.  
 
@@ -35,52 +35,52 @@ Additional values include:
 
 ```xml
 <CLASS_SEARCH_REQUEST>
-	<INSTITUTION></INSTITUTION> 
-	<STRM></STRM>
-	<SUBJECT></SUBJECT>
-	<CRSE_ID></CRSE_ID> 
-	<CLASS_TYPE></CLASS_TYPE>
-	<CU_CLASS_STAT></CU_CLASS_STAT>
-	<CRSE_ATTR></CRSE_ATTR> 
-	<CRSE_ATTR_VALUE></CRSE_ATTR_VALUE>
-	<SCHEDULE_PRINT></SCHEDULE_PRINT> 
-	<ACAD_ORG></ACAD_ORG> 
-	<ACAD_GROUP></ACAD_GROUP>
-	<CLASS_NBR></CLASS_NBR>
-	<CRSE_OFFER_NBR></CRSE_OFFER_NBR>
-	<SESSION_CODE></SESSION_CODE>
-	<CLASS_SECTION></CLASS_SECTION>
-	<CATALOG_NBR></CATALOG_NBR>
-	<SSR_EXACT_MATCH1></SSR_EXACT_MATCH1>
-	<SSR_OPEN_ONLY>N</SSR_OPEN_ONLY>
-	<OEE_IND></OEE_IND>
-	<DESCR></DESCR>
-	<ACAD_CAREER></ACAD_CAREER>
-	<SSR_COMPONENT></SSR_COMPONENT>
-	<INSTRUCTION_MODE></INSTRUCTION_MODE>
-	<CAMPUS></CAMPUS>
-	<LOCATION></LOCATION>
-	<MEETING_TIME_START></MEETING_TIME_START>
-	<SSR_MTGTIME_START2></SSR_MTGTIME_START2>
-	<MEETING_TIME_END></MEETING_TIME_END>
-	<MON>N</MON>
-	<TUES>N</TUES>
-	<WED>N</WED>
-	<THURS>N</THURS>
-	<FRI>N</FRI>
-	<SAT>N</SAT>
-	<SUN>N</SUN>
-	<INCLUDE_CLASS_DAYS></INCLUDE_CLASS_DAYS>
-	<LAST_NAME></LAST_NAME>
-	<SSR_EXACT_MATCH2></SSR_EXACT_MATCH2>
-	<UNITS_MINIMUM></UNITS_MINIMUM>
-	<UNITS_MAXIMUM></UNITS_MAXIMUM>
-	<SCC_ENTITY_INST_ID></SCC_ENTITY_INST_ID>
-	<OBEY_WARNING_LIMIT></OBEY_WARNING_LIMIT>
-	<SSR_START_TIME_OPR></SSR_START_TIME_OPR>
-	<SSR_END_TIME_OPR></SSR_END_TIME_OPR>
-	<SSR_UNITS_MIN_OPR></SSR_UNITS_MIN_OPR>
-	<SSR_UNITS_MAX_OPR></SSR_UNITS_MAX_OPR>
+  <INSTITUTION></INSTITUTION> 
+  <STRM></STRM>
+  <SUBJECT></SUBJECT>
+  <CRSE_ID></CRSE_ID> 
+  <CLASS_TYPE></CLASS_TYPE>
+  <CU_CLASS_STAT></CU_CLASS_STAT>
+  <CRSE_ATTR></CRSE_ATTR> 
+  <CRSE_ATTR_VALUE></CRSE_ATTR_VALUE>
+  <SCHEDULE_PRINT></SCHEDULE_PRINT> 
+  <ACAD_ORG></ACAD_ORG> 
+  <ACAD_GROUP></ACAD_GROUP>
+  <CLASS_NBR></CLASS_NBR>
+  <CRSE_OFFER_NBR></CRSE_OFFER_NBR>
+  <SESSION_CODE></SESSION_CODE>
+  <CLASS_SECTION></CLASS_SECTION>
+  <CATALOG_NBR></CATALOG_NBR>
+  <SSR_EXACT_MATCH1></SSR_EXACT_MATCH1>
+  <SSR_OPEN_ONLY>N</SSR_OPEN_ONLY>
+  <OEE_IND></OEE_IND>
+  <DESCR></DESCR>
+  <ACAD_CAREER></ACAD_CAREER>
+  <SSR_COMPONENT></SSR_COMPONENT>
+  <INSTRUCTION_MODE></INSTRUCTION_MODE>
+  <CAMPUS></CAMPUS>
+  <LOCATION></LOCATION>
+  <MEETING_TIME_START></MEETING_TIME_START>
+  <SSR_MTGTIME_START2></SSR_MTGTIME_START2>
+  <MEETING_TIME_END></MEETING_TIME_END>
+  <MON>N</MON>
+  <TUES>N</TUES>
+  <WED>N</WED>
+  <THURS>N</THURS>
+  <FRI>N</FRI>
+  <SAT>N</SAT>
+  <SUN>N</SUN>
+  <INCLUDE_CLASS_DAYS></INCLUDE_CLASS_DAYS>
+  <LAST_NAME></LAST_NAME>
+  <SSR_EXACT_MATCH2></SSR_EXACT_MATCH2>
+  <UNITS_MINIMUM></UNITS_MINIMUM>
+  <UNITS_MAXIMUM></UNITS_MAXIMUM>
+  <SCC_ENTITY_INST_ID></SCC_ENTITY_INST_ID>
+  <OBEY_WARNING_LIMIT></OBEY_WARNING_LIMIT>
+  <SSR_START_TIME_OPR></SSR_START_TIME_OPR>
+  <SSR_END_TIME_OPR></SSR_END_TIME_OPR>
+  <SSR_UNITS_MIN_OPR></SSR_UNITS_MIN_OPR>
+  <SSR_UNITS_MAX_OPR></SSR_UNITS_MAX_OPR>
 </CLASS_SEARCH_REQUEST>
 ```
 
@@ -88,11 +88,11 @@ Additional values include:
 
 *STRM* - The name and numberic code of these are available from an LOV Service as they are available, but they use the following pattern:
 
-*2154 = 2015 Summer
-*2157 = 2015 Fall
-*2161 = 2016 Spring
-*2164 = 2016 Summer
-*2167 = 2016 Fall
+* 2154 = 2015 Summer
+* 2157 = 2015 Fall
+* 2161 = 2016 Spring
+* 2164 = 2016 Summer
+* 2167 = 2016 Fall
 
 *SUBJECT* - Available from an LOV Service
 
@@ -100,7 +100,7 @@ Additional values include:
 
 *CLASS_TYPE* - E or N (Enroll or Not Enroll)
 
-*CU_CLASS_STAT* - X Includes cancelled classes
+*CU_CLASS_STAT* - A (default), X only cancelled classes, AX both active and cancelled
 
 *SCHEDULE_PRINT* - Y or N
 
