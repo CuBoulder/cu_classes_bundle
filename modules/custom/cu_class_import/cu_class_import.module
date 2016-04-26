@@ -289,6 +289,14 @@ function class_import_admin_settings() {
     '#title' => t('Version'),
     '#description' => t(''),
   );
+
+  $form['adv']['cu_class_import_use_lov_subjects'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_use_lov_subjects', 0),
+    '#title' => t('Use Dynamic LoV Driven Subject List'),
+    '#description' => t(''),
+  );
+
   return system_settings_form($form);
 }
 
@@ -310,22 +318,32 @@ function cu_course_import_form($form, &$form_state) {
     'D-CUDEN' => t('Denver'),
   );
 
-  $form['institution'] = array(
-    '#type' => 'select',
-    '#default_value' => variable_get('class_import_current_institution', key($institution_options)),
-    '#title' => t('Institution'),
-    '#options' => $institution_options,
-    '#description' => t(''),
-    '#ajax' => array(
-      // When 'event' occurs, Drupal will perform an ajax request in the
-      // background. Usually the default value is sufficient (eg. change for
-      // select elements), but valid values include any jQuery event,
-      // most notably 'mousedown', 'blur', and 'submit'.
-      // 'event' => 'change',
-      'callback' => 'subjects_dependent_dropdown_callback',
-      'wrapper' => 'dropdown-second-replace',
-    ),
-  );
+  if(variable_get('cu_class_import_use_lov_subjects', 0)){
+    $form['institution'] = array(
+      '#type' => 'select',
+      '#default_value' => variable_get('class_import_current_institution', key($institution_options)),
+      '#title' => t('Institution'),
+      '#options' => $institution_options,
+      '#description' => t(''),
+      '#ajax' => array(
+        // When 'event' occurs, Drupal will perform an ajax request in the
+        // background. Usually the default value is sufficient (eg. change for
+        // select elements), but valid values include any jQuery event,
+        // most notably 'mousedown', 'blur', and 'submit'.
+        // 'event' => 'change',
+        'callback' => 'subjects_dependent_dropdown_callback',
+        'wrapper' => 'dropdown-second-replace',
+      ),
+    );
+  } else {
+    $form['institution'] = array(
+      '#type' => 'select',
+      '#default_value' => variable_get('class_import_current_institution', key($institution_options)),
+      '#title' => t('Institution'),
+      '#options' => $institution_options,
+      '#description' => t(''),
+    );
+  }
 
   $term_options = cu_class_import_get_terms();
 
@@ -334,7 +352,7 @@ function cu_course_import_form($form, &$form_state) {
     '#default_value' => '2164',
     '#title' => t('Term'),
     '#options' => $term_options,
-    '#description' => t('Terms are available X days before enrollment opens'),
+    '#description' => t('Terms are available some number of days before enrollment opens.  This date is set by the registars and remains an undocumented process and value.'),
   );
 
 /*
@@ -362,20 +380,124 @@ $form['college'] = array(
 */
 
   $institution = isset($form_state['values']['institution']) ? $form_state['values']['institution'] : variable_get('class_import_current_institution', key($institution_options));
-
-  $form['subject'] = array(
-    '#type' => 'select',
-    //'#default_value' => variable_get('class_import_current_subject', ''),
-    '#title' => t('Subject'),
-    //'#default_value' => variable_get('class_import_current_subject', ''),
-    // The entire enclosing div created here gets replaced when dropdown_first
-    // is changed.
-    '#prefix' => '<div id="dropdown-second-replace">',
-    '#suffix' => '</div>',
-    // When the form is rebuilt during ajax processing, the $selected variable
-    // will now have the new value and so the options will change.
-    '#options' => _subjects_get_second_dropdown_options($institution),
+  if(variable_get('cu_class_import_use_lov_subjects', 0)){
+    $form['subject'] = array(
+      '#type' => 'select',
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      '#title' => t('Subject'),
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      // The entire enclosing div created here gets replaced when dropdown_first
+      // is changed.
+      '#prefix' => '<div id="dropdown-second-replace">',
+      '#suffix' => '</div>',
+      // When the form is rebuilt during ajax processing, the $selected variable
+      // will now have the new value and so the options will change.
+      '#options' => _subjects_get_second_dropdown_options($institution),
+    );
+  } else {
+    $subjects =  array(
+  'ENVD' => 'ENVD',
+  'ARTF' => 'ARTF',
+  'ARTH' => 'ARTH',
+  'ARTS' => 'ARTS',
+  'JPNS' => 'JPNS',
+  'KREN' => 'KREN',
+  'ANTH' => 'ANTH',
+  'APPM' => 'APPM',
+  'ASIA' => 'ASIA',
+  'ASTR' => 'ASTR',
+  'ATOC' => 'ATOC',
+  'CHEM' => 'CHEM',
+  'CLAS' => 'CLAS',
+  'LATN' => 'LATN',
+  'COML' => 'COML',
+  'EBIO' => 'EBIO',
+  'ECON' => 'ECON',
+  'ENGL' => 'ENGL',
+  'ENVS' => 'ENVS',
+  'ETHN' => 'ETHN',
+  'FILM' => 'FILM',
+  'FREN' => 'FREN',
+  'ITAL' => 'ITAL',
+  'GEOG' => 'GEOG',
+  'GEOL' => 'GEOL',
+  'GRMN' => 'GRMN',
+  'RUSS' => 'RUSS',
+  'SCAN' => 'SCAN',
+  'HIST' => 'HIST',
+  'HONR' => 'HONR',
+  'HUMN' => 'HUMN',
+  'IAFS' => 'IAFS',
+  'IPHY' => 'IPHY',
+  'JWST' => 'JWST',
+  'LING' => 'LING',
+  'MATH' => 'MATH',
+  'MCDB' => 'MCDB',
+  'MUSM' => 'MUSM',
+  'PHIL' => 'PHIL',
+  'PHYS' => 'PHYS',
+  'PSCI' => 'PSCI',
+  'NRSC' => 'NRSC',
+  'PSYC' => 'PSYC',
+  'WRTG' => 'WRTG',
+  'RLST' => 'RLST',
+  'SLHS' => 'SLHS',
+  'SOCY' => 'SOCY',
+  'SPAN' => 'SPAN',
+  'DNCE' => 'DNCE',
+  'THTR' => 'THTR',
+  'WMST' => 'WMST',
+  'ACCT' => 'ACCT',
+  'BADM' => 'BADM',
+  'BCOR' => 'BCOR',
+  'BPOL' => 'BPOL',
+  'CESR' => 'CESR',
+  'ESBM' => 'ESBM',
+  'FNCE' => 'FNCE',
+  'INBU' => 'INBU',
+  'MGMT' => 'MGMT',
+  'MKTG' => 'MKTG',
+  'REAL' => 'REAL',
+  'APRD' => 'APRD',
+  'COMM' => 'COMM',
+  'CMDP' => 'CMDP',
+  'JRNL' => 'JRNL',
+  'MDST' => 'MDST',
+  'LDSP' => 'LDSP',
+  'PRLC' => 'PRLC',
+  'EDUC' => 'EDUC',
+  'LEAD' => 'LEAD',
+  'ASEN' => 'ASEN',
+  'ATLS' => 'ATLS',
+  'CHEN' => 'CHEN',
+  'CSCI' => 'CSCI',
+  'AREN' => 'AREN',
+  'CVEN' => 'CVEN',
+  'ECEN' => 'ECEN',
+  'EMEN' => 'EMEN',
+  'COEN' => 'COEN',
+  'GEEN' => 'GEEN',
+  'HUEN' => 'HUEN',
+  'MCEN' => 'MCEN',
+  'TLEN' => 'TLEN',
+  'LAWS' => 'LAWS',
+  'MUEL' => 'MUEL',
+  'MUSC' => 'MUSC',
+  'MSBX' => 'MSBX',
+  'MSBC' => 'MSBC',
+  'TMUS' => 'TMUS',
+  'HIND' => 'HIND',
   );
+
+  asort($subjects);
+
+    $form['subject'] = array(
+      '#type' => 'select',
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      '#title' => t('Subject'),
+      '#options' => $subjects,
+    );
+  }
 
   $form['submit_button'] = array(
     '#type' => 'submit',
@@ -1271,100 +1393,6 @@ function cu_class_import_get_subjects($colleges = array(), $institution = 'B-CUB
   }
   // Return coded list of subjects.
   return $all_subjects;
-
-  return array(
-  'ENVD' => 'ENVD',
-  'ARTF' => 'ARTF',
-  'ARTH' => 'ARTH',
-  'ARTS' => 'ARTS',
-  'JPNS' => 'JPNS',
-  'KREN' => 'KREN',
-  'ANTH' => 'ANTH',
-  'APPM' => 'APPM',
-  'ASIA' => 'ASIA',
-  'ASTR' => 'ASTR',
-  'ATOC' => 'ATOC',
-  'CHEM' => 'CHEM',
-  'CLAS' => 'CLAS',
-  'LATN' => 'LATN',
-  'COML' => 'COML',
-  'EBIO' => 'EBIO',
-  'ECON' => 'ECON',
-  'ENGL' => 'ENGL',
-  'ENVS' => 'ENVS',
-  'ETHN' => 'ETHN',
-  'FILM' => 'FILM',
-  'FREN' => 'FREN',
-  'ITAL' => 'ITAL',
-  'GEOG' => 'GEOG',
-  'GEOL' => 'GEOL',
-  'GRMN' => 'GRMN',
-  'RUSS' => 'RUSS',
-  'SCAN' => 'SCAN',
-  'HIST' => 'HIST',
-  'HONR' => 'HONR',
-  'HUMN' => 'HUMN',
-  'IAFS' => 'IAFS',
-  'IPHY' => 'IPHY',
-  'JWST' => 'JWST',
-  'LING' => 'LING',
-  'MATH' => 'MATH',
-  'MCDB' => 'MCDB',
-  'MUSM' => 'MUSM',
-  'PHIL' => 'PHIL',
-  'PHYS' => 'PHYS',
-  'PSCI' => 'PSCI',
-  'NRSC' => 'NRSC',
-  'PSYC' => 'PSYC',
-  'WRTG' => 'WRTG',
-  'RLST' => 'RLST',
-  'SLHS' => 'SLHS',
-  'SOCY' => 'SOCY',
-  'SPAN' => 'SPAN',
-  'DNCE' => 'DNCE',
-  'THTR' => 'THTR',
-  'WMST' => 'WMST',
-  'ACCT' => 'ACCT',
-  'BADM' => 'BADM',
-  'BCOR' => 'BCOR',
-  'BPOL' => 'BPOL',
-  'CESR' => 'CESR',
-  'ESBM' => 'ESBM',
-  'FNCE' => 'FNCE',
-  'INBU' => 'INBU',
-  'MGMT' => 'MGMT',
-  'MKTG' => 'MKTG',
-  'REAL' => 'REAL',
-  'APRD' => 'APRD',
-  'COMM' => 'COMM',
-  'CMDP' => 'CMDP',
-  'JRNL' => 'JRNL',
-  'MDST' => 'MDST',
-  'LDSP' => 'LDSP',
-  'PRLC' => 'PRLC',
-  'EDUC' => 'EDUC',
-  'LEAD' => 'LEAD',
-  'ASEN' => 'ASEN',
-  'ATLS' => 'ATLS',
-  'CHEN' => 'CHEN',
-  'CSCI' => 'CSCI',
-  'AREN' => 'AREN',
-  'CVEN' => 'CVEN',
-  'ECEN' => 'ECEN',
-  'EMEN' => 'EMEN',
-  'COEN' => 'COEN',
-  'GEEN' => 'GEEN',
-  'HUEN' => 'HUEN',
-  'MCEN' => 'MCEN',
-  'TLEN' => 'TLEN',
-  'LAWS' => 'LAWS',
-  'MUEL' => 'MUEL',
-  'MUSC' => 'MUSC',
-  'MSBX' => 'MSBX',
-  'MSBC' => 'MSBC',
-  'TMUS' => 'TMUS',
-  'HIND' => 'HIND',
-  );
 }
 
 function cu_class_import_entity_view_alter(&$build, $type) {
