@@ -307,8 +307,23 @@ function cu_class_views_colleges_schools() {
   $groups['envd']['subjects'] = array(
     'ENVD' => 'ENVD',
   );
-  ksort($groups);
-  return $groups;
+
+  // Putting in Boulder for now since view doesn't have an institution field.
+  // Should add exposed filter to view or make a variable in config form.
+  $institution = 'B-CUBLD';
+
+  if ($cache = cache_get('cu_class_import_colleges:' . $institution)) {
+    $groups = $cache->data;
+  } else {
+    $groups = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_colleges_display' => TRUE));
+  }
+
+  foreach ($groups as $key => $value) {
+    $groups_final[$value]['title'] = $value;
+  }
+
+  asort($groups_final);
+  return $groups_final;
 }
 
 function cu_class_views_colleges_schools_filter($form, $form_state) {
