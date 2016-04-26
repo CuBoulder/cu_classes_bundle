@@ -1,0 +1,169 @@
+/* Variables */
+$blue: #007BC8;
+
+/* Mixins */
+@mixin element-invisible {
+  border: 0;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute !important;
+  width: 1px;
+}
+
+@mixin gradient($color, $color2) {
+  background-image: -webkit-gradient(linear, left top, left bottom, from($color), to($color2));
+  background-image: -webkit-linear-gradient(top, $color, $color2);
+  background-image: -moz-linear-gradient(top, $color, $color2);
+  background-image: -o-linear-gradient(top, $color, $color2);
+  background-image: -ms-linear-gradient(top, $color, $color2);
+  background-image: linear-gradient(top, $color, $color2);
+}
+
+/* Styles */
+.express-course {
+  margin-bottom:20px;
+}
+.express-course-classes {
+  position: relative;
+}
+.classes-view-some {
+  position: relative;
+}
+.express-course-classes .express-class {
+  border-top:1px solid #e7e7e7;
+  border-bottom:1px solid #e7e7e7;
+  padding:10px;
+  margin-bottom: -1px;
+}
+.express-course-classes .express-class:nth-child(even) {
+   background-color: #f5f5f5;
+}
+.express-course-classes .express-class:nth-child(3) {
+}
+.express-course-classes a.view-more-classes {
+  width:100%;
+  height:33%;
+  position: absolute;
+  z-index:1;
+  bottom:0;
+  left:0;
+  @include gradient(rgba(255,255,255,.55), rgba(255,255,255,.99));
+
+
+  display:block;
+  text-align: center;
+  padding:10px 10px;
+}
+a.view-more-classes span {
+  background: $blue;
+  color:#fff !important;
+  display: inline-block;
+  padding: 5px 10px;
+  color:#363636;
+  text-transform: uppercase;
+  font-size: 10px;
+  //border:2px solid #fff;
+  font-weight: 600;
+}
+.express-course-classes.classes-view-some .express-class:nth-child(n+4) {
+    display:none;
+}
+.express-course-classes.classes-view-some.classes-view-some-initial {
+  border-bottom: 1px solid #e7e7e7;
+  padding-bottom: 0px;
+}
+
+.course-list-page-filter form#express-classes-filter-form  > div:first-child {
+  overflow: hidden;
+  margin-bottom: 20px;
+
+  background: #f5f5f5;
+  padding:10px;
+  .form-item {
+    display: inline-block;
+    margin: 0;
+    margin-right:10px;
+  }
+  label {
+    font-size:75%;
+    font-weight:600;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    color:#707070;
+  }
+}
+.class-headers {
+  overflow: hidden;
+  padding:5px 10px;
+}
+.class-headers {
+  display: none;
+  //font-size: 75%;
+}
+.class-label {
+  display: block;
+}
+.class-data {
+  margin-bottom: 10px;
+  font-size: 85%;
+}
+@media (min-width: 768px) {
+  .express-course-classes {
+    .class-label {
+      @include element-invisible;
+    }
+  }
+  .class-headers {
+    display: block;
+  }
+  .class-data {
+    margin-bottom: 0;
+  }
+}
+h2.course-title {
+  font-size: 120%;
+}
+
+h2.class-label,
+h3.class-label,
+h4.class-label,
+h5.class-label,
+strong.class-label {
+  font-size:75%;
+  font-weight:600;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  color:#707070;
+}
+
+/* Term Navigation */
+
+.classes-term-navigation {
+  border-bottom:1px solid #e7e7e7;
+  margin-bottom: 20px;
+  ul, li {
+    list-style: none;
+    list-style-image: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul {
+    display: flex;
+    margin-bottom: -1px;
+  }
+  li {
+    flex: 0 1 auto;
+  }
+  a {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #f5f5f5;
+    border:1px solid #e7e7e7;
+  }
+  a.selected-term {
+    background: #fff;
+    border-bottom-color: #fff;
+    color:#333;
+  }
+}

@@ -1,0 +1,932 @@
+<?php
+/**
+ * @file
+ * Code for the CU Courses feature.
+ */
+
+include_once 'cu_courses.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function cu_courses_menu() {
+  $items = array();
+  // Course entity view - term/2016/summer/course/WRTG/2030
+  $items['term/%/%/course/%/%'] = array(
+    'page callback' => 'cu_courses_course_display',
+    'page arguments' => array(1,2,4,5),
+    'access arguments' => array('access content'),
+    'title callback' => 'cu_courses_course_title',
+    'title arguments' => array(1,2,4,5),
+  );
+  return $items;
+}
+
+/**
+ * Returns a list of courses, filterable by term, subject, range and format.
+ */
+function cu_courses_list($terms = NULL, $subject = NULL, $range = NULL, $format = NULL, $catalog_number = NULL, $display = NULL, $nid = NULL, $type = 'node') {
+
+  // Get terms
+  $term_list = array();
+  foreach ($terms as $term) {
+    $term_code = $term['value'];
+    $term_list[$term_code] = $term_code;
+  }
+  // Sort nodes in reverse order, most recent first
+  krsort($term_list);
+  // Get selected term, otherwise set to first term.
+  if (isset($_GET['term'])) {
+    $selected_term = check_plain($_GET['term']);
+  }
+  else {
+    $selected_term = current($term_list);
+  }
+
+  // Build term navigation if there are multiple terms
+  $term_nav = array();
+  $term_nav['#prefix'] = '<div class="classes-term-navigation"><ul>';
+  $term_nav['#suffix'] = '</ul></div>';
+  if (count($term_list) > 1 && $nid) {
+    foreach ($term_list as $term) {
+      $term_name_parts = cu_courses_term_code_translate($term);
+      $term_name = ucfirst($term_name_parts['term']) . ' ' . $term_name_parts['year'];
+      // Custom active link class
+      $term_nav_link_class = ($term == $selected_term) ? 'selected-term' : '';
+
+      $link = l($term_name, 'node/' . $nid, array('query' => array('term' => $term), 'attributes' => array('class' => array($term_nav_link_class))));
+      // Remove active class from links - otherwise all are active
+      $link = str_replace('active', '', $link);
+      $term_nav['#markup'] .= '<li>' . $link . '</li>';
+    }
+    $output['term_nav'] = $term_nav;
+  }
+
+  // Build list of courses of selected term
+  $output[$selected_term] = cu_courses_courses_by_term($selected_term, $subject, $range, $format, $catalog_number, $display, $nid, $type);
+
+  return $output;
+}
+
+/**
+ * Builds list of courses for a single term.
+ */
+function cu_courses_courses_by_term($term = NULL, $subject = NULL, $range = NULL, $format = NULL, $catalog_number = NULL, $display = NULL, $nid = NULL, $type = 'node') {
+  $course_query = db_select('cu_course', 'cu_course');
+  $course_query->fields('cu_course', array('course_id', 'catalog_nbr', 'title', 'subject', 'term_id'));
+  $course_query->orderBy('cu_course.subject', 'ASC');
+  $course_query->orderBy('cu_course.catalog_nbr', 'ASC');
+
+  if ($term) {
+    $course_query->condition('cu_course.term_id', $term, '=');
+  }
+  if ($subject) {
+    $subjects = array();
+    foreach ($subject as $key => $value) {
+      $subjects[] = $value['value'];
+    }
+    $course_query->condition('cu_course.subject', $subjects, 'in');
+  }
+  if($range) {
+    $catalog_nbr_range = array();
+    $catalog_nbr_range[] = $range[0]['from'];
+    $catalog_nbr_range[] = $range[0]['to'];
+    $course_query->condition('cu_course.catalog_nbr', $catalog_nbr_range, 'between');
+  }
+  if ($catalog_number) {
+    $course_query->condition('cu_course.catalog_nbr', $catalog_number, '=');
+  }
+
+  // Display options
+  if ($display) {
+    $display_options = array();
+    foreach ($display as $option) {
+      $display_options[$option['value']] = $option['value'];
+    }
+  }
+
+  // User filters
+  if (isset($_GET['subject'])) {
+    $subject = array(check_plain($_GET['subject']));
+    $course_query->condition('cu_course.subject', $subject, '=');
+  }
+
+  if (isset($_GET['level'])) {
+    $level = check_plain($_GET['level']);
+    $levels = cu_courses_course_level_range($level);
+    $course_query->condition('cu_course.catalog_nbr', $levels, 'between');
+  }
+  $course_results = $course_query->execute()->fetchAllAssoc('course_id');
+
+  // If no results, show error message for users that have permissions
+  if (empty($course_results)) {
+    if (user_access('create course_list_page content') || user_access('create custom_course_list_page content') || user_access('create any custom_course_list bean')) {
+      drupal_set_message(t('No courses matched your settings.'), 'warning');
+    }
+  }
+
+  $output = array();
+
+  // Loop through courses and get associated classes
+  foreach ($course_results as $course_key => $course_result) {
+    $course_vars = (array) $course_result;
+
+    // Get course description from associated classes
+    $course_vars['description'] = _cu_courses_get_course_description($course_result->course_id);
+
+    $class_query = db_select('cu_class', 'cu_class');
+    $class_query->fields('cu_class', array('class_id', 'title', 'course_id', 'status'));
+
+    $class_query->condition('cu_class.status', 1, '=');
+    $class_query->condition('cu_class.course_id', $course_key, '=');
+
+    // Class values
+
+    // Class section
+    // field_data_field_class_class_section
+    $class_query->join('field_data_field_class_class_section', 'section', 'section.entity_id = cu_class.class_id');
+    $class_query->fields('section', array('field_class_class_section_value'));
+    $class_query->orderBy('section.field_class_class_section_value', 'ASC');
+
+    // Class instructor
+    // field_data_field_class_ssr_instr_long
+    $class_query->join('field_data_field_class_ssr_instr_long', 'instructor', 'instructor.entity_id = cu_class.class_id');
+    $class_query->fields('instructor', array('field_class_ssr_instr_long_value'));
+
+    // Class location
+    // field_data_field_class_ssr_mtg_loc_long
+    $class_query->join('field_data_field_class_ssr_mtg_loc_long', 'location', 'location.entity_id = cu_class.class_id');
+    $class_query->fields('location', array('field_class_ssr_mtg_loc_long_value'));
+
+    // Class meeting schedule
+    // field_data_field_class_ssr_mtg_sched_long
+    $class_query->join('field_data_field_class_ssr_mtg_sched_long', 'schedule', 'schedule.entity_id = cu_class.class_id');
+    $class_query->fields('schedule', array('field_class_ssr_mtg_sched_long_value'));
+
+    // Class format
+    // field_data_field_class_instruction_mode
+    $class_query->join('field_data_field_class_instruction_mode', 'format', 'format.entity_id = cu_class.class_id');
+    $class_query->fields('format', array('field_class_instruction_mode_value'));
+
+    // Class session
+    // field_data_field_class_session_code
+    $class_query->join('field_data_field_class_session_code', 'session', 'session.entity_id = cu_class.class_id');
+    $class_query->fields('session', array('field_class_session_code_value'));
+
+
+    $class_results = $class_query->execute()->fetchAllAssoc('class_id');
+
+    // Convert class objects to arrays and add to course variables
+    foreach ($class_results as $class_key => $class_result) {
+      $course_vars['cu_classes'][$class_key] = (array) $class_result;
+    }
+    // Add display options to course variables
+    $course_vars['display_options'] = $display_options;
+    $course_vars['type'] = $type;
+
+    // Build course path for course title links
+    $term_parts = cu_courses_term_code_translate($term);
+    $path_parts = array();
+    $path_parts[] = 'term';
+    $path_parts[] = $term_parts['year'];
+    $path_parts[] = $term_parts['term'];
+    $path_parts[] = 'course';
+    $path_parts[] = $course_vars['subject'];
+    $path_parts[] = $course_vars['catalog_nbr'];
+
+    $course_vars['course_path'] = join('/', $path_parts);
+
+    // Build course title
+    $course_title_full = $course_vars['subject'] . ' ' . $course_vars['catalog_nbr'] . ' : ' . $course_vars['title'];
+    $course_vars['course_title_link'] = l($course_title_full, $course_vars['course_path'],array('query' => array('referrer' => $nid)));
+
+    // If there are more than 2 associated classes add class for toggle
+    if (!empty($course_vars['cu_classes'])) {
+      $course_vars['class_view'] = count($course_vars['cu_classes']) < 3 ? 'classes-view-all' : 'classes-view-some classes-view-some-initial';
+    }
+    $output[$course_key]['#markup'] = theme('cu_courses_course', $course_vars);
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * Adds theme functions and tempalte files for dashboards
+ */
+function cu_courses_theme(&$existing, $type, $theme, $path) {
+  $registry = array();
+  $template_dir = drupal_get_path('module', 'cu_courses') . '/templates';
+
+  // For lists of courses in course list pages
+  $registry['cu_courses_course'] = array(
+    'template' => 'cu-courses-course',
+    'path' => $template_dir,
+  );
+  // For a single course display
+  $registry['cu_courses_course_single'] = array(
+    'template' => 'cu-courses-course-single',
+    'path' => $template_dir,
+  );
+  // For a single class in course list
+  $registry['cu_courses_class'] = array(
+    'template' => 'cu-courses-class',
+    'path' => $template_dir,
+  );
+  return $registry;
+}
+
+/**
+ * Implements module_preprocess_node().
+ */
+function cu_courses_preprocess_node(&$vars) {
+  // course_list_page
+  if ($vars['node']->type == 'course_list_page') {
+
+    // Simplify node configs
+    $terms = !empty($vars['field_course_list_term']) ? $vars['field_course_list_term'] : NULL;
+
+    $subject = !empty($vars['field_course_list_subject']) ? $vars['field_course_list_subject'] : NULL;
+
+    $range = !empty($vars['field_course_list_range']) ? $vars['field_course_list_range'] : NULL;
+
+    $format = !empty($vars['field_course_list_format']) ? $vars['field_course_list_format'] : NULL;
+
+    $display = !empty($vars['field_course_list_display']) ? $vars['field_course_list_display'] : NULL;
+
+    // Build exposed filters
+    $exposed_filters = array();
+    foreach($vars['field_course_list_filters'] as $filter) {
+      $filter_type = $filter['value'];
+      $exposed_filters[$filter_type] = $filter_type;
+    }
+
+    // Build pre-filters
+    $pre_filters = array();
+    $pre_filters['subject'] = $subject;
+    $pre_filters['format'] = $format;
+
+    // Save body so we can add it back later
+    $body = $vars['content']['body'];
+    // Clear node content
+    $vars['content'] = array();
+    // Add node body
+    $vars['content']['body'] = $body;
+    $vars['content']['body']['#weight'] = 0;
+    // Add exposed filters
+    $vars['content']['filter'] = drupal_get_form('cu_courses_filter_form', $pre_filters, $exposed_filters);
+    $vars['content']['filter']['#weight'] = 5;
+
+
+    $catalog_number = NULL;
+    $nid = $vars['node']->nid;
+    $vars['content']['course_list']['course_list_content'] = cu_courses_list($terms, $subject, $range, $format, $catalog_number, $display, $nid, 'node');
+    $vars['content']['course_list']['#weight'] = 10;
+  }
+
+  // custom_course_list_page
+  if ($vars['node']->type == 'custom_course_list_page') {
+    $nid = $vars['node']->nid;
+    $courses = array();
+    $pre_filters = array();
+
+    foreach ($vars['node']->field_custom_courses_collection[LANGUAGE_NONE] as $custom_course) {
+      $fc_id = $custom_course['value'];
+      $custom_course_fc = field_collection_item_load($fc_id);
+
+      // Simplify field collection configs
+      $term = array(array('value' => $custom_course_fc->field_custom_course_term[LANGUAGE_NONE][0]['value']));
+
+      // Build subject variable just like it was from field_course_list_subject
+      $subject = array(array('value' => $custom_course_fc->field_custom_course_subject[LANGUAGE_NONE][0]['value']));
+      $pre_filters['subject'][]['value'] = $custom_course_fc->field_custom_course_subject[LANGUAGE_NONE][0]['value'];
+
+      $catalog_number = $custom_course_fc->field_custom_course_cat_number[LANGUAGE_NONE][0]['value'];
+
+      $display = !empty($vars['field_course_list_display']) ? $vars['field_course_list_display'] : NULL;
+
+      $courses[] = cu_courses_list($term, $subject, NULL, NULL, $catalog_number, $display, $nid, 'node');
+    }
+    // Save body so we can add it back later
+    $body = $vars['content']['body'];
+    // Clear node content
+    $vars['content'] = array();
+    // Add node body
+    $vars['content']['body'] = $body;
+    $vars['content']['body']['#weight'] = 0;
+    // Add exposed filters
+    // Build exposed filters
+    $exposed_filters = array();
+    foreach($vars['field_course_list_filters'] as $filter) {
+      $filter_type = $filter['value'];
+      $exposed_filters[$filter_type] = $filter_type;
+    }
+
+    $vars['content']['filter'] = drupal_get_form('cu_courses_filter_form', $pre_filters, $exposed_filters);
+    $vars['content']['filter']['#weight'] = 5;
+
+    $vars['content']['course_list']['course_list_content'] = $courses;
+    $vars['content']['course_list']['#weight'] = 10;
+
+    $empty = 1;
+    foreach ($courses as $course) {
+      $course_listing = current($course);
+        if (!empty($course_listing)) {
+          $empty = 0;
+        }
+    }
+    if ($empty) {
+      $vars['content']['no_results']['#markup'] = '<p>There are no results for your query.</p>';
+      $vars['content']['no_results']['#weight'] = 15;
+    }
+  }
+}
+
+/**
+ * Options for exposed filters.
+ */
+function cu_courses_filter_options() {
+  return array(
+    'subject' => 'Subject',
+    'level' => 'Course Level',
+  );
+}
+/**
+ * Course level options for exposed filter.
+ */
+function cu_courses_course_level_options() {
+  return array(
+    'lower' => '1000-2000',
+    'upper' => '3000-4000',
+    'grad_lower' => '5000',
+    'grad_upper' => '6000-8000',
+  );
+}
+
+/**
+ * Helper function to set course level range.
+ */
+function cu_courses_course_level_range($level) {
+  $range = array();
+  $range['lower'] = array (
+    'from' => 1000,
+    'to' => 2999,
+  );
+  $range['upper'] = array (
+    'from' => 3000,
+    'to' => 4999,
+  );
+  $range['grad_lower'] = array (
+    'from' => 5000,
+    'to' => 5999,
+  );
+  $range['grad_upper'] = array (
+    'from' => 6000,
+    'to' => 8999,
+  );
+
+  return $range[$level];
+}
+
+/**
+ * Implements hook_form().
+ *
+ * Exposed filter form.
+ */
+function cu_courses_filter_form($form, &$form_state, $pre_filters, $exposed_filters) {
+
+  $form = array();
+  $form['#prefix'] = '<div class="course-list-page-filter">';
+  $form['#suffix'] = '</div>';
+
+  $show_filters = 0;
+
+  // If subject filter is exposed
+  if (isset($exposed_filters['subject'])) {
+
+    // Only show options selected on node form
+    $all_subjects = cu_class_subject_values();
+    if (!empty($pre_filters['subject'])) {
+      $subjects = array();
+      foreach ($pre_filters['subject'] as $key => $value) {
+        $subjects[$value['value']] = $value['value'];
+      }
+      foreach ($all_subjects as $key => $subject) {
+        if (!isset($subjects[$key])) {
+          unset($all_subjects[$key]);
+        }
+      }
+    }
+    if (count($all_subjects) > 1) {
+      $form['subject'] = array(
+        '#type' => 'select',
+        '#options' => $all_subjects,
+        '#title' => 'Subject',
+        '#empty_option' => '-All-',
+      );
+      if (isset($_GET['subject'])) {
+        $form['subject']['#default_value'] = array(check_plain($_GET['subject']));
+      }
+      $show_filters = 1;
+    }
+  }
+
+  // If format filter is exposed
+  if (isset($exposed_filters['format'])) {
+    $all_formats = cu_class_format_values();
+    if (!empty($pre_filters['format'])) {
+      $formats = array();
+      foreach ($pre_filters['format'] as $key => $value) {
+        $formats[$value['value']] = $value['value'];
+      }
+      foreach ($all_formats as $key => $format) {
+        if (!isset($formats[$key])) {
+          unset($all_formats[$key]);
+        }
+      }
+    }
+    if (count($all_formats) > 1) {
+      $form['format'] = array(
+        '#type' => 'select',
+        '#options' => $all_formats,
+        '#title' => 'Format',
+        '#empty_option' => '-All-',
+      );
+      if (isset($_GET['format'])) {
+        $form['format']['#default_value'] = array(check_plain($_GET['format']));
+      }
+      $show_filters = 1;
+    }
+  }
+
+  // If course level filter is exposed
+  if (isset($exposed_filters['level'])) {
+    $all_levels = cu_courses_course_level_options();
+    if (!empty($pre_filters['level'])) {
+      $levels = array();
+      foreach ($pre_filters['level'] as $key => $value) {
+        $levels[$value['value']] = $value['value'];
+      }
+      foreach ($all_levels as $key => $level) {
+        if (!isset($levels[$key])) {
+          unset($all_levels[$key]);
+        }
+      }
+    }
+    if (count($all_levels) > 1) {
+      $form['level'] = array(
+        '#type' => 'select',
+        '#options' => $all_levels,
+        '#title' => 'Course Level',
+        '#empty_option' => '-All-',
+      );
+      if (isset($_GET['level'])) {
+        $form['level']['#default_value'] = array(check_plain($_GET['level']));
+      }
+      $show_filters = 1;
+    }
+  }
+
+  if ($show_filters == 0) {
+    return array();
+  }
+
+  // Add submit/Filter button
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Filter',
+    '#prefix' => '<div class="form-item form-actions">',
+    '#suffix' => '</div>',
+  );
+
+  // Add reset button
+  $form['reset'] = array(
+  '#type' => 'submit',
+  '#value' => t('Reset'),
+  '#submit' => array('cu_courses_filter_form_reset'),
+  '#prefix' => '<div class="form-item form-actions">',
+  '#suffix' => '</div>',
+);
+  return $form;
+}
+
+/**
+ * Submit function for cu_courses_filter_form().
+ */
+function cu_courses_filter_form_submit($form, &$form_state) {
+  // Get current node
+  $node = menu_get_object();
+  // Get the nid
+  $nid = $node->nid;
+
+  // Get filters if they were submitted
+  foreach (array('subject', 'format', 'level') as $name) {
+    if (!empty($form_state['values'][$name])) {
+      $keys[$name] = $form_state['values'][$name];
+    }
+  }
+  // Build new url with filter parameters
+  $options = array();
+  if (isset($keys)) {
+    $options['query'] = $keys;
+  }
+  // Redirect to new url
+  $form_state['redirect'] = array('node/' . $nid, $options);
+  return;
+}
+
+/**
+ * Reset function for cu_courses_filter_form().
+ */
+function cu_courses_filter_form_reset($form, &$form_state) {
+  // Get current node
+  $node = menu_get_object();
+  // Get the nid
+  $nid = $node->nid;
+  // Redirect to node without any filter settings
+  $form_state['redirect'] = array('node/' . $nid);
+}
+
+/**
+ * Page callback function for term/%/%/course/%/%
+ */
+function cu_courses_course_display($year, $term, $subject, $catalog_number) {
+  $course_query = db_select('cu_course', 'cu_course');
+  $course_query->fields('cu_course', array('course_id', 'catalog_nbr', 'title', 'subject', 'term_id'));
+  $course_query->orderBy('cu_course.subject', 'ASC');
+  $course_query->orderBy('cu_course.catalog_nbr', 'ASC');
+
+  // Get term code from year, term/semester
+  $term_code = cu_courses_translate_to_term_code($year, $term);
+  // Conditions
+  if ($term_code) {
+    $course_query->condition('cu_course.term_id', $term_code, '=');
+  }
+  if ($subject) {
+    $subject = strtoupper($subject);
+    $course_query->condition('cu_course.subject', $subject, '=');
+  }
+  if ($catalog_number) {
+    $course_query->condition('cu_course.catalog_nbr', $catalog_number, '=');
+  }
+
+  $course_query->distinct();
+  $course_query->groupBy('cu_course.course_id');
+
+  $course_results = $course_query->execute()->fetchAllAssoc('course_id');
+
+  foreach ($course_results as $course_key => $course_result) {
+    $course_vars = (array) $course_result;
+
+    $class_query = db_select('cu_class', 'cu_class');
+    $class_query->fields('cu_class', array('class_id', 'title', 'course_id', 'status'));
+
+    $class_query->condition('cu_class.status', 1, '=');
+    $class_query->condition('cu_class.course_id', $course_key, '=');
+
+    // Class values
+
+    // Class section
+    // field_data_field_class_class_section
+    $class_query->join('field_data_field_class_class_section', 'section', 'section.entity_id = cu_class.class_id');
+    $class_query->fields('section', array('field_class_class_section_value'));
+    $class_query->orderBy('section.field_class_class_section_value', 'ASC');
+
+    // Class description
+    // field_data_field_class_ssr_descrlong
+    $class_query->join('field_data_field_class_ssr_descrlong', 'description', 'description.entity_id = cu_class.class_id');
+    $class_query->fields('description', array('field_class_ssr_descrlong_value'));
+
+    // Class instructor
+    // field_data_field_class_ssr_instr_long
+    $class_query->join('field_data_field_class_ssr_instr_long', 'instructor', 'instructor.entity_id = cu_class.class_id');
+    $class_query->fields('instructor', array('field_class_ssr_instr_long_value'));
+
+    // Class location
+    // field_data_field_class_ssr_mtg_loc_long
+    $class_query->join('field_data_field_class_ssr_mtg_loc_long', 'location', 'location.entity_id = cu_class.class_id');
+    $class_query->fields('location', array('field_class_ssr_mtg_loc_long_value'));
+
+    // Class meeting schedule
+    // field_data_field_class_ssr_mtg_sched_long
+    $class_query->join('field_data_field_class_ssr_mtg_sched_long', 'schedule', 'schedule.entity_id = cu_class.class_id');
+    $class_query->fields('schedule', array('field_class_ssr_mtg_sched_long_value'));
+
+    // Class format
+    // field_data_field_class_instruction_mode
+    $class_query->join('field_data_field_class_instruction_mode', 'format', 'format.entity_id = cu_class.class_id');
+    $class_query->fields('format', array('field_class_instruction_mode_value'));
+
+    // Class session
+    // field_data_field_class_session_code
+    $class_query->join('field_data_field_class_session_code', 'session', 'session.entity_id = cu_class.class_id');
+    $class_query->fields('session', array('field_class_session_code_value'));
+
+    $class_results = $class_query->execute()->fetchAllAssoc('class_id');
+
+    // Compare Descriptions
+    // If descriptions change, there should be multiple array items
+    $descriptions = array();
+    foreach ($class_results as $class_key => $class_result) {
+      $encoded = base64_encode($class_result->field_class_ssr_descrlong_value);
+      $descriptions[$encoded] = $class_result->field_class_ssr_descrlong_value;
+    }
+    $unique_descriptions = count($descriptions) > 1 ? 1 : 0;
+
+    foreach ($class_results as $class_key => $class_result) {
+      // If desciptions are shared, remove from class variables
+      if (!$unique_descriptions) {
+        $class_result->field_class_ssr_descrlong_value = NULL;
+      }
+      $course_vars['cu_classes'][$class_key] = (array) $class_result;
+    }
+
+    // If descriptions are shared, add to course variables
+    if (!$unique_descriptions) {
+      $course_vars['description'] = current($descriptions);
+    }
+
+    $output[$course_key]['#markup'] = theme('cu_courses_course_single', $course_vars);
+  }
+
+  // Build Breadcrumbs from referrer value
+  if (isset($_GET['referrer'])) {
+    $parent_nid = check_plain($_GET['referrer']);
+    if ($parent = _cu_courses_get_node_title($parent_nid)) {
+      $breadcrumb = array();
+      $breadcrumb[] = l('Home', '');
+      $breadcrumb[] = l($parent, 'node/' . $parent_nid);
+
+      // Set Breadcrumbs
+      drupal_set_breadcrumb($breadcrumb);
+    }
+  }
+  return $output;
+}
+/**
+ * Title callback function for term/%/%/course/%/%
+ */
+function cu_courses_course_title($year, $term, $subject, $catalog_number) {
+  $course_query = db_select('cu_course', 'cu_course');
+  $course_query->fields('cu_course', array('title', 'course_id', 'catalog_nbr', 'subject', 'term_id'));
+  $term_code = cu_courses_translate_to_term_code($year, $term);
+  if ($term_code) {
+    $course_query->condition('cu_course.term_id', $term_code, '=');
+  }
+  if ($subject) {
+    $subject = strtoupper($subject);
+    $course_query->condition('cu_course.subject', $subject, '=');
+  }
+  if ($catalog_number) {
+    $course_query->condition('cu_course.catalog_nbr', $catalog_number, '=');
+  }
+
+  $course_query->distinct();
+  $course_query->groupBy('cu_course.course_id');
+
+  $course_result = $course_query->execute()->fetchAssoc();
+
+  $title = $course_result['subject'] . ' ' . $course_result['catalog_nbr'] . ' : ' . $course_result['title'];
+  return $title;
+}
+
+/**
+ * Translate a term code to year and semester.
+ */
+function cu_courses_term_code_translate($term_code) {
+  $codes[1] = 'spring';
+  $codes[4] = 'summer';
+  $codes[7] = 'fall';
+  $code = substr($term_code, -1, 1);
+  $term['term'] = $codes[$code];
+  $term['year'] = '20' . substr($term_code, -3, 2);
+  return $term;
+}
+
+/**
+ * Translate year and semester to term code.
+ */
+function cu_courses_translate_to_term_code($year, $term) {
+  $codes['spring'] = 1;
+  $codes['summer'] = 4;
+  $codes['fall'] = 7;
+  $year = substr($year, -2, 2);
+  $term_code = 2 . $year . $codes[$term];
+  return $term_code;
+}
+
+/**
+ * Format meeting time/schedule
+ */
+function cu_courses_meeting_schedule($meeting_time_raw) {
+  // Allowed values not to be formatted
+  $allowed = array(
+    'TBA',
+    'TBD',
+    'tba',
+    'tbd',
+  );
+  if (in_array($meeting_time_raw, $allowed)) {
+    return $meeting_time_raw;
+  }
+  $meeting_time_parts = explode(' ', $meeting_time_raw);
+  // Meeting schedule display
+  foreach ($meeting_time_parts as $key => $part) {
+    // Add spaces to days
+    if (ctype_alpha($part)) {
+      $regex = '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/';
+      $meeting_time_parts[$key] = preg_replace( $regex, ' $1', $part ) . '<br />';
+    }
+    // Convert to 12hour time
+    if (strpos($part, ':') !== FALSE) {
+      $meeting_time_parts[$key] = date('g:i a', strtotime($part));
+    }
+  }
+  return join(' ', $meeting_time_parts);
+}
+
+/**
+ * Helper function to get the node title without loading the whole node object.
+ */
+function _cu_courses_get_node_title($nid) {
+  return db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetchField();
+}
+/**
+ * Helper function to get the first description from an associated class.
+ */
+function _cu_courses_get_course_description($course_id) {
+  $class_query = db_select('cu_class', 'cu_class');
+  $class_query->fields('cu_class', array('class_id', 'course_id', 'status'));
+
+  $class_query->condition('cu_class.status', 1, '=');
+  $class_query->condition('cu_class.course_id', $course_id, '=');
+
+  $class_query->join('field_data_field_class_ssr_descrlong', 'description', 'description.entity_id = cu_class.class_id');
+  $class_query->fields('description', array('field_class_ssr_descrlong_value'));
+
+  $description = $class_query->execute()->fetchField(3);
+  return $description;
+}
+
+/**
+ * Available terms.
+ *
+ * TODO: Get terms from course settings configs.
+ */
+function cu_courses_available_terms() {
+  return array(
+    '2161' => 'Spring 2016',
+    '2164' => 'Summer 2016',
+  );
+}
+
+/**
+ * Course display options - can be displayed in addition to the course title.
+ */
+function cu_courses_display_options() {
+  return array(
+    'description' => 'Course Description',
+    'classes' => 'Classes',
+  );
+}
+
+/**
+ * Implements module_preprocess_entity().
+ *
+ * Custom course list block.
+ */
+function cu_courses_preprocess_entity(&$vars) {
+  $entity_type = $vars['elements']['#entity_type'];
+  $bundle = $vars['elements']['#bundle'];
+  if ($vars['elements']['#bundle'] == 'custom_course_list') {
+    $node = menu_get_object();
+    $nid = $node->nid;
+    $courses = array();
+
+    // Get all collection items and load
+    foreach ($vars['elements']['#entity']->field_custom_courses_collection[LANGUAGE_NONE] as $custom_course) {
+      $fc_id = $custom_course['value'];
+      $custom_course_fc = field_collection_item_load($fc_id);
+
+      // Simplify variables
+      $term = array(array('value' => $custom_course_fc->field_custom_course_term[LANGUAGE_NONE][0]['value']));
+
+      // Build subject variable just like it was from field_course_list_subject
+      $subject = array(array('value' => $custom_course_fc->field_custom_course_subject[LANGUAGE_NONE][0]['value']));
+      $pre_filters['subject'][]['value'] = $custom_course_fc->field_custom_course_subject[LANGUAGE_NONE][0]['value'];
+
+      $catalog_number = $custom_course_fc->field_custom_course_cat_number[LANGUAGE_NONE][0]['value'];
+
+      $display = !empty($vars['field_course_list_display']) ? $vars['field_course_list_display'] : NULL;
+
+      $courses[] = cu_courses_list($term, $subject, $range = NULL, $format = NULL, $catalog_number, $display, $nid, 'block');
+    }
+    /* No body field yet
+      // Save body so we can add it back later
+      //$body = $vars['content']['body'];
+      // Clear node content
+      $vars['content'] = array();
+      // Add node body
+      $vars['content']['body'] = $body;
+      $vars['content']['body']['#weight'] = 0;
+    */
+
+    $vars['content']['course_list']['course_list_content'] = $courses;
+    $vars['content']['course_list']['#weight'] = 10;
+  }
+}
+
+
+/**
+ * Define site permissions in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @param $role
+ *   The role for which the permissions are being requested.
+ *
+ * @return
+ *   An array defining all the permissions for the site.
+ */
+
+function cu_news_bundle_secure_permissions($role) {
+  $permissions = array(
+    'anonymous user' => array(
+      'view any custom_course_list bean',
+    ),
+    'authenticated user' => array(
+      'view any custom_course_list bean',
+    ),
+    'administrator' => array(
+      'create any custom_course_list bean',
+      'create course_list_page content',
+      'create custom_course_list_page content',
+      'delete any course_list_page content',
+      'delete any custom_course_list_page content',
+      'delete any custom_course_list bean',
+      'delete own course_list_page content',
+      'delete own custom_course_list_page content',
+      'edit any custom_course_list_page content',
+      'edit any custom_course_list bean',
+      'edit any custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'view any custom_course_list bean',
+    ),
+    'content_editor' => array(
+      'create any custom_course_list bean',
+      'create course_list_page content',
+      'create custom_course_list_page content',
+      'delete any course_list_page content',
+      'delete any custom_course_list_page content',
+      'delete any custom_course_list bean',
+      'delete own course_list_page content',
+      'delete own custom_course_list_page content',
+      'edit any custom_course_list_page content',
+      'edit any custom_course_list bean',
+      'edit any custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'view any custom_course_list bean',
+    ),
+    'developer' => array(
+      'create any custom_course_list bean',
+      'create course_list_page content',
+      'create custom_course_list_page content',
+      'delete any course_list_page content',
+      'delete any custom_course_list_page content',
+      'delete any custom_course_list bean',
+      'delete own course_list_page content',
+      'delete own custom_course_list_page content',
+      'edit any custom_course_list_page content',
+      'edit any custom_course_list bean',
+      'edit any custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'view any custom_course_list bean',
+    ),
+    'edit_my_content' => array(
+    ),
+    'site_owner' => array(
+      'create any custom_course_list bean',
+      'create course_list_page content',
+      'create custom_course_list_page content',
+      'delete any course_list_page content',
+      'delete any custom_course_list_page content',
+      'delete any custom_course_list bean',
+      'delete own course_list_page content',
+      'delete own custom_course_list_page content',
+      'edit any custom_course_list_page content',
+      'edit any custom_course_list bean',
+      'edit any custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'edit own custom_course_list_page content',
+      'view any custom_course_list bean',
+    ),
+  );
+
+  if (isset($permissions[$role])) {
+    return $permissions[$role];
+  }
+}
