@@ -29,7 +29,7 @@ a.view-more-classes span { background: #007bc8; color: #fff !important; display:
 
 .class-label { display: block; }
 
-.class-data { margin-bottom: 10px; font-size: 85%; }
+.class-data { margin-bottom: 10px; font-size: 80%; }
 
 @media (min-width: 768px) { .express-course-classes .class-label { border: 0; height: 1px; overflow: hidden; padding: 0; position: absolute !important; width: 1px; }
   .class-headers { display: block; }
