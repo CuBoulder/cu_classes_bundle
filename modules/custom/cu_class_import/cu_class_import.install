@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * @file
+ * Install functions for class import module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function cu_class_import_schema() {
+  $schema = array();
+
+  $schema['cu_courses_organizations'] = array(
+    'description' => 'The base table for Organizations contained in LoV service.',
+    'fields' => array(
+      'code' => array(
+        'description' => 'Primary key for Organizations',
+        'type' => 'varchar',
+        'length' => 11,
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => 'Name of Organization',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'readable_value' => array(
+        'description' => 'Human-readable name of Organization',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'parent_org' => array(
+        'description' => 'Name of the Organization one level above the code field',
+        'type' => 'varchar',
+        'length' => 11,
+        'not null' => FALSE,
+      ),
+      'level' => array(
+        'description' => 'Level of depth of code field\'s parent organization',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'status' => array(
+        'description' => 'Whether the organizational code is published or not',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+    ),
+    'primary key' => array('code'),
+  );
+
+  $schema['cu_courses_subjects'] = array(
+    'description' => 'The base table for Subjects contained in LoV service.',
+    'fields' => array(
+      'code' => array(
+        'description' => 'Primary key for Subjects',
+        'type' => 'varchar',
+        'length' => 11,
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => 'Name of Organization',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'readable_value' => array(
+        'description' => 'Human-readable name of Organization',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'parent_org' => array(
+        'description' => 'Name of the Organization one level above the code field',
+        'type' => 'varchar',
+        'length' => 11,
+        'not null' => FALSE,
+      ),
+      'status' => array(
+        'description' => 'Whether the organizational code is published or not',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+    ),
+    'primary key' => array('code'),
+  );
+
+  return $schema;
+}
