@@ -7,15 +7,15 @@
 /**
  * Implements hook_views_default_views().
  */
-function cu_class_views_views_default_views() {
+function cu_class_views_summer_views_default_views() {
   $export = array();
 
   $view = new view();
-  $view->name = 'cu_classes';
+  $view->name = 'cu_classes_summer';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'cu_class';
-  $view->human_name = 'Classes';
+  $view->human_name = 'Classes Summer';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -410,6 +410,5 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['path'] = 'courses/search';
   $export['cu_classes'] = $view;
 
-  
   return $export;
 }

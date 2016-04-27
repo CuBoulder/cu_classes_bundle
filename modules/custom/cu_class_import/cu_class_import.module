@@ -146,14 +146,6 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
-
-  $form['cu_class_import_api_version'] = array(
-    '#type' => 'textfield',
-    '#default_value' => variable_get('cu_class_import_api_version', '2a1'),
-    '#title' => t('Version'),
-    '#description' => t(''),
-  );
-
   $form['cu_class_import_api_username'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_class_import_api_username', ''),
@@ -166,6 +158,20 @@ function class_import_admin_settings() {
     '#default_value' => variable_get('cu_class_import_api_password', ''),
     '#title' => t('API Password'),
     '#description' => t('Provided by UIS'),
+  );
+
+  $form['cu_college_import_api_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
+    '#title' => t('Base URL of Org LoV (Lookup of Value Service)'),
+    '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
+  );
+
+  $form['cu_subject_import_api_url'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root='),
+    '#title' => t('Base URL of Subject LoV (Lookup of Value Service'),
+    '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
   );
 
   $form['cu_class_import_cache_duration'] = array(
@@ -277,6 +283,20 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
+  $form['adv']['cu_class_import_api_version'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_api_version', '2a2'),
+    '#title' => t('Version'),
+    '#description' => t(''),
+  );
+
+  $form['adv']['cu_class_import_use_lov_subjects'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_use_lov_subjects', 0),
+    '#title' => t('Use Dynamic LoV Driven Subject List'),
+    '#description' => t(''),
+  );
+
   return system_settings_form($form);
 }
 
@@ -291,20 +311,39 @@ function cu_class_import_access() {
 /**
  * Process form
  */
-function cu_course_import_form() {
+function cu_course_import_form($form, &$form_state) {
   $institution_options = array(
-    'CUBLD' => t('Boulder'),
-    'CUSPG' => t('Colorado Springs'),
-    'CUDEV' => t('Denver'),
+    'B-CUBLD' => t('Boulder'),
+    'C-CUSPG' => t('Colorado Springs'),
+    'D-CUDEN' => t('Denver'),
   );
 
-  $form['institution'] = array(
-    '#type' => 'select',
-    '#default_value' => '2164',
-    '#title' => t('Institution'),
-    '#options' => $institution_options,
-    '#description' => t(''),
-  );
+  if(variable_get('cu_class_import_use_lov_subjects', 0)){
+    $form['institution'] = array(
+      '#type' => 'select',
+      '#default_value' => variable_get('class_import_current_institution', key($institution_options)),
+      '#title' => t('Institution'),
+      '#options' => $institution_options,
+      '#description' => t(''),
+      '#ajax' => array(
+        // When 'event' occurs, Drupal will perform an ajax request in the
+        // background. Usually the default value is sufficient (eg. change for
+        // select elements), but valid values include any jQuery event,
+        // most notably 'mousedown', 'blur', and 'submit'.
+        // 'event' => 'change',
+        'callback' => 'subjects_dependent_dropdown_callback',
+        'wrapper' => 'dropdown-second-replace',
+      ),
+    );
+  } else {
+    $form['institution'] = array(
+      '#type' => 'select',
+      '#default_value' => variable_get('class_import_current_institution', key($institution_options)),
+      '#title' => t('Institution'),
+      '#options' => $institution_options,
+      '#description' => t(''),
+    );
+  }
 
   $term_options = cu_class_import_get_terms();
 
@@ -313,19 +352,152 @@ function cu_course_import_form() {
     '#default_value' => '2164',
     '#title' => t('Term'),
     '#options' => $term_options,
-    '#description' => t('Terms are available X days before enrollment opens'),
+    '#description' => t('Terms are available some number of days before enrollment opens.  This date is set by the registars and remains an undocumented process and value.'),
   );
 
-  $subject_options = cu_class_import_get_subjects();
+/*
+$form['college'] = array(
+  '#type' => 'select',
+  //'#default_value' => variable_get('class_import_current_subject', ''),
+  '#title' => t('College'),
+  // The entire enclosing div created here gets replaced when dropdown_first
+  // is changed.
+  '#prefix' => '<div id="dropdown-first-replace">',
+  '#suffix' => '</div>',
+  // When the form is rebuilt during ajax processing, the $selected variable
+  // will now have the new value and so the options will change.
+  '#options' => _colleges_get_first_dropdown_options($institution),
+  '#ajax' => array(
+    // When 'event' occurs, Drupal will perform an ajax request in the
+    // background. Usually the default value is sufficient (eg. change for
+    // select elements), but valid values include any jQuery event,
+    // most notably 'mousedown', 'blur', and 'submit'.
+    // 'event' => 'change',
+    'callback' => 'subjects_dependent_dropdown_callback',
+    'wrapper' => 'dropdown-second-replace',
+  ),
+);
+*/
 
-  asort($subject_options);
-  $form['subject'] = array(
-    '#type' => 'select',
-    '#default_value' => variable_get('class_import_current_subject', ''),
-    '#title' => t('Subject'),
-    '#options' => $subject_options,
-    '#description' => t(''),
+  $institution = isset($form_state['values']['institution']) ? $form_state['values']['institution'] : variable_get('class_import_current_institution', key($institution_options));
+  if(variable_get('cu_class_import_use_lov_subjects', 0)){
+    $form['subject'] = array(
+      '#type' => 'select',
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      '#title' => t('Subject'),
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      // The entire enclosing div created here gets replaced when dropdown_first
+      // is changed.
+      '#prefix' => '<div id="dropdown-second-replace">',
+      '#suffix' => '</div>',
+      // When the form is rebuilt during ajax processing, the $selected variable
+      // will now have the new value and so the options will change.
+      '#options' => _subjects_get_second_dropdown_options($institution),
+    );
+  } else {
+    $subjects =  array(
+  'ENVD' => 'ENVD',
+  'ARTF' => 'ARTF',
+  'ARTH' => 'ARTH',
+  'ARTS' => 'ARTS',
+  'JPNS' => 'JPNS',
+  'KREN' => 'KREN',
+  'ANTH' => 'ANTH',
+  'APPM' => 'APPM',
+  'ASIA' => 'ASIA',
+  'ASTR' => 'ASTR',
+  'ATOC' => 'ATOC',
+  'CHEM' => 'CHEM',
+  'CLAS' => 'CLAS',
+  'LATN' => 'LATN',
+  'COML' => 'COML',
+  'EBIO' => 'EBIO',
+  'ECON' => 'ECON',
+  'ENGL' => 'ENGL',
+  'ENVS' => 'ENVS',
+  'ETHN' => 'ETHN',
+  'FILM' => 'FILM',
+  'FREN' => 'FREN',
+  'ITAL' => 'ITAL',
+  'GEOG' => 'GEOG',
+  'GEOL' => 'GEOL',
+  'GRMN' => 'GRMN',
+  'RUSS' => 'RUSS',
+  'SCAN' => 'SCAN',
+  'HIST' => 'HIST',
+  'HONR' => 'HONR',
+  'HUMN' => 'HUMN',
+  'IAFS' => 'IAFS',
+  'IPHY' => 'IPHY',
+  'JWST' => 'JWST',
+  'LING' => 'LING',
+  'MATH' => 'MATH',
+  'MCDB' => 'MCDB',
+  'MUSM' => 'MUSM',
+  'PHIL' => 'PHIL',
+  'PHYS' => 'PHYS',
+  'PSCI' => 'PSCI',
+  'NRSC' => 'NRSC',
+  'PSYC' => 'PSYC',
+  'WRTG' => 'WRTG',
+  'RLST' => 'RLST',
+  'SLHS' => 'SLHS',
+  'SOCY' => 'SOCY',
+  'SPAN' => 'SPAN',
+  'DNCE' => 'DNCE',
+  'THTR' => 'THTR',
+  'WMST' => 'WMST',
+  'ACCT' => 'ACCT',
+  'BADM' => 'BADM',
+  'BCOR' => 'BCOR',
+  'BPOL' => 'BPOL',
+  'CESR' => 'CESR',
+  'ESBM' => 'ESBM',
+  'FNCE' => 'FNCE',
+  'INBU' => 'INBU',
+  'MGMT' => 'MGMT',
+  'MKTG' => 'MKTG',
+  'REAL' => 'REAL',
+  'APRD' => 'APRD',
+  'COMM' => 'COMM',
+  'CMDP' => 'CMDP',
+  'JRNL' => 'JRNL',
+  'MDST' => 'MDST',
+  'LDSP' => 'LDSP',
+  'PRLC' => 'PRLC',
+  'EDUC' => 'EDUC',
+  'LEAD' => 'LEAD',
+  'ASEN' => 'ASEN',
+  'ATLS' => 'ATLS',
+  'CHEN' => 'CHEN',
+  'CSCI' => 'CSCI',
+  'AREN' => 'AREN',
+  'CVEN' => 'CVEN',
+  'ECEN' => 'ECEN',
+  'EMEN' => 'EMEN',
+  'COEN' => 'COEN',
+  'GEEN' => 'GEEN',
+  'HUEN' => 'HUEN',
+  'MCEN' => 'MCEN',
+  'TLEN' => 'TLEN',
+  'LAWS' => 'LAWS',
+  'MUEL' => 'MUEL',
+  'MUSC' => 'MUSC',
+  'MSBX' => 'MSBX',
+  'MSBC' => 'MSBC',
+  'TMUS' => 'TMUS',
+  'HIND' => 'HIND',
   );
+
+  asort($subjects);
+
+    $form['subject'] = array(
+      '#type' => 'select',
+      //'#default_value' => variable_get('class_import_current_subject', ''),
+      '#title' => t('Subject'),
+      '#options' => $subjects,
+    );
+  }
 
   $form['submit_button'] = array(
     '#type' => 'submit',
@@ -334,6 +506,26 @@ function cu_course_import_form() {
 
   return $form;
 }
+
+function subjects_dependent_dropdown_callback($form, $form_state) {
+  return $form['subject'];
+}
+
+function _subjects_get_second_dropdown_options($institution = '') {
+
+  return cu_class_import_get_colleges($institution);
+}
+
+/*
+function subjects_dependent_dropdown_callback($form, $form_state) {
+  return $form['subject'];
+}
+
+function _subjects_get_second_dropdown_options($key = '') {
+
+  return cu_class_import_get_subjects($key);
+}
+*/
 
 /**
  * Process form
@@ -345,8 +537,13 @@ function cu_course_import_form_submit($form, &$form_state) {
   $subject = $form['subject']['#value'];
 
   variable_set('class_import_current_subject', $subject);
+  variable_set('class_import_current_institution', $institution);
 
-  cu_course_import($institution, $term, $subject);
+  // Split institution since value differs in API response.
+  // Only send second part of institution code.
+  $institution = explode('-', $institution);
+
+  cu_course_import($institution[1], $term, $subject);
 
   return '';
 
@@ -468,7 +665,7 @@ function cu_class_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_class_import_curl($institution, $term, $subject, $course_id) {
+function cu_class_import_curl($institution, $term, $subject, $course_id, $instuctor_mode = NULL) {
 
   watchdog('cu_class_import', 'API Request for Course %course_id', array('%course_id' => $course_id), WATCHDOG_INFO);
 
@@ -506,18 +703,16 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
     curl_setopt($curl, CURLOPT_POST, true);
     // This allows us to access the endpoint without verifying the SSL cert.
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
     // Use Basic Auth
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
-    //@TODO:  THIS IS JUST FOR TESTING... we need to loop through each online instructor mode
-    if(variable_get('cu_class_import_online_only', 0)) {
-      $curl_request_body .= '<INSTRUCTION_MODE>OL</INSTRUCTION_MODE>';
+    if ($instuctor_mode) {
+      $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
@@ -537,7 +732,8 @@ function cu_class_import_curl($institution, $term, $subject, $course_id) {
   }
   // Close the curl to free resources
   curl_close($curl);
-  return str_replace('<?xml version="1.0"?>', '', $curl_response);
+
+  return str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $curl_response);
 }
 
 
@@ -674,9 +870,10 @@ function cu_class_import_course_batch_finished($success, $results, $operations) 
 /**
  * process the import
  */
-function cu_class_import($institution, $term, $subject, $course_id, $cache_duration = FALSE) {
+function cu_class_import($institution, $term, $subject, $course_id, $instructor_mode = NULL, $cache_duration = FALSE) {
   //used to unpublish classes as when they are removed
   $classes = array();
+  $brcq_array = array();
   $ignore = FALSE;
 
   // if a specific duration isn't passed, use default
@@ -701,7 +898,15 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
     ->execute();
   }
 
-  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  if(variable_get('cu_class_import_online_only', 0)) {
+    // combine the resposes for each instructor mode
+    $response = cu_class_import_curl($institution, $term, $subject, $course_id, 'OL');
+    dsm(array($response));
+  }
+  else {
+    // get all the insructor modes
+    $response = cu_class_import_curl($institution, $term, $subject, $course_id);
+  }
 
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
@@ -792,12 +997,79 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
           $crse_attr_value_descr = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCR;
           $crse_attr_value_dscrformal = (string) $crse_attribute->CRSE_ATTR_VALUE_DESCRFORMAL;
 
+          if ($crse_attr == 'BRCQ') {
+            $brcq_array[] = $crse_attr_value;
+          }
+
+          //@TODO add $crse_attr_value_descr and $crse_attr_value_dscrformal to cache
+
           //dsm($crse_attr);
           //dsm($crse_attr_value);
           //dsm($crse_attr_descr);
           //dsm($crse_attr_value_dscrformal);
+
         }
-        // check to see if class already exists...
+
+        // format assuming we are creating a new class and format in array
+        // use $class = (object) $values to reuse same set up for both existing and new
+
+        if (variable_get('cu_class_import_as_needs_review', 0)) {
+          $status = -3;
+        } else {
+          $status = 1;
+        }
+
+        // set defaults
+        $values = array(
+          'class_id' => $class_id,
+          'title' => $title,
+          'course_id' => $course_id,
+          'type' => 'class',
+          'status' => $status,
+        );
+
+        $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
+        $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
+        $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
+        $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
+        $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
+        $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
+        $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
+        $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
+        $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
+
+        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+        $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
+        $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
+        $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+
+        $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
+        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+
+        $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
+
+        $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
+        $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
+        $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
+        $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
+
+        $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
+        $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
+
+        // $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
+        // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
+        // expecting format to be 2016-01-08 22:45:45
+        $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d H:i:s');
+
+        $cancel_dt = (string) $class->CANCEL_DT;
+        if ($cancel_dt) {
+          $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
+          $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_date;
+        }
+
+        $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
+
+        // check to see if class already exists and when it was last updated
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
 
         if (!$ignore && $last_updated) {
@@ -812,52 +1084,20 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
             }
           }
           else {
-           // FORMAT THE ENTITY BEING UPDATED
-           // @TODO use $array = (array) $object to reuse same set up for both existing and new
+
+           //
+
            $existing_class = entity_load_single('cu_class', $class_id);
 
-           $existing_class->field_class_crse_id[LANGUAGE_NONE][0]['value'] = $course_id;
-           $existing_class->field_class_course_title_long[LANGUAGE_NONE][0]['value'] = $title;
-           $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] = $subject;
-           $existing_class->field_class_institution[LANGUAGE_NONE][0]['value'] = $institution;
-           $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-           $existing_class->field_class_strm[LANGUAGE_NONE][0]['value'] = $term;
-           $existing_class->field_class_class_section[LANGUAGE_NONE][0]['value'] = $section;
-           $existing_class->field_class_class_nbr[LANGUAGE_NONE][0]['value'] = $class_id;
-           $existing_class->field_class_ssr_descrlong[LANGUAGE_NONE][0]['value'] = $descrlong;
+           $class = (object) $values;
 
-           $existing_class->field_class_enrl_cap[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-           $existing_class->field_class_enrl_tot[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-           $existing_class->field_class_wait_tot[LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-           $existing_class->field_class_enrl_stat[LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
+           dsm($class);
+           dsm($existing_class);
 
-           $existing_class->field_class_session_code[LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-           $existing_class->field_class_units_acad_prog[LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+           // keep status and any other fields we give users control over
+           $class->status = $existing_class->status;
 
-           $existing_class->field_class_ssr_instr_long[LANGUAGE_NONE][0]['value'] = $instructor;
-
-           $existing_class->field_class_start_dt[LANGUAGE_NONE][0]['value'] = $start;
-           $existing_class->field_class_end_dt[LANGUAGE_NONE][0]['value'] = $end;
-           $existing_class->field_class_meeting_time_start[LANGUAGE_NONE][0]['value'] = $start_time;
-           $existing_class->field_class_meeting_time_end[LANGUAGE_NONE][0]['value'] = $end_time;
-
-           $existing_class->field_class_ssr_mtg_sched_long[LANGUAGE_NONE][0]['value'] = $schedule_long;
-           $existing_class->field_class_ssr_mtg_loc_long[LANGUAGE_NONE][0]['value'] = $location_long;
-
-           // $existing_class->field_class_crse_attr[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-           // $existing_class->field_class_crse_attr_value[LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-           // expecting format to be 2016-01-08 22:45:45
-           $existing_class->field_class_last_updated[LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
-
-           //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
-           $cancel_dt = (string) $class->CANCEL_DT;
-           if ($cancel_dt) {
-             $existing_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'] = $cancel_dt;
-           }
-
-           $existing_class->field_class_instruction_mode[LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
-
-           $updated = entity_save('cu_class', $existing_class);
+           $updated = entity_save('cu_class', $class);
            if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
              drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
            }
@@ -866,60 +1106,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
         else {
           // if doesn't exist, add it if it's not in the list to ignore
           if (!$ignore) {
-            if (variable_get('cu_class_import_as_needs_review', 0)) {
-              $status = -3;
-            } else {
-              $status = 1;
-            }
-            $values = array(
-              'class_id' => $class_id,
-              'title' => $title,
-              'course_id' => $course_id,
-              'type' => 'class',
-              'status' => $status,
-            );
 
-            $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
-            $values['field_class_course_title_long'][LANGUAGE_NONE][0]['value'] = $title;
-            $values['field_class_subject'][LANGUAGE_NONE][0]['value'] = $subject;
-            $values['field_class_institution'][LANGUAGE_NONE][0]['value'] = $institution;
-            $values['field_class_catalog_nbr'][LANGUAGE_NONE][0]['value'] = $catalog_nbr;
-            $values['field_class_strm'][LANGUAGE_NONE][0]['value'] = $term;
-            $values['field_class_class_section'][LANGUAGE_NONE][0]['value'] = $section;
-            $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
-            $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
-
-            $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
-            $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
-            $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
-            $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
-
-            $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-            $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
-
-            $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
-
-            $values['field_class_start_dt'][LANGUAGE_NONE][0]['value'] = $start;
-            $values['field_class_end_dt'][LANGUAGE_NONE][0]['value'] = $end;
-            $values['field_class_meeting_time_start'][LANGUAGE_NONE][0]['value'] = $start_time;
-            $values['field_class_meeting_time_end'][LANGUAGE_NONE][0]['value'] = $end_time;
-
-            $values['field_class_ssr_mtg_sched_long'][LANGUAGE_NONE][0]['value'] = $schedule_long;
-            $values['field_class_ssr_mtg_loc_long'][LANGUAGE_NONE][0]['value'] = $location_long;
-
-            // $values['field_class_crse_attr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR;
-            // $values['field_class_crse_attr_value'][LANGUAGE_NONE][0]['value'] = (string) $class->CRSE_ATTR_VALUE;
-            // expecting format to be 2016-01-08 22:45:45
-            $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d h:i:s');
-
-            //@TODO Does CANCEL_DT need to be reformatted... not sure because I can't see them yet
-
-            $cancel_dt = (string) $class->CANCEL_DT;
-            if ($cancel_dt) {
-              $values['field_class_cancel_dt'][LANGUAGE_NONE][0]['value'] = $cancel_dt;
-            }
-
-            $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
             $class = entity_create('cu_class', $values);
             $created = entity_save('cu_class', $class);
@@ -932,7 +1119,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
       }
 
       // remove classes for this course that are no longer returned by API or Primer
-      //  $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
+      // $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
       $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
 
       foreach ($all_classes as $class) {
@@ -958,7 +1145,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $cache_durat
  */
 function cu_course_import($institution, $term, $subject) {
 
-  $response = cu_course_import_curl($institution, $term, $subject, $course_id);
+  $response = cu_course_import_curl($institution, $term, $subject);
   $xml = simplexml_load_string($response);
 
   if (is_object($xml)) {
@@ -1014,7 +1201,7 @@ function cu_course_import($institution, $term, $subject) {
       } // isset
     }
 
-  return $ouput;
+  return $output;
 }
 
 /**
@@ -1053,100 +1240,159 @@ function xml2array_parse($xml){
   return $return;
 }
 
-function cu_class_import_get_subjects() {
-  return array(
-  'ENVD' => 'ENVD',
-  'ARTF' => 'ARTF',
-  'ARTH' => 'ARTH',
-  'ARTS' => 'ARTS',
-  'JPNS' => 'JPNS',
-  'KREN' => 'KREN',
-  'ANTH' => 'ANTH',
-  'APPM' => 'APPM',
-  'ASIA' => 'ASIA',
-  'ASTR' => 'ASTR',
-  'ATOC' => 'ATOC',
-  'CHEM' => 'CHEM',
-  'CLAS' => 'CLAS',
-  'LATN' => 'LATN',
-  'COML' => 'COML',
-  'EBIO' => 'EBIO',
-  'ECON' => 'ECON',
-  'ENGL' => 'ENGL',
-  'ENVS' => 'ENVS',
-  'ETHN' => 'ETHN',
-  'FILM' => 'FILM',
-  'FREN' => 'FREN',
-  'ITAL' => 'ITAL',
-  'GEOG' => 'GEOG',
-  'GEOL' => 'GEOL',
-  'GRMN' => 'GRMN',
-  'RUSS' => 'RUSS',
-  'SCAN' => 'SCAN',
-  'HIST' => 'HIST',
-  'HONR' => 'HONR',
-  'HUMN' => 'HUMN',
-  'IAFS' => 'IAFS',
-  'IPHY' => 'IPHY',
-  'JWST' => 'JWST',
-  'LING' => 'LING',
-  'MATH' => 'MATH',
-  'MCDB' => 'MCDB',
-  'MUSM' => 'MUSM',
-  'PHIL' => 'PHIL',
-  'PHYS' => 'PHYS',
-  'PSCI' => 'PSCI',
-  'NRSC' => 'NRSC',
-  'PSYC' => 'PSYC',
-  'WRTG' => 'WRTG',
-  'RLST' => 'RLST',
-  'SLHS' => 'SLHS',
-  'SOCY' => 'SOCY',
-  'SPAN' => 'SPAN',
-  'DNCE' => 'DNCE',
-  'THTR' => 'THTR',
-  'WMST' => 'WMST',
-  'ACCT' => 'ACCT',
-  'BADM' => 'BADM',
-  'BCOR' => 'BCOR',
-  'BPOL' => 'BPOL',
-  'CESR' => 'CESR',
-  'ESBM' => 'ESBM',
-  'FNCE' => 'FNCE',
-  'INBU' => 'INBU',
-  'MGMT' => 'MGMT',
-  'MKTG' => 'MKTG',
-  'REAL' => 'REAL',
-  'APRD' => 'APRD',
-  'COMM' => 'COMM',
-  'CMDP' => 'CMDP',
-  'JRNL' => 'JRNL',
-  'MDST' => 'MDST',
-  'LDSP' => 'LDSP',
-  'PRLC' => 'PRLC',
-  'EDUC' => 'EDUC',
-  'LEAD' => 'LEAD',
-  'ASEN' => 'ASEN',
-  'ATLS' => 'ATLS',
-  'CHEN' => 'CHEN',
-  'CSCI' => 'CSCI',
-  'AREN' => 'AREN',
-  'CVEN' => 'CVEN',
-  'ECEN' => 'ECEN',
-  'EMEN' => 'EMEN',
-  'COEN' => 'COEN',
-  'GEEN' => 'GEEN',
-  'HUEN' => 'HUEN',
-  'MCEN' => 'MCEN',
-  'TLEN' => 'TLEN',
-  'LAWS' => 'LAWS',
-  'MUEL' => 'MUEL',
-  'MUSC' => 'MUSC',
-  'MSBX' => 'MSBX',
-  'MSBC' => 'MSBC',
-  'TMUS' => 'TMUS',
-  'HIND' => 'HIND',
-  );
+/**
+ * Get colleges from an institution using the LOV service.
+ *
+ * @param string $institution
+ *   - An institutional code from the Colorado university system.
+ *     A list of codes: https://osbtst.dev.cu.edu/All_Cs_Lov_OrgTree
+ *
+ * @param array $options
+ *   - An array of options used to return colleges and subjects under different
+ *     conditions.
+ *       ['return_subjects_display'] -- Return subjects for display purposes
+ *         rather than subject codes.
+ *       ['return_colleges_display'] -- Return colleges for display purposes
+ *         rather than college codes.
+ *
+ * @return array
+ *   - A list of colleges based on institution and display options.
+ */
+function cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array()) {
+  // Get subjects from cache
+  if ($cache = cache_get('cu_class_import_subjects:' . $institution) && !empty($options)) {
+    return $cache->data;
+  }
+  // Setup the cURL request.
+  // Using basic authentication this way, instead of curl_setopt() because
+  // authentication wasn't working with that method.
+  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
+
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$response = curl_exec($curl)) {
+    drupal_set_message('cURL to the College LoV Service failed.', 'error');
+  }
+  // Parse response.
+  curl_close($curl);
+  $p = xml_parser_create();
+  xml_parse_into_struct($p, $response, $values, $index);
+  xml_parser_free($p);
+
+  // Create colleges array structure.
+  $j = 0;
+  $h = 0;
+  $colleges_xml = array();
+  foreach ($values as $value) {
+    if ($value['tag'] == 'CODE') {
+      $colleges_xml[$j]['code'] = $value['value'];
+      $j++;
+    }
+    if ($value['tag'] == 'DESC') {
+      $colleges_xml[$h]['description'] = $value['value'];
+      $h++;
+    }
+  }
+
+  // Create array of colleges to send to get subjects.
+  $colleges = array();
+  foreach ($colleges_xml as $key => $subject) {
+    $colleges[$subject['code']] = $subject['description'];
+  }
+
+  // Sort colleges alphabetically.
+  asort($colleges);
+  return cu_class_import_get_subjects($colleges, $institution, $options);
+}
+
+/**
+ * Get subjects from the LOV service based on passed colleges and institution.
+ *
+ * @param array $colleges
+ *   List of colleges to loop through and get subjects.
+ *
+ * @param string $institution
+ *   The institution the colleges belong to.
+ *
+ * @param array $options
+ *   - An array of options used to return colleges and subjects under different
+ *     conditions.
+ *       ['return_subjects_display'] -- Return subjects for display purposes
+ *         rather than subject codes.
+ *       ['return_colleges_display'] -- Return colleges for display purposes
+ *         rather than college codes.
+ *
+ * @return array
+ *   A list of subjects based on institution and colleges.
+ */
+function cu_class_import_get_subjects($colleges = array(), $institution = 'B-CUBLD', $options = array()) {
+  $subjects = array();
+  $all_subjects = array();
+  $subjects_display = array();
+  $j = 0;
+  $h = 0;
+
+  // Cache results for one day.
+  cache_set('cu_class_import_colleges:' . $institution, $colleges, 'cache', time() + 60 * 60 * 24);
+  if (isset($options['return_colleges_display']) && $options['return_colleges_display'] == TRUE) {
+    return $colleges;
+  }
+  foreach ($colleges as $key => $college) {
+    // Setup the cURL request.
+    // Using basic authentication this way, instead of curl_setopt() because
+    // authentication wasn't working with that method.
+    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root=') . $key);
+
+    // Return the transfer as a string of the values if the curl succeeds.
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+    // Get the data! Also check and see if the curl worked and log the error if it did not.
+    if (!$response = curl_exec($curl)) {
+      drupal_set_message('cURL to the Subject LoV Service failed.', 'error');
+    }
+    curl_close($curl);
+    $p = xml_parser_create();
+    xml_parse_into_struct($p, $response, $subjects, $index);
+    xml_parser_free($p);
+
+    // Loop through subjects and create array structure.
+    foreach ($subjects as $subject) {
+      if ($subject['tag'] == 'CODE') {
+        // Get list of subjects for course import.
+        $all_subjects[$subject['value']] = $subject['value'];
+
+        // Get list of subjects for Views display.
+        $subjects_display[$j]['code'] = $subject['value'];
+        $j++;
+      }
+
+      if ($subject['tag'] == 'DESC') {
+        $subjects_display[$h]['description'] = $subject['value'];
+        $h++;
+      }
+    }
+  }
+  // Merge description and code together for display purposes.
+  $final_subjects_display = array();
+  foreach ($subjects_display as $subject) {
+    $final_subjects_display[$subject['code']] = $subject['description'];
+  }
+  // Sort results alphabetically.
+  asort($all_subjects);
+  asort($final_subjects_display);
+
+  // Cache results for one day.
+  cache_set('cu_class_import_subjects_display:' . $institution, $final_subjects_display, 'cache', time() + 60 * 60 * 24);
+  cache_set('cu_class_import_subjects:' . $institution, $all_subjects, 'cache', time() + 60 * 60 * 24);
+
+  // Return display array if flag is set.
+  if (isset($options['return_subjects_display']) && $options['return_subjects_display'] == TRUE) {
+    return $final_subjects_display;
+  }
+  // Return coded list of subjects.
+  return $all_subjects;
 }
 
 function cu_class_import_entity_view_alter(&$build, $type) {

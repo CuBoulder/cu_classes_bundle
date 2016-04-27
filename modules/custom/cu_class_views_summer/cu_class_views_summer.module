@@ -4,27 +4,57 @@
  * Code for the CU Class Views feature.
  */
 
-include_once 'cu_class_views.features.inc';
+include_once 'cu_class_views_summer.features.inc';
 
-function cu_class_views_menu() {
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function cu_class_views_summer_theme_registry_alter(&$theme_registry) {
+  $module_path = drupal_get_path('module', 'cu_class_views_summer');
+  $theme_registry_copy = $theme_registry;
+  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'cu_class', $module_path);
+  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+  $hooks = array('cu_class');
+  foreach ($hooks as $h) {
+    if (isset($theme_registry[$h]['theme paths'])) {
+      $first_element = array_shift($theme_registry[$h]['theme paths']);
+      array_unshift($theme_registry[$h]['theme paths'], array_shift($theme_registry[$h]['theme paths']), $module_path);
+    }
+  }
+}
+
+function cu_class_views_summer_preprocess_entity(&$vars) {
+  $entity_type = $vars['elements']['#entity_type'];
+  $bundle = $vars['elements']['#bundle'];
+  if (($entity_type == 'cu_class') && ($bundle == 'class')) {
+    if ($vars['view_mode'] == 'short') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__short_summer';
+    }
+    if ($vars['view_mode'] == 'list') {
+      $vars['theme_hook_suggestions'][] = 'cu_class__list_summer';
+    }
+  }
+}
+
+function cu_class_views_summer_menu() {
   $items = array();
   $items['class-views/lookup/%'] = array(
     'title' => 'Course Subjects by College/School',
-    'page callback' => 'cu_class_views_subject_callback',
+    'page callback' => 'cu_class_views_summer_subject_callback',
     'page arguments' => array(3),
     'access callback' => TRUE,
   );
   return $items;
 }
 
-function cu_class_views_block_info() {
+function cu_class_views_summer_block_info() {
   $blocks = array();
   $blocks['course_search_form'] = array(
     'info' => t('Course Search Form'),
   );
   return $blocks;
 }
-function cu_class_views_block_view($delta = '') {
+function cu_class_views_summer_block_view($delta = '') {
   switch ($delta) {
     case 'course_search_form':
 
@@ -42,10 +72,10 @@ function cu_class_views_block_view($delta = '') {
   return $block;
 }
 
-function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
-  if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
+function cu_class_views_summer_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-cu-classes-summer-page') {
     // Add College/School filter
-    $groups = cu_class_views_colleges_schools();
+    $groups = cu_class_views_summer_colleges_schools();
     $options = array();
     $options['all'] = '-None-';
     foreach ($groups as $key => $group) {
@@ -71,7 +101,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     unset($form['#info']['filter-combine']);
     //$combine = $form['#info']['filter-combine'];
     //$form['#info'] = array('filter-combine' => $combine) + $form['#info'];
-    $form['#submit'][] = 'cu_class_views_colleges_schools_filter';
+    $form['#submit'][] = 'cu_class_views_summer_colleges_schools_filter';
 
     // Subject
     $form['field_class_subject_value']['#type'] = 'select';
@@ -106,7 +136,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       '#type' => 'button',
       '#button_type' => 'reset',
       '#value' => 'Reset',
-      '#validate' => array('cu_class_views_form_reset'),
+      '#validate' => array('cu_class_views_summer_form_reset'),
       '#attributes' => array('class' => array('button', 'button-gray')),
     );
     $form['actions']['#prefix'] = '<div class="class-search-actions">';
@@ -117,7 +147,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     // bypass views_exposed_form_validate
     // added to strip altered -None-
     //unset($form['#validate']);
-    $form['#validate'][] = 'cu_class_views_form_views_exposed_validation';
+    $form['#validate'][] = 'cu_class_views_summer_form_views_exposed_validation';
 
     // Adding hidden value so we can tell if form has been submitted or not
     $form['submitted'] = array(
@@ -151,13 +181,13 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
 
 }
 
-function cu_class_views_form_views_exposed_validation($form, &$form_state) {
+function cu_class_views_summer_form_views_exposed_validation($form, &$form_state) {
   if (empty($form_state['values']['college_school_filter'])) {
     //$form_state['values']['college_school_filter'] = 'all';
   }
 }
 
-function cu_class_views_views_pre_render(&$view) {
+function cu_class_views_summer_views_pre_render(&$view) {
   if ($view->name == 'cu_classes') {
 
     // Do not show result count on default view
@@ -185,7 +215,7 @@ function cu_class_views_views_pre_render(&$view) {
   }
 }
 
-function cu_class_views_colleges_schools() {
+function cu_class_views_summer_colleges_schools() {
   $groups = array();
   $groups['arts_and_sciences']['title'] = 'Arts and Sciences';
   $groups['arts_and_sciences']['subjects'] = array(
@@ -307,32 +337,17 @@ function cu_class_views_colleges_schools() {
   $groups['envd']['subjects'] = array(
     'ENVD' => 'ENVD',
   );
-
-  // Putting in Boulder for now since view doesn't have an institution field.
-  // Should add exposed filter to view or make a variable in config form.
-  $institution = 'B-CUBLD';
-
-  if ($cache = cache_get('cu_class_import_colleges:' . $institution)) {
-    $groups = $cache->data;
-  } else {
-    $groups = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_colleges_display' => TRUE));
-  }
-
-  foreach ($groups as $key => $value) {
-    $groups_final[$value]['title'] = $value;
-  }
-
-  asort($groups_final);
-  return $groups_final;
+  ksort($groups);
+  return $groups;
 }
 
-function cu_class_views_colleges_schools_filter($form, $form_state) {
+function cu_class_views_summer_colleges_schools_filter($form, $form_state) {
   if (!empty($form_state['values']['college_school_filter'])) {
     $url_parts = $_GET;
     unset($url_parts['q']);
     $url_parts['college_school'] = $form_state['values']['college_school_filter'];
     $filter = $form_state['values']['college_school_filter'];
-    $groups = cu_class_views_colleges_schools();
+    $groups = cu_class_views_summer_colleges_schools();
     $subjects = array();
     if (isset($groups[$filter]['subjects'])) {
       foreach ($groups[$filter]['subjects'] as $subject) {
@@ -346,17 +361,17 @@ function cu_class_views_colleges_schools_filter($form, $form_state) {
   }
 }
 
-function cu_class_views_form_reset($form, $form_state) {
+function cu_class_views_summer_form_reset($form, $form_state) {
   if ($form_state['values']['op'] == 'Reset') {
     drupal_goto('courses/search');
   }
 }
 
-function cu_class_views_subject_callback($group) {
+function cu_class_views_summer_subject_callback($group) {
   // Get all available subjects
   $all_subjects = cu_class_subject_values();
   // Get all subjects grouped by college/school
-  $grouped_subjects = cu_class_views_colleges_schools();
+  $grouped_subjects = cu_class_views_summer_colleges_schools();
   // Get all subject for the college/school we want
   $single_group_subjects = $grouped_subjects[$group]['subjects'];
   // Remove any items that are not part of the college/school

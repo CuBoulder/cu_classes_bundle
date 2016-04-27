@@ -1,5 +1,7 @@
 <?php
 /**
  * @file
- * Drupal needs this blank file.
+ * Code for the Class Fields feature.
  */
+
+include_once 'cu_class_fields.features.inc';
