@@ -1279,9 +1279,7 @@ function _get_colleges($institution = 'C-CUBLD') {
 
   // Get the data! Also check and see if the curl worked and log the error if it did not.
   if (!$response = curl_exec($curl)) {
-    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-    error_log($error_message, 0);
-    print_r($error_message);
+    drupal_set_message('cURL to the College LoV Service failed.', 'error');
   }
 
   // Parse response.
@@ -1353,9 +1351,7 @@ function _get_departments($colleges) {
 
     // Get the data! Also check and see if the curl worked and log the error if it did not.
     if (!$response = curl_exec($curl)) {
-      $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-      error_log($error_message, 0);
-      print_r($error_message);
+      drupal_set_message('cURL to the College LoV Service failed.', 'error');
     }
     curl_close($curl);
     $p = xml_parser_create();
@@ -1363,7 +1359,6 @@ function _get_departments($colleges) {
     xml_parser_free($p);
 
     // Loop through subjects and create array structure.
-    //dpm($subjects);
     foreach ($subjects as $subject) {
       if ($subject['tag'] == 'CODE') {
         // Get list of subjects for course import.
@@ -1431,9 +1426,7 @@ function _get_subjects($departments) {
 
     // Get the data! Also check and see if the curl worked and log the error if it did not.
     if (!$response = curl_exec($curl)) {
-      $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-      error_log($error_message, 0);
-      print_r($error_message);
+      drupal_set_message('cURL to the College LoV Service failed.', 'error');
     }
     curl_close($curl);
     $p = xml_parser_create();
