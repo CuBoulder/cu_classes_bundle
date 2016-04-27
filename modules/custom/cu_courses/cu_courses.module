@@ -173,6 +173,11 @@ function cu_courses_courses_by_term($term = NULL, $subject = NULL, $range = NULL
     $class_query->join('field_data_field_class_session_code', 'session', 'session.entity_id = cu_class.class_id');
     $class_query->fields('session', array('field_class_session_code_value'));
 
+    // Class topic
+    // field_class_crs_topic_descr
+    $class_query->join('field_data_field_class_crs_topic_descr', 'topic', 'topic.entity_id = cu_class.class_id');
+    $class_query->fields('topic', array('field_class_crs_topic_descr_value'));
+
 
     $class_results = $class_query->execute()->fetchAllAssoc('class_id');
 
