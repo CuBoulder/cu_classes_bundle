@@ -18,7 +18,7 @@
   </p>
 <?php endif; ?>
   <?php if (!empty($cu_classes) && isset($display_options['classes'])): ?>
-    <div class="class-headers">
+    <div class="class-headers" aria-hidden="true" role="presentation">
       <div class="row">
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
           <strong class="class-label">Section</strong>
