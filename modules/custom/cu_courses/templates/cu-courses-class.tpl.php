@@ -7,6 +7,9 @@
     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 class-data">
       <<?php print $heading_tag1; ?> class="class-label">Section</<?php print $heading_tag1; ?>>
       <?php print $field_class_class_section_value; ?>
+      <?php if (isset($field_class_crs_topic_descr_value)): ?>
+        <br /><?php print $field_class_crs_topic_descr_value; ?>
+      <?php endif; ?>
     </div>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 class-data">
       <<?php print $heading_tag2; ?> class="class-label">Instructor</<?php print $heading_tag2; ?>>
