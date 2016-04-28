@@ -1252,10 +1252,8 @@ function cu_class_import_populate_subjects($institution = 'B-CUBLD') {
 
   // Get colleges from Institution.
   $colleges = _get_colleges($institution);
-
   // Get departments from colleges.
   $departments = _get_departments($colleges);
-
   // Get subjects from departments.
   $subjects = _get_subjects($departments);
 
