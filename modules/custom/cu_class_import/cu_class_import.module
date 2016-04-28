@@ -1061,6 +1061,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         // expecting format to be 2016-01-08 22:45:45
         $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d H:i:s');
 
+        $values['field_class_crs_topic_descr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRS_TOPIC_DESCR;
+
+
         $cancel_dt = (string) $class->CANCEL_DT;
         if ($cancel_dt) {
           $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
@@ -1091,8 +1094,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
            $class = (object) $values;
 
-           dsm($class);
-           dsm($existing_class);
+           //dsm($class);
+           //dsm($existing_class);
 
            // keep status and any other fields we give users control over
            $class->status = $existing_class->status;
