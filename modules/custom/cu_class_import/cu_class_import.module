@@ -943,6 +943,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $descrlong = (string) utf8_decode($class->SSR_DESCRLONG);
         $campus_code = (string) $class->CAMPUS;
 
+        $parent_org = cu_class_import_get_subject_parent($subject, $institution);
+        $top_org = cu_class_import_get_subject_top($parent_org);
+
         // Check Elements to Ignore
         // Prepare Session Codes
         $session_code_ids = str_replace(" ", "", variable_get('cu_class_import_session_cd', ''));
@@ -1064,6 +1067,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_crs_topic_descr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRS_TOPIC_DESCR;
         $values['field_class_acad_career'][LANGUAGE_NONE][0]['value'] = $acad_career;
 
+        $values['field_class_subject_parent'][LANGUAGE_NONE][0]['value'] = $parent_org;
+        $values['field_class_subject_top_level'][LANGUAGE_NONE][0]['value'] = $top_org;
 
         $cancel_dt = (string) $class->CANCEL_DT;
         if ($cancel_dt) {
@@ -1577,36 +1582,43 @@ function cu_class_import_org_name_fix($name) {
   // ideal this will eventaully be fixed at the API level by UIS
 
   // use spaces and capitalization when possible to aviod false positives
-  $name = str_ireplace("Arch ", "Architecture ", $name);
-  $name = str_ireplace("Sci ", "Science ", $name);
-  $name = str_ireplace("Ed ", "Education ", $name);
-  $name = str_ireplace("Eng ", "Engineering ", $name);
-  $name = str_ireplace("Engr ", "Engineering ", $name);
-  $name = str_ireplace("Coll ", "College ", $name);
-  $name = str_ireplace("Commncation ", "Communication ", $name);
-  $name = str_ireplace("Prof ", "Professional ", $name);
-  $name = str_ireplace("Pgm ", "Program in ", $name);
+  $name = str_replace("Arch ", "Architecture ", $name);
+  $name = str_replace("Sci ", "Science ", $name);
+  $name = str_replace("Ed ", "Education ", $name);
+  $name = str_replace("Eng ", "Engineering ", $name);
+  $name = str_replace("Engr ", "Engineering ", $name);
+  $name = str_replace("Coll ", "College ", $name);
+  $name = str_replace("Commncation ", "Communication ", $name);
+  $name = str_replace("Prof ", "Professional ", $name);
+  $name = str_replace("Pgm ", "Program in ", $name);
 
   // can't use space because this is at the end of the value
-  $name = str_ireplace("Dvlpmnt", "Development", $name);
-  $name = str_ireplace("Admin", "Administration", $name);
-  $name = str_ireplace("Info", "Information", $name);
+  $name = str_replace("Dvlpmnt", "Development", $name);
+  $name = str_replace("Admin", "Administration", $name);
+  $name = str_replace("Info", "Information", $name);
 
   return $name;
 }
 
 function cu_class_import_get_subject_parent($subject, $institution) {
-  //cu_courses_subjects WHERE code = LIKE B-%
 
-  return $org;
+  if ($institution == 'CUBLD') {
+    $prefix = 'B-%';
+  }
+
+  $parent = db_query('SELECT parent_org FROM {cu_courses_subjects} WHERE code = :code AND parent_org LIKE :prefix', array(':code' => $subject, ':prefix' => $prefix))->fetchField();
+
+  return $parent;
 }
 
 function cu_class_import_get_subject_top($org) {
 
+  do {
+    $count++;
+    $patent_org = db_query('SELECT * FROM {cu_courses_organizations} WHERE code = :code', array(':code' => $org))->fetchObject();
+    //if we need to go up another level, set the new parent as the starting org
+    $org = $patent_org->parent_org;
+  } while ($patent_org->level > 1 || $count == 5);
 
-  // get the parent from cu_courses_organizations
-  //is level = 1?
-  //try another level
-
-  return $org;
+  return $patent_org->code;
 }
