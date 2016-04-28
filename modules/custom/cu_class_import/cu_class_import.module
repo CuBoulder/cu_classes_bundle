@@ -136,7 +136,7 @@ function cu_class_import_filter_settings() {
   return system_settings_form($form);
 }
 
-function class_import_admin_settings() {
+function class_import_admin_settings($form, &$form_state) {
   $form = array();
 
   $form['cu_class_import_api_url'] = array(
@@ -160,18 +160,51 @@ function class_import_admin_settings() {
     '#description' => t('Provided by UIS'),
   );
 
-  $form['cu_college_import_api_url'] = array(
+  $form['lov_service'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('LoV Service Configuration'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['lov_service']['cu_organization_import_api_url'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
+    '#default_value' => variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
     '#title' => t('Base URL of Org LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
   );
 
-  $form['cu_subject_import_api_url'] = array(
+  $form['lov_service']['cu_subject_import_api_url'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root='),
-    '#title' => t('Base URL of Subject LoV (Lookup of Value Service'),
+    '#title' => t('Base URL of Subject LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
+  );
+
+  $institution_options = array(
+    'B-CUBLD' => t('Boulder'),
+    'C-CUSPG' => t('Colorado Springs'),
+    'D-CUDEN' => t('Denver'),
+  );
+
+  $form['lov_service']['cu_class_import_institutions'] = array(
+    '#title' => t('Institutions'),
+    '#type' => 'checkboxes',
+    '#description' => t('Choose the institution you want to import subjects from.'),
+    '#default_value' => variable_get('cu_class_import_institutions'),
+    '#options' => $institution_options,
+  );
+
+  $form['lov_service']['clear_data'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear Subjects Data'),
+    '#submit' => array('_clear_subjects_data'),
+  );
+
+  $form['lov_service']['populate_data'] = array(
+    '#type' => 'submit',
+    '#value' => t('Populate Subjects Data'),
+    '#submit' => array('_populate_subjects_data'),
   );
 
   $form['cu_class_import_cache_duration'] = array(
@@ -305,6 +338,35 @@ function class_import_admin_settings() {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Submit handler for populating subjects data.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function _populate_subjects_data($form, &$form_state) {
+  // Populate subjects for each chosen institution.
+  $institutions = $form_state['values']['cu_class_import_institutions'];
+  foreach ($institutions as $key => $institution) {
+    if (is_string($institution)) {
+      cu_class_import_populate_subjects($key);
+    }
+  }
+  drupal_set_message('Populated subjects data from LoV service.');
+  variable_set('cu_class_import_institutions', $institutions);
+}
+
+/**
+ * Submit handler for clearing subjects data.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function _clear_subjects_data($form, &$form_state) {
+  cu_class_import_truncate_subjects();
+  drupal_set_message('Cleared data relating to subjects.');
 }
 
 /**
@@ -1500,4 +1562,20 @@ function cu_class_import_org_name_fix($name) {
   $name = str_ireplace("Admin", "Administration", $name);
   $name = str_ireplace("Info", "Information", $name);
 
+}
+
+function cu_class_import_get_subject_parent($subject, $institution) {
+  //cu_courses_subjects WHERE code = LIKE B-%
+
+  return $org;
+}
+
+function cu_class_import_get_subject_top($org) {
+
+
+  // get the parent from cu_courses_organizations
+  //is level = 1?
+  //try another level
+
+  return $org;
 }
