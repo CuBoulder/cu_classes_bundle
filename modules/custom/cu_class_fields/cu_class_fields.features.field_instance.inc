@@ -39,7 +39,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 15,
+      'weight' => 16,
     ),
   );
 
@@ -86,7 +86,7 @@ function cu_class_fields_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 16,
+      'weight' => 17,
     ),
   );
 
@@ -682,7 +682,7 @@ function cu_class_fields_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 6,
+      'weight' => 9,
     ),
   );
 
@@ -890,7 +890,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 13,
+      'weight' => 14,
     ),
   );
 
@@ -1164,6 +1164,86 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_subject_parent'.
+  $field_instances['cu_class-class-field_class_subject_parent'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 36,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_subject_parent',
+    'label' => 'Dept/Program',
+    'required' => 0,
+    'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance: 'cu_class-class-field_class_subject_top_level'.
+  $field_instances['cu_class-class-field_class_subject_top_level'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 35,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_subject_top_level',
+    'label' => 'College/School',
+    'required' => 0,
+    'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 6,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_units_acad_prog'.
   $field_instances['cu_class-class-field_class_units_acad_prog'] = array(
     'bundle' => 'class',
@@ -1195,7 +1275,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 14,
+      'weight' => 15,
     ),
   );
 
@@ -1251,6 +1331,8 @@ function cu_class_fields_field_default_field_instances() {
   t('CRSE_ATTR_VALUE_BRCQ');
   t('CRSE_ID');
   t('CRS_TOPIC_DESCR');
+  t('College/School');
+  t('Dept/Program');
   t('END_DT');
   t('ENRL_CAP');
   t('ENRL_STAT');

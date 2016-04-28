@@ -32,13 +32,14 @@ function cu_class_fields_field_group_info() {
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
-      'formatter' => 'collapsible',
+      'label' => 'Additional Values',
       'instance_settings' => array(
-        'description' => '',
-        'classes' => 'group-class-additional-values field-group-fieldset',
         'required_fields' => 1,
         'id' => '',
+        'classes' => 'group-class-additional-values field-group-fieldset',
+        'description' => '',
       ),
+      'formatter' => 'collapsed',
     ),
   );
   $field_groups['group_class_additional_values|cu_class|class|form'] = $field_group;
@@ -54,7 +55,7 @@ function cu_class_fields_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'API Values',
-    'weight' => '5',
+    'weight' => '8',
     'children' => array(
       0 => 'field_class_class_nbr',
       1 => 'field_class_crse_id',
@@ -98,13 +99,14 @@ function cu_class_fields_field_group_info() {
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
-      'formatter' => 'collapsible',
+      'label' => 'Enrollment',
       'instance_settings' => array(
-        'description' => '',
-        'classes' => 'group-class-enrollment field-group-fieldset',
         'required_fields' => 1,
         'id' => '',
+        'classes' => 'group-class-enrollment field-group-fieldset',
+        'description' => '',
       ),
+      'formatter' => 'collapsed',
     ),
   );
   $field_groups['group_class_enrollment|cu_class|class|form'] = $field_group;
@@ -136,16 +138,46 @@ function cu_class_fields_field_group_info() {
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
+      'label' => 'Class Meeting',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'id' => '',
+        'classes' => 'group-class-meeting field-group-fieldset',
+        'description' => '',
+      ),
+      'formatter' => 'collapsed',
+    ),
+  );
+  $field_groups['group_class_meeting|cu_class|class|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_class_subject|cu_class|class|form';
+  $field_group->group_name = 'group_class_subject';
+  $field_group->entity_type = 'cu_class';
+  $field_group->bundle = 'class';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Subject',
+    'weight' => '5',
+    'children' => array(
+      0 => 'field_class_subject_top_level',
+      1 => 'field_class_subject_parent',
+    ),
+    'format_type' => 'fieldset',
+    'format_settings' => array(
       'formatter' => 'collapsible',
       'instance_settings' => array(
         'description' => '',
-        'classes' => 'group-class-meeting field-group-fieldset',
+        'classes' => 'group-class-subject field-group-fieldset',
         'required_fields' => 1,
         'id' => '',
       ),
     ),
   );
-  $field_groups['group_class_meeting|cu_class|class|form'] = $field_group;
+  $field_groups['group_class_subject|cu_class|class|form'] = $field_group;
 
   // Translatables
   // Included for use with string extractors like potx.
@@ -153,6 +185,7 @@ function cu_class_fields_field_group_info() {
   t('Additional Values');
   t('Class Meeting');
   t('Enrollment');
+  t('Subject');
 
   return $field_groups;
 }

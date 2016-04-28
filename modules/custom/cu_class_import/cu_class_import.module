@@ -297,6 +297,13 @@ function class_import_admin_settings() {
     '#description' => t(''),
   );
 
+  $form['adv']['cu_class_import_exclude_ce'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('cu_class_import_exclude_ce', 1),
+    '#title' => t('Include Continuing Ed'),
+    '#description' => t('This will import from all campuses for an instution.  NEEDS WORK to handle Anschutz Medical Campus.'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -709,10 +716,15 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
-    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CAMPUS>BLDR</CAMPUS><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
+    $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
     if ($instuctor_mode) {
       $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
+    }
+
+    if (variable_get('cu_class_import_exclude_ce', 1)) {
+      // @TODO: Add code to handle other institutions
+      $curl_request_body .= '<CAMPUS>BLDR</CAMPUS>';
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
@@ -726,9 +738,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
 
   // Get the data! Also check and see if the curl worked and log the error if it did not.
   if (!$curl_response = curl_exec($curl)) {
-    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
-    error_log($error_message, 0);
-    print_r($error_message);
+    drupal_set_message('cURL to the Course API failed - ' . curl_error($curl), 'error');
   }
   // Close the curl to free resources
   curl_close($curl);
@@ -1465,4 +1475,29 @@ function cu_class_import_cron() {
       $queue->createItem($course);
     }
   }
+}
+
+/**
+ * Helper funciton to correct org names for accessiblity and usiblity
+ */
+function cu_class_import_org_name_fix($name) {
+  // These are a series of string replacements based on what we've seen
+  // ideal this will eventaully be fixed at the API level by UIS
+
+  // use spaces and capitalization when possible to aviod false positives
+  $name = str_ireplace("Arch ", "Architecture ", $name);
+  $name = str_ireplace("Sci ", "Science ", $name);
+  $name = str_ireplace("Ed ", "Education ", $name);
+  $name = str_ireplace("Eng ", "Engineering ", $name);
+  $name = str_ireplace("Engr ", "Engineering ", $name);
+  $name = str_ireplace("Coll ", "College ", $name);
+  $name = str_ireplace("Commncation ", "Communication ", $name);
+  $name = str_ireplace("Prof ", "Professional ", $name);
+  $name = str_ireplace("Pgm ", "Program in ", $name);
+
+  // can't use space because this is at the end of the value
+  $name = str_ireplace("Dvlpmnt", "Development", $name);
+  $name = str_ireplace("Admin", "Administration", $name);
+  $name = str_ireplace("Info", "Information", $name);
+
 }
