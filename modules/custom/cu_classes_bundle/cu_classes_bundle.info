@@ -7,3 +7,4 @@ dependencies[] = cu_course
 dependencies[] = cu_class
 dependencies[] = cu_class_fields
 dependencies[] = cu_class_views_admin
+dependencies[] = cu_class_import
