@@ -919,6 +919,11 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
     if (isset($xml->SEARCH_RESULT->SUBJECTS) && isset($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY)) {
 
+      foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT as $course) {
+        //dsm(xml2array_parse($course));
+        $acad_career = (string) $course->ACAD_CAREER;
+      }
+
       foreach ($xml->SEARCH_RESULT->SUBJECTS->SUBJECT->CLASSES_SUMMARY->children() as $class) {
         //reset ignore to false
         $ignore = FALSE;
@@ -1057,6 +1062,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_last_updated'][LANGUAGE_NONE][0]['value'] = date('Y-m-d H:i:s');
 
         $values['field_class_crs_topic_descr'][LANGUAGE_NONE][0]['value'] = (string) $class->CRS_TOPIC_DESCR;
+        $values['field_class_acad_career'][LANGUAGE_NONE][0]['value'] = $acad_career;
 
 
         $cancel_dt = (string) $class->CANCEL_DT;
