@@ -136,7 +136,7 @@ function cu_class_import_filter_settings() {
   return system_settings_form($form);
 }
 
-function class_import_admin_settings() {
+function class_import_admin_settings($form, &$form_state) {
   $form = array();
 
   $form['cu_class_import_api_url'] = array(
@@ -160,18 +160,51 @@ function class_import_admin_settings() {
     '#description' => t('Provided by UIS'),
   );
 
-  $form['cu_college_import_api_url'] = array(
+  $form['lov_service'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('LoV Service Configuration'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['lov_service']['cu_organization_import_api_url'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('cu_college_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
+    '#default_value' => variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
     '#title' => t('Base URL of Org LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
   );
 
-  $form['cu_subject_import_api_url'] = array(
+  $form['lov_service']['cu_subject_import_api_url'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root='),
-    '#title' => t('Base URL of Subject LoV (Lookup of Value Service'),
+    '#title' => t('Base URL of Subject LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
+  );
+
+  $institution_options = array(
+    'B-CUBLD' => t('Boulder'),
+    'C-CUSPG' => t('Colorado Springs'),
+    'D-CUDEN' => t('Denver'),
+  );
+
+  $form['lov_service']['cu_class_import_institutions'] = array(
+    '#title' => t('Institutions'),
+    '#type' => 'checkboxes',
+    '#description' => t('Choose the institution you want to import subjects from.'),
+    '#default_value' => variable_get('cu_class_import_institutions'),
+    '#options' => $institution_options,
+  );
+
+  $form['lov_service']['clear_data'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear Subjects Data'),
+    '#submit' => array('_clear_subjects_data'),
+  );
+
+  $form['lov_service']['populate_data'] = array(
+    '#type' => 'submit',
+    '#value' => t('Populate Subjects Data'),
+    '#submit' => array('_populate_subjects_data'),
   );
 
   $form['cu_class_import_cache_duration'] = array(
@@ -305,6 +338,35 @@ function class_import_admin_settings() {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Submit handler for populating subjects data.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function _populate_subjects_data($form, &$form_state) {
+  // Populate subjects for each chosen institution.
+  $institutions = $form_state['values']['cu_class_import_institutions'];
+  foreach ($institutions as $key => $institution) {
+    if (is_string($institution)) {
+      cu_class_import_populate_subjects($key);
+    }
+  }
+  drupal_set_message('Populated subjects data from LoV service.');
+  variable_set('cu_class_import_institutions', $institutions);
+}
+
+/**
+ * Submit handler for clearing subjects data.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function _clear_subjects_data($form, &$form_state) {
+  cu_class_import_truncate_subjects();
+  drupal_set_message('Cleared data relating to subjects.');
 }
 
 /**
@@ -1463,6 +1525,246 @@ function cu_class_import_queue_process($course) {
 }
 
 /**
+ * Populate subjects tables using LoV service.
+ *
+ * @param string $institution
+ */
+function cu_class_import_populate_subjects($institution = 'B-CUBLD') {
+  $departments = array();
+  $colleges = array();
+  $subjects = array();
+
+  //@todo Add error checking below.
+
+  // Get colleges from Institution.
+  $colleges = _get_colleges($institution);
+
+  // Get departments from colleges.
+  $departments = _get_departments($colleges);
+
+  // Get subjects from departments.
+  $subjects = _get_subjects($departments);
+
+  watchdog('cu_class_import', 'Imported %count subjects from %institution', array('%count' => count($subjects), '%institution' => $institution));
+}
+
+/**
+ * Get list of colleges based on institution.
+ *
+ * @param string $institution
+ * @return array
+ */
+function _get_colleges($institution = 'C-CUBLD') {
+  // Setup the cURL request.
+  // Using basic authentication this way, instead of curl_setopt() because
+  // authentication wasn't working with that method.
+  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
+
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$response = curl_exec($curl)) {
+    $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+    error_log($error_message, 0);
+    print_r($error_message);
+  }
+
+  // Parse response.
+  curl_close($curl);
+  $p = xml_parser_create();
+  xml_parse_into_struct($p, $response, $values, $index);
+  xml_parser_free($p);
+
+  // Create colleges array structure.
+  $j = 0;
+  $h = 0;
+  $colleges_xml = array();
+  foreach ($values as $value) {
+    if ($value['tag'] == 'CODE') {
+      $colleges_xml[$j]['code'] = $value['value'];
+      $j++;
+    }
+    if ($value['tag'] == 'DESC') {
+      $colleges_xml[$h]['description'] = $value['value'];
+      $h++;
+    }
+  }
+
+  // Create array of colleges to send to get subjects.
+  $colleges = array();
+  $level = 1;
+  foreach ($colleges_xml as $key => $subject) {
+    $colleges[$subject['code']] = $subject['description'];
+
+    // Store values in table.
+    $query = db_merge('cu_courses_organizations')
+      ->key(array('code' => $subject['code']))
+      ->fields(array(
+        'code' => $subject['code'],
+        'value' => $subject['description'],
+        'level' => $level,
+        'parent_org' => $institution,
+        'status' => 1,
+      ))
+      ->execute();
+  }
+
+  // Sort colleges alphabetically.
+  asort($colleges);
+  return $colleges;
+}
+
+/**
+ * Get a list of departments based on colleges.
+ *
+ * @param $colleges
+ * @return array
+ */
+function _get_departments($colleges) {
+  $subjects = array();
+  $all_subjects = array();
+  $subjects_display = array();
+  $j = 0;
+  $h = 0;
+  $level = 2;
+  foreach ($colleges as $key => $college) {
+    // Setup the cURL request.
+    // Using basic authentication this way, instead of curl_setopt() because
+    // authentication wasn't working with that method.
+    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $key);
+
+    // Return the transfer as a string of the values if the curl succeeds.
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+    // Get the data! Also check and see if the curl worked and log the error if it did not.
+    if (!$response = curl_exec($curl)) {
+      $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+      error_log($error_message, 0);
+      print_r($error_message);
+    }
+    curl_close($curl);
+    $p = xml_parser_create();
+    xml_parse_into_struct($p, $response, $subjects, $index);
+    xml_parser_free($p);
+
+    // Loop through subjects and create array structure.
+    //dpm($subjects);
+    foreach ($subjects as $subject) {
+      if ($subject['tag'] == 'CODE') {
+        // Get list of subjects for course import.
+        $all_subjects[$subject['value']] = $subject['value'];
+
+        // Get list of subjects for Views display.
+        $subjects_display[$j]['code'] = $subject['value'];
+        $subjects_display[$j]['organization'] = $key;
+        $j++;
+      }
+
+      if ($subject['tag'] == 'DESC') {
+        $subjects_display[$h]['description'] = $subject['value'];
+        $h++;
+      }
+    }
+  }
+  // Merge description and code together for display purposes.
+  $final_subjects_display = array();
+
+  foreach ($subjects_display as $subject) {
+    $final_subjects_display[$subject['code']] = $subject['description'];
+
+    // Store values in table.
+    $query = db_merge('cu_courses_organizations')
+      ->key(array('code' => $subject['code']))
+      ->fields(array(
+        'code' => $subject['code'],
+        'value' => $subject['description'],
+        'level' => $level,
+        'parent_org' => $subject['organization'],
+        'status' => 1,
+      ))
+      ->execute();
+
+  }
+  // Sort results alphabetically.
+  asort($final_subjects_display);
+
+  return $final_subjects_display;
+
+}
+
+/**
+ * Get list of subjects based on departments.
+ *
+ * @param $departments
+ * @return array
+ */
+function _get_subjects($departments) {
+
+  $subjects = array();
+  $all_subjects = array();
+  $subjects_display = array();
+  $j = 0;
+  $h = 0;
+  foreach ($departments as $key => $college) {
+    // Setup the cURL request.
+    // Using basic authentication this way, instead of curl_setopt() because
+    // authentication wasn't working with that method.
+    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root=') . $key);
+
+    // Return the transfer as a string of the values if the curl succeeds.
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+    // Get the data! Also check and see if the curl worked and log the error if it did not.
+    if (!$response = curl_exec($curl)) {
+      $error_message = 'cURL to the Course API failed - ' . curl_error($curl);
+      error_log($error_message, 0);
+      print_r($error_message);
+    }
+    curl_close($curl);
+    $p = xml_parser_create();
+    xml_parse_into_struct($p, $response, $subjects, $index);
+    xml_parser_free($p);
+
+    // Loop through subjects and create array structure.
+    foreach ($subjects as $subject) {
+      if ($subject['tag'] == 'CODE') {
+
+        // Get list of subjects for Views display.
+        $subjects_display[$j]['code'] = $subject['value'];
+        $subjects_display[$j]['organization'] = $key;
+        $j++;
+      }
+
+      if ($subject['tag'] == 'DESC') {
+        $subjects_display[$h]['description'] = $subject['value'];
+        $h++;
+      }
+    }
+  }
+  // Merge description and code together for display purposes.
+  $final_subjects_display = array();
+  foreach ($subjects_display as $subject) {
+    $final_subjects_display[$subject['code']] = $subject['description'];
+
+    // Store values in table.
+    $query = db_merge('cu_courses_subjects')
+      ->key(array('code' => $subject['code']))
+      ->fields(array(
+        'code' => $subject['code'],
+        'value' => $subject['description'],
+        'parent_org' => $subject['organization'],
+        'status' => 1,
+      ))
+      ->execute();
+  }
+  // Sort results alphabetically.
+  asort($final_subjects_display);
+
+  return $final_subjects_display;
+}
+
+/**
  * Implements hook_cron()
  */
 function cu_class_import_cron() {
@@ -1500,4 +1802,20 @@ function cu_class_import_org_name_fix($name) {
   $name = str_ireplace("Admin", "Administration", $name);
   $name = str_ireplace("Info", "Information", $name);
 
+}
+
+function cu_class_import_get_subject_parent($subject, $institution) {
+  //cu_courses_subjects WHERE code = LIKE B-%
+
+  return $org;
+}
+
+function cu_class_import_get_subject_top($org) {
+
+
+  // get the parent from cu_courses_organizations
+  //is level = 1?
+  //try another level
+
+  return $org;
 }
