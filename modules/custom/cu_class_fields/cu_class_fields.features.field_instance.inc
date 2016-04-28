@@ -10,6 +10,46 @@
 function cu_class_fields_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'cu_class-class-field_class_acad_career'.
+  $field_instances['cu_class-class-field_class_acad_career'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 37,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_acad_career',
+    'label' => 'ACAD_CAREER',
+    'required' => 0,
+    'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 20,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_campus_des'.
   $field_instances['cu_class-class-field_class_campus_des'] = array(
     'bundle' => 'class',
@@ -86,7 +126,7 @@ function cu_class_fields_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 17,
+      'weight' => 18,
     ),
   );
 
@@ -317,7 +357,7 @@ function cu_class_fields_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 18,
+      'weight' => 19,
     ),
   );
 
@@ -1322,6 +1362,7 @@ function cu_class_fields_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('ACAD_CAREER');
   t('CAMPUS_LOVDescr');
   t('CANCEL_DT');
   t('CATALOG_NBR');
