@@ -24,11 +24,12 @@ function cu_class_fields_field_group_info() {
     'weight' => '12',
     'children' => array(
       0 => 'field_class_campus_des',
-      1 => 'field_class_ssr_component',
-      2 => 'field_class_units_acad_prog',
-      3 => 'field_class_cancel_dt',
-      4 => 'field_class_crs_topic_descr',
-      5 => 'field_class_crse_attr_value_brcq',
+      1 => 'field_class_cancel_dt',
+      2 => 'field_class_crs_topic_descr',
+      3 => 'field_class_crse_attr_value_brcq',
+      4 => 'field_class_ssr_component',
+      5 => 'field_class_units_acad_prog',
+      6 => 'field_class_acad_career',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
@@ -62,9 +63,9 @@ function cu_class_fields_field_group_info() {
       2 => 'field_class_institution',
       3 => 'field_class_session_code',
       4 => 'field_class_strm',
-      5 => 'group_class_enrollment',
-      6 => 'group_class_meeting',
-      7 => 'group_class_additional_values',
+      5 => 'group_class_additional_values',
+      6 => 'group_class_enrollment',
+      7 => 'group_class_meeting',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
@@ -163,8 +164,8 @@ function cu_class_fields_field_group_info() {
     'label' => 'Subject',
     'weight' => '5',
     'children' => array(
-      0 => 'field_class_subject_top_level',
-      1 => 'field_class_subject_parent',
+      0 => 'field_class_subject_parent',
+      1 => 'field_class_subject_top_level',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
