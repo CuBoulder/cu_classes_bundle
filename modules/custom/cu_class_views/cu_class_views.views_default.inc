@@ -285,6 +285,15 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_default_classes'] = FALSE;
+  /* Field: Class: INSTITUTION */
+  $handler->display->display_options['fields']['field_class_institution']['id'] = 'field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['table'] = 'field_data_field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['field'] = 'field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['label'] = '';
+  $handler->display->display_options['fields']['field_class_institution']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_institution']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_institution']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_institution']['element_default_classes'] = FALSE;
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';

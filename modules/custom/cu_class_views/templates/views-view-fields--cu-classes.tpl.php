@@ -78,6 +78,13 @@ $meeting_time = join(' ',$meeting_time_parts);
               ?>
             </div>
 
+            <div class="class-institution">
+              <?php
+                  print cu_class_views_institutions($fields['field_class_institution']->content);
+
+              ?>
+            </div>
+
           </div>
 
         </div>
