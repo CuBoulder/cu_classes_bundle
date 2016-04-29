@@ -1070,6 +1070,12 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_subject_parent'][LANGUAGE_NONE][0]['value'] = $parent_org;
         $values['field_class_subject_top_level'][LANGUAGE_NONE][0]['value'] = $top_org;
 
+        $values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE_LOVDescr;
+        $values['field_class_ssr_component'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_COMPONENT;
+
+
+        //SSR_COMPONENT Description?
+
         $cancel_dt = (string) $class->CANCEL_DT;
         if ($cancel_dt) {
           $cancel_date = date('Y-m-d h:i:s', strtotime($cancel_dt));
