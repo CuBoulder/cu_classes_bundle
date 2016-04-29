@@ -3,7 +3,6 @@ core = 7.x
 package = CU-Classes
 dependencies[] = entity
 dependencies[] = views
-;dependencies[] = views_vexp_ajax
 scripts[] = js/cu-class-views.js
 stylesheets[all][] = css/cu-class-views.css
 features[ctools][] = views:views_default:3.0

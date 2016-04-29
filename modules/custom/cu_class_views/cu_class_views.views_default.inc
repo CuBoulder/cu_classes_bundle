@@ -343,6 +343,27 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value']['value'] = '1';
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Class: INSTITUTION (field_class_institution) */
+  $handler->display->display_options['filters']['field_class_institution_value']['id'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['table'] = 'field_data_field_class_institution';
+  $handler->display->display_options['filters']['field_class_institution_value']['field'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_institution_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['operator_id'] = 'field_class_institution_value_op';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['label'] = 'Campus';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['operator'] = 'field_class_institution_value_op';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['identifier'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: College/School (field_class_subject_top_level) */
   $handler->display->display_options['filters']['field_class_subject_top_level_value']['id'] = 'field_class_subject_top_level_value';
   $handler->display->display_options['filters']['field_class_subject_top_level_value']['table'] = 'field_data_field_class_subject_top_level';

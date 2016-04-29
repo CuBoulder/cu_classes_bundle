@@ -14,6 +14,15 @@ function cu_class_views_menu() {
     'page arguments' => array(3),
     'access callback' => TRUE,
   );
+  $items['admin/settings/classes/search'] = array(
+    'title' => 'Class Search Settings',
+    'description' => 'Configure the class search.',
+    'page callback' => 'drupal_get_form',
+    'file' => 'cu_class_views.admin.inc',
+    'page arguments' => array('cu_class_search_settings'),
+    'access arguments' => array('administer class content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
   return $items;
 }
 
@@ -45,7 +54,28 @@ function cu_class_views_block_view($delta = '') {
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
 
-
+    // Campus Filter
+    $campus_options_saved = variable_get('cu_class_search_campus', array());
+    $campus_options = array(
+      'CUBLD' => 'Boulder',
+      'CUSPG' => 'Colorado Springs',
+      'CUDEV' => 'Denver',
+    );
+    foreach ($campus_options as $key => $option) {
+      if (empty($campus_options_saved[$key])) {
+        unset($campus_options[$key]);
+      }
+    }
+    $form['field_class_institution_value']['#type'] = 'select';
+    $form['field_class_institution_value']['#options'] = $campus_options;
+    $form['field_class_institution_value']['#multiple'] = FALSE;
+    unset($form['field_class_institution_value']['#size']);
+    $form['field_class_institution_value']['#empty_value'] = '';
+    if (count($campus_options) < 2) {
+      $form['field_class_institution_value']['#value'] = key($campus_options);
+      $form['field_class_institution_value']['#type'] = 'hidden';
+      drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
+    }
 
     // College/School filter
     $form['field_class_subject_top_level_value']['#type'] = 'select';
