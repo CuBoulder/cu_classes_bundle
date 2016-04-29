@@ -1578,6 +1578,12 @@ function cu_class_import_get_subject_parent($subject, $institution) {
   if ($institution == 'CUBLD') {
     $prefix = 'B-%';
   }
+  if ($institution == 'CUSPG') {
+    $prefix = 'C-%';
+  }
+  if ($institution == 'CUDEN') {
+    $prefix = 'D-%';
+  }
 
   $parent = db_query('SELECT parent_org FROM {cu_courses_subjects} WHERE code = :code AND parent_org LIKE :prefix', array(':code' => $subject, ':prefix' => $prefix))->fetchField();
 
