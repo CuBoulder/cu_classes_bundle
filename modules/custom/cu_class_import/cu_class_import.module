@@ -349,10 +349,16 @@ function class_import_admin_settings($form, &$form_state) {
 function _populate_subjects_data($form, &$form_state) {
   // Populate subjects for each chosen institution.
   $institutions = $form_state['values']['cu_class_import_institutions'];
+  $institution_counter = 0;
   foreach ($institutions as $key => $institution) {
     if (is_string($institution)) {
       cu_class_import_populate_subjects($key);
+      $institution_counter++;
     }
+  }
+  if (empty($institution_counter)) {
+    drupal_set_message('Please choose an institution for import.', 'error');
+    return;
   }
   drupal_set_message('Populated subjects data from LoV service.');
   variable_set('cu_class_import_institutions', $institutions);
@@ -535,10 +541,7 @@ function cu_course_import_form_submit($form, &$form_state) {
     cu_course_import($institution[1], $term, $subject);
   }
 
-
-
   return '';
-
 }
 
 
@@ -1284,25 +1287,23 @@ function cu_class_import_populate_subjects($institution = 'B-CUBLD') {
 
   //@todo Add error checking below.
 
-  // Get colleges from Institution.
-  $colleges = _get_colleges($institution);
+  // Get organizations under Institution.
+  $level = 0;
+  $subjects = _cu_class_import_get_organizations($institution, $level);
 
-  // Get departments from colleges.
-  $departments = _get_departments($colleges);
-
-  // Get subjects from departments.
-  $subjects = _get_subjects($departments);
+  // Get subjects from organizations.
+  //$subjects = _cu_class_import_get_subjects($organizations);
 
   watchdog('cu_class_import', 'Imported %count subjects from %institution', array('%count' => count($subjects), '%institution' => $institution));
 }
 
 /**
- * Get list of colleges based on institution.
+ * Get list of organizations based on institution.
  *
  * @param string $institution
  * @return array
  */
-function _get_colleges($institution = 'C-CUBLD') {
+function _cu_class_import_get_organizations($institution = 'C-CUBLD', $level = 0) {
   // Setup the cURL request.
   // Using basic authentication this way, instead of curl_setopt() because
   // authentication wasn't working with that method.
@@ -1337,9 +1338,15 @@ function _get_colleges($institution = 'C-CUBLD') {
     }
   }
 
+  // If no organization codes, break recursive loop.
+  if (empty($colleges_xml)) {
+    return;
+  }
+
   // Create array of colleges to send to get subjects.
   $colleges = array();
-  $level = 1;
+  $operations = array();
+  $level++;
   foreach ($colleges_xml as $key => $subject) {
     $colleges[$subject['code']] = $subject['description'];
 
@@ -1356,88 +1363,26 @@ function _get_colleges($institution = 'C-CUBLD') {
         'readable_value' => $readable_name,
       ))
       ->execute();
+
+    // Chunk modules into groups.
+      $operations[] = array('_cu_class_import_get_organizations', array($subject['code'], $level));
+    //_cu_class_import_get_organizations($subject['code'], $level);
   }
 
   // Sort colleges alphabetically.
   asort($colleges);
-  return $colleges;
-}
+  _cu_class_import_get_subjects($colleges);
 
-/**
- * Get a list of departments based on colleges.
- *
- * @param $colleges
- * @return array
- */
-function _get_departments($colleges) {
-  $subjects = array();
-  $all_subjects = array();
-  $subjects_display = array();
-  $j = 0;
-  $h = 0;
-  $level = 2;
-  foreach ($colleges as $key => $college) {
-    // Setup the cURL request.
-    // Using basic authentication this way, instead of curl_setopt() because
-    // authentication wasn't working with that method.
-    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $key);
-
-    // Return the transfer as a string of the values if the curl succeeds.
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-
-    // Get the data! Also check and see if the curl worked and log the error if it did not.
-    if (!$response = curl_exec($curl)) {
-      drupal_set_message('cURL to the College LoV Service failed.', 'error');
-    }
-    curl_close($curl);
-    $p = xml_parser_create();
-    xml_parse_into_struct($p, $response, $subjects, $index);
-    xml_parser_free($p);
-
-    // Loop through subjects and create array structure.
-    foreach ($subjects as $subject) {
-      if ($subject['tag'] == 'CODE') {
-        // Get list of subjects for course import.
-        $all_subjects[$subject['value']] = $subject['value'];
-
-        // Get list of subjects for Views display.
-        $subjects_display[$j]['code'] = $subject['value'];
-        $subjects_display[$j]['organization'] = $key;
-        $j++;
-      }
-
-      if ($subject['tag'] == 'DESC') {
-        $subjects_display[$h]['description'] = $subject['value'];
-        $h++;
-      }
-    }
-  }
-  // Merge description and code together for display purposes.
-  $final_subjects_display = array();
-
-  foreach ($subjects_display as $subject) {
-    $final_subjects_display[$subject['code']] = $subject['description'];
-
-    $readable_name = cu_class_import_org_name_fix($subject['description']);
-    // Store values in table.
-    $query = db_merge('cu_courses_organizations')
-      ->key(array('code' => $subject['code']))
-      ->fields(array(
-        'code' => $subject['code'],
-        'value' => $subject['description'],
-        'level' => $level,
-        'parent_org' => $subject['organization'],
-        'status' => 1,
-        'readable_value' => $readable_name,
-      ))
-      ->execute();
-
-  }
-  // Sort results alphabetically.
-  asort($final_subjects_display);
-
-  return $final_subjects_display;
-
+  // Set batch operation and redirect to bundles list when done.
+  $batch = array(
+    'title' => t('Importing course subjects...'),
+    'operations' => $operations,
+    //'finished' => 'profile_module_manager_batch_finished',
+    'init_message' => t('Initializing...'),
+    'progress_message' => t('Operation @current out of @total.'),
+    'error_message' => t('Bundle failed to be enabled.'),
+  );
+  batch_set($batch);
 }
 
 /**
@@ -1446,7 +1391,7 @@ function _get_departments($colleges) {
  * @param $departments
  * @return array
  */
-function _get_subjects($departments) {
+function _cu_class_import_get_subjects($departments) {
 
   $subjects = array();
   $all_subjects = array();
@@ -1487,6 +1432,10 @@ function _get_subjects($departments) {
       }
     }
   }
+
+  if (empty($subjects_display)) {
+    return;
+  }
   // Merge description and code together for display purposes.
   $final_subjects_display = array();
   foreach ($subjects_display as $subject) {
@@ -1494,9 +1443,11 @@ function _get_subjects($departments) {
 
     $readable_name = cu_class_import_org_name_fix($subject['description']);
     // Store values in table.
+    // Make sure to prefix/append subjects with organization code.
     $query = db_merge('cu_courses_subjects')
-      ->key(array('code' => $subject['code']))
+      ->key(array('id' => $subject['organization'] . '-' . $subject['code']))
       ->fields(array(
+        'id' => $subject['organization'] . '-' . $subject['code'],
         'code' => $subject['code'],
         'value' => $subject['description'],
         'parent_org' => $subject['organization'],
@@ -1594,14 +1545,15 @@ function cu_class_import_org_name_fix($name) {
   $name = str_replace("Eng ", "Engineering ", $name);
   $name = str_replace("Engr ", "Engineering ", $name);
   $name = str_replace("Coll ", "College ", $name);
-  $name = str_replace("Commncation ", "Communication ", $name);
   $name = str_replace("Prof ", "Professional ", $name);
   $name = str_replace("Pgm ", "Program in ", $name);
 
   // can't use space because this is at the end of the value
   $name = str_replace("Dvlpmnt", "Development", $name);
   $name = str_replace("Admin", "Administration", $name);
-  $name = str_replace("Info", "Information", $name);
+  $name = str_replace("Applied Sci", "Applied Science", $name);
+  $name = str_replace("Media,Commncation,Info", "Media, Communication and Information", $name);
+  $name = str_replace("Liberal Arts & Sci", "Liberal Arts & Science", $name);
 
   return $name;
 }
