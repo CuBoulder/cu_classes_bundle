@@ -1445,7 +1445,7 @@ function _cu_class_import_get_subjects($departments) {
     // Store values in table.
     // Make sure to prefix/append subjects with organization code.
     $query = db_merge('cu_courses_subjects')
-      ->key(array('code' => $subject['code']))
+      ->key(array('id' => $subject['organization'] . '-' . $subject['code']))
       ->fields(array(
         'id' => $subject['organization'] . '-' . $subject['code'],
         'code' => $subject['code'],
