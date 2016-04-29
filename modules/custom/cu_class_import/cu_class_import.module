@@ -1285,7 +1285,7 @@ function cu_class_import_truncate_subjects() {
  * Get a list of subjects to send to /course/import form.
  */
 function _cu_class_import_subject_options() {
-  $query = db_query("SELECT code, value FROM {cu_courses_subjects}");
+  $query = db_query("SELECT code, CONCAT(code,' - ',value) as value FROM {cu_courses_subjects}");
   $result = $query->fetchAllKeyed();
   return $result;
 }
