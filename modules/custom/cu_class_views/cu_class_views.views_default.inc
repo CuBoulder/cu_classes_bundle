@@ -84,15 +84,6 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_course_title_long']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_course_title_long']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_course_title_long']['element_default_classes'] = FALSE;
-  /* Field: Class: CRSE_ATTR_VALUE */
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['id'] = 'field_class_crse_attr_value';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['table'] = 'field_data_field_class_crse_attr_value';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['field'] = 'field_class_crse_attr_value';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['label'] = '';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['element_type'] = '0';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['element_wrapper_type'] = '0';
-  $handler->display->display_options['fields']['field_class_crse_attr_value']['element_default_classes'] = FALSE;
   /* Field: Class: INSTRUCTION_MODE */
   $handler->display->display_options['fields']['field_class_instruction_mode']['id'] = 'field_class_instruction_mode';
   $handler->display->display_options['fields']['field_class_instruction_mode']['table'] = 'field_data_field_class_instruction_mode';
@@ -218,15 +209,6 @@ function cu_class_views_views_default_views() {
     'thousand_separator' => '',
     'prefix_suffix' => 1,
   );
-  /* Field: Class: CRSE_ATTR */
-  $handler->display->display_options['fields']['field_class_crse_attr']['id'] = 'field_class_crse_attr';
-  $handler->display->display_options['fields']['field_class_crse_attr']['table'] = 'field_data_field_class_crse_attr';
-  $handler->display->display_options['fields']['field_class_crse_attr']['field'] = 'field_class_crse_attr';
-  $handler->display->display_options['fields']['field_class_crse_attr']['label'] = '';
-  $handler->display->display_options['fields']['field_class_crse_attr']['element_type'] = '0';
-  $handler->display->display_options['fields']['field_class_crse_attr']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_class_crse_attr']['element_wrapper_type'] = '0';
-  $handler->display->display_options['fields']['field_class_crse_attr']['element_default_classes'] = FALSE;
   /* Field: Class: SUBJECT */
   $handler->display->display_options['fields']['field_class_subject']['id'] = 'field_class_subject';
   $handler->display->display_options['fields']['field_class_subject']['table'] = 'field_data_field_class_subject';
@@ -276,6 +258,33 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_ssr_mtg_sched_long']['element_default_classes'] = FALSE;
+  /* Field: Class: CRS_TOPIC_DESCR */
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['id'] = 'field_class_crs_topic_descr';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['table'] = 'field_data_field_class_crs_topic_descr';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['field'] = 'field_class_crs_topic_descr';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['label'] = '';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_crs_topic_descr']['element_default_classes'] = FALSE;
+  /* Field: Class: College/School */
+  $handler->display->display_options['fields']['field_class_subject_top_level']['id'] = 'field_class_subject_top_level';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['table'] = 'field_data_field_class_subject_top_level';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['field'] = 'field_class_subject_top_level';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['label'] = '';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_subject_top_level']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_subject_top_level']['element_default_classes'] = FALSE;
+  /* Field: Class: INSTRUCTION_MODE_LOVDescr */
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['id'] = 'field_class_instruction_mode_des';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['table'] = 'field_data_field_class_instruction_mode_des';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['field'] = 'field_class_instruction_mode_des';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['label'] = '';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_default_classes'] = FALSE;
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
@@ -288,21 +297,9 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['sorts']['field_class_class_section_value']['id'] = 'field_class_class_section_value';
   $handler->display->display_options['sorts']['field_class_class_section_value']['table'] = 'field_data_field_class_class_section';
   $handler->display->display_options['sorts']['field_class_class_section_value']['field'] = 'field_class_class_section_value';
-  /* Contextual filter: Class: SUBJECT (field_class_subject) */
-  $handler->display->display_options['arguments']['field_class_subject_value']['id'] = 'field_class_subject_value';
-  $handler->display->display_options['arguments']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
-  $handler->display->display_options['arguments']['field_class_subject_value']['field'] = 'field_class_subject_value';
-  $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['field_class_subject_value']['default_argument_options']['argument'] = 'all';
-  $handler->display->display_options['arguments']['field_class_subject_value']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['field_class_subject_value']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['field_class_subject_value']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['field_class_subject_value']['limit'] = '0';
-  $handler->display->display_options['arguments']['field_class_subject_value']['break_phrase'] = TRUE;
   $handler->display->display_options['filter_groups']['groups'] = array(
     1 => 'AND',
     2 => 'AND',
-    3 => 'AND',
   );
   /* Filter criterion: Global: Combine fields filter */
   $handler->display->display_options['filters']['combine']['id'] = 'combine';
@@ -340,6 +337,33 @@ function cu_class_views_views_default_views() {
     'field_class_subject' => 'field_class_subject',
     'field_class_catalog_nbr' => 'field_class_catalog_nbr',
   );
+  /* Filter criterion: Class: Status */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'cu_class';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value']['value'] = '1';
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Class: College/School (field_class_subject_top_level) */
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['id'] = 'field_class_subject_top_level_value';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['table'] = 'field_data_field_class_subject_top_level';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['field'] = 'field_class_subject_top_level_value';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['expose']['operator_id'] = 'field_class_subject_top_level_value_op';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['expose']['label'] = 'College/School';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['expose']['operator'] = 'field_class_subject_top_level_value_op';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['expose']['identifier'] = 'field_class_subject_top_level_value';
+  $handler->display->display_options['filters']['field_class_subject_top_level_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
@@ -360,37 +384,17 @@ function cu_class_views_views_default_views() {
     3 => 0,
     5 => 0,
   );
-  /* Filter criterion: Class: INSTRUCTION_MODE (field_class_instruction_mode) */
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['id'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['table'] = 'field_data_field_class_instruction_mode';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['field'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['operator'] = 'contains';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['group'] = 2;
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator_id'] = 'field_class_instruction_mode_value_op';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['label'] = 'Format';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['operator'] = 'field_class_instruction_mode_value_op';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['identifier'] = 'field_class_instruction_mode_value';
-  $handler->display->display_options['filters']['field_class_instruction_mode_value']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    8 => 0,
-    12 => 0,
-    6 => 0,
-    10 => 0,
-    16 => 0,
-  );
-  /* Filter criterion: Class: SESSION_CODE (field_class_session_code) */
-  $handler->display->display_options['filters']['field_class_session_code_value']['id'] = 'field_class_session_code_value';
-  $handler->display->display_options['filters']['field_class_session_code_value']['table'] = 'field_data_field_class_session_code';
-  $handler->display->display_options['filters']['field_class_session_code_value']['field'] = 'field_class_session_code_value';
-  $handler->display->display_options['filters']['field_class_session_code_value']['group'] = 2;
-  $handler->display->display_options['filters']['field_class_session_code_value']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['operator_id'] = 'field_class_session_code_value_op';
-  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['label'] = 'Session';
-  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['operator'] = 'field_class_session_code_value_op';
-  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['identifier'] = 'field_class_session_code_value';
-  $handler->display->display_options['filters']['field_class_session_code_value']['expose']['remember_roles'] = array(
+  /* Filter criterion: Class: INSTRUCTION_MODE_LOVDescr (field_class_instruction_mode_des) */
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['id'] = 'field_class_instruction_mode_des_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['table'] = 'field_data_field_class_instruction_mode_des';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['field'] = 'field_class_instruction_mode_des_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['expose']['operator_id'] = 'field_class_instruction_mode_des_value_op';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['expose']['label'] = 'Format';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['expose']['operator'] = 'field_class_instruction_mode_des_value_op';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['expose']['identifier'] = 'field_class_instruction_mode_des_value';
+  $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     6 => 0,
@@ -398,18 +402,14 @@ function cu_class_views_views_default_views() {
     7 => 0,
     3 => 0,
     5 => 0,
+    8 => 0,
+    9 => 0,
   );
-  /* Filter criterion: Class: Status */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'cu_class';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value']['value'] = '1';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'courses/search';
   $export['cu_classes'] = $view;
 
-  
   return $export;
 }
