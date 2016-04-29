@@ -11,7 +11,15 @@
 function cu_class_import_schema() {
   $schema = array();
 
-  $schema['cu_courses_organizations'] = array(
+  $schema = _cu_class_import_initial_db_tables();
+
+  return $schema;
+}
+
+function _cu_class_import_initial_db_tables() {
+  $tables = array();
+
+  $tables['cu_courses_organizations'] = array(
     'description' => 'The base table for Organizations contained in LoV service.',
     'fields' => array(
       'code' => array(
@@ -54,7 +62,7 @@ function cu_class_import_schema() {
     'primary key' => array('code'),
   );
 
-  $schema['cu_courses_subjects'] = array(
+  $tables['cu_courses_subjects'] = array(
     'description' => 'The base table for Subjects contained in LoV service.',
     'fields' => array(
       'id' => array(
@@ -97,5 +105,18 @@ function cu_class_import_schema() {
     'primary key' => array('id'),
   );
 
-  return $schema;
+  return $tables;
+}
+
+/**
+ * Update added db tables.
+ */
+function cu_class_import_update_7001() {
+
+  $tables = _cu_class_import_initial_db_tables();
+  foreach ($tables as $key => $table) {
+    if (!db_table_exists($key)) {
+      db_create_table($key, $table);
+    }
+  }
 }

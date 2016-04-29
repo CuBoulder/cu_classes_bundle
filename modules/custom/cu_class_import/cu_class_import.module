@@ -1433,6 +1433,7 @@ function _cu_class_import_get_subjects($departments) {
     }
   }
 
+  // Break loop if no subjects to add.
   if (empty($subjects_display)) {
     return;
   }
