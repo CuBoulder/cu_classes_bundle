@@ -106,11 +106,11 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     */
 
     $combine = $form['#info']['filter-combine'];
-    // Remove line below and uncomment following two lines to display keyword search
+    // Remove 2 lines below and uncomment following two lines to display keyword search
     unset($form['#info']['filter-combine']);
+    unset($form['combine']);
     //$combine = $form['#info']['filter-combine'];
     //$form['#info'] = array('filter-combine' => $combine) + $form['#info'];
-
     // Subject
     $form['field_class_subject_value']['#type'] = 'select';
     $form['field_class_subject_value']['#options'] = cu_class_views_options_subjects($top_selected);
