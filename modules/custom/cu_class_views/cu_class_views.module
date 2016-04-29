@@ -199,11 +199,21 @@ function cu_class_views_options_top_level() {
   $query->condition('orgs.level', 1, '=');
   $query->condition('orgs.status', 1, '=');
   $results = $query->execute()->fetchAllAssoc('code');
+
+  $institution_codes = array(
+    'B' => 'Boulder Campus',
+    'C' => 'Colorado Springs Campus',
+    'D' => 'Denver Campus',
+  );
+
   foreach ($results as $key => $result) {
     if (isset($available[$key])) {
-      $options[$key] = $result->value;
+      // Get institution code.
+      $code= substr($key, 0, 1);
+      $options[$institution_codes[$code]][$key] = $result->value;
     }
   }
+
   return $options;
 }
 
