@@ -55,6 +55,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_subject_top_level_value']['#empty_value'] = '';
 
     // Ajax for dependent options
+    /*
     $form['field_class_subject_top_level_value']['#ajax'] = array(
 
       'method' => 'replace',
@@ -62,6 +63,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       'callback' => 'cu_class_views_subject_dependent_callback',
       'wrapper' => 'edit-field-class-subject-value',
     );
+    */
 
     $combine = $form['#info']['filter-combine'];
     // Remove line below and uncomment following two lines to display keyword search
