@@ -1545,14 +1545,15 @@ function cu_class_import_org_name_fix($name) {
   $name = str_replace("Eng ", "Engineering ", $name);
   $name = str_replace("Engr ", "Engineering ", $name);
   $name = str_replace("Coll ", "College ", $name);
-  $name = str_replace("Commncation ", "Communication ", $name);
   $name = str_replace("Prof ", "Professional ", $name);
   $name = str_replace("Pgm ", "Program in ", $name);
 
   // can't use space because this is at the end of the value
   $name = str_replace("Dvlpmnt", "Development", $name);
   $name = str_replace("Admin", "Administration", $name);
-  $name = str_replace("Info", "Information", $name);
+  $name = str_replace("Applied Sci", "Applied Science", $name);
+  $name = str_replace("Media,Commncation,Info", "Media, Communication and Information", $name);
+  $name = str_replace("Liberal Arts & Sci", "Liberal Arts & Science", $name);
 
   return $name;
 }
