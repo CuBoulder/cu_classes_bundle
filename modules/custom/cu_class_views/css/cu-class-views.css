@@ -26,6 +26,7 @@
 .view-cu-classes .views-widget-filter-combine label { display: block; }
 .view-cu-classes .views-widget-filter-combine label.icon-closed:before { content: "\f196"; padding-right: 5px; font-family: FontAwesome; }
 .view-cu-classes .views-widget-filter-combine label.icon-open:before { content: "\f147"; padding-right: 5px; font-family: FontAwesome; }
+.view-cu-classes .class-meeting-time, .view-cu-classes .class-institution { font-size: 75%; }
 
 .class-view-column-headers { font-weight: 600; padding: 10px 20px; font-size: 65%; text-transform: uppercase; display: none; color: #333; background-color: #ccc; }
 
