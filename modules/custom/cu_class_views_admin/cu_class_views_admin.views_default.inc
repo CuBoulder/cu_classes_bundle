@@ -40,6 +40,7 @@ function cu_class_views_admin_views_default_views() {
     'title' => 'title',
     'field_class_ssr_instr_long' => 'field_class_ssr_instr_long',
     'field_class_last_updated' => 'field_class_last_updated',
+    'field_class_instruction_mode' => 'field_class_instruction_mode',
     'status' => 'status',
     'course_id' => 'course_id',
   );
@@ -94,8 +95,15 @@ function cu_class_views_admin_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'field_class_instruction_mode' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
     'status' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
@@ -198,6 +206,16 @@ function cu_class_views_admin_views_default_views() {
     'show_remaining_days' => 0,
   );
   $handler->display->display_options['fields']['field_class_last_updated']['field_api_classes'] = TRUE;
+  /* Field: Class: INSTRUCTION_MODE */
+  $handler->display->display_options['fields']['field_class_instruction_mode']['id'] = 'field_class_instruction_mode';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['table'] = 'field_data_field_class_instruction_mode';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['field'] = 'field_class_instruction_mode';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['label'] = 'Mode';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_instruction_mode']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_instruction_mode']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_class_instruction_mode']['field_api_classes'] = TRUE;
   /* Field: Class: Status */
   $handler->display->display_options['fields']['status']['id'] = 'status';
   $handler->display->display_options['fields']['status']['table'] = 'cu_class';
