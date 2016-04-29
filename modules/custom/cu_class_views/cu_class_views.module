@@ -44,39 +44,27 @@ function cu_class_views_block_view($delta = '') {
 
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
-    // Add College/School filter
-    $groups = cu_class_views_colleges_schools();
-    $options = array();
-    $options['all'] = '-None-';
-    foreach ($groups as $key => $group) {
-      $options[$key] = $group['title'];
-    }
-    $form['college_school_filter']['#type'] = 'select';
-    $form['college_school_filter']['#options'] = $options;
-    $form['college_school_filter']['#multiple'] = FALSE;
-    $form['college_school_filter']['#required'] = FALSE;
-    $filter = isset($_GET['college_school']) ? $_GET['college_school'] : NULL;
-    if ($filter) {
-      $form['college_school_filter']['#default_value'] = $filter;
-    }
+
+    // College/School filter
+
+    $form['field_class_subject_top_level_value']['#type'] = 'select';
+    $form['field_class_subject_top_level_value']['#options'] = cu_class_views_options_top_level();
+    $form['field_class_subject_top_level_value']['#multiple'] = FALSE;
+    unset($form['field_class_subject_top_level_value']['#size']);
+    $form['field_class_subject_top_level_value']['#empty_value'] = '';
+
     $combine = $form['#info']['filter-combine'];
-    $info = array(
-      'value' => 'college_school_filter',
-      'label' => 'College/School',
-      'operator' => 'college_school_op',
-    );
-    $form['#info'] = array('filter_college_school' => $info) + $form['#info'];
+
 
     // Remove line below and uncomment following two lines to display keyword search
     unset($form['#info']['filter-combine']);
     //$combine = $form['#info']['filter-combine'];
     //$form['#info'] = array('filter-combine' => $combine) + $form['#info'];
-    $form['#submit'][] = 'cu_class_views_colleges_schools_filter';
 
     // Subject
     $form['field_class_subject_value']['#type'] = 'select';
 
-    $form['field_class_subject_value']['#options'] = cu_class_subject_values();
+    $form['field_class_subject_value']['#options'] = cu_class_views_options_subjects();
     unset($form['field_class_subject_value']['#size']);
     $form['field_class_subject_value']['#multiple'] = FALSE;
     $form['field_class_subject_value']['#empty_value'] = '';
@@ -85,7 +73,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
 
     // Format
     $form['field_class_instruction_mode_value']['#type'] = 'select';
-    $form['field_class_instruction_mode_value']['#options'] = cu_class_format_values();
+    $form['field_class_instruction_mode_value']['#options'] = cu_class_views_options_formats();
     unset($form['field_class_instruction_mode_value']['#size']);
     $form['field_class_instruction_mode_value']['#multiple'] = FALSE;
     $form['field_class_instruction_mode_value']['#empty_value'] = '';
@@ -158,7 +146,7 @@ function cu_class_views_views_pre_render(&$view) {
       unset($view->query->pager->display->handler->handlers['header']['result']);
     }
 
-    $view_headers = '<div class="class-view-column-headers">
+    $view_headers = '<div class="class-view-column-headers" aria-hidden="true" role="presentation">
       <div class="row clearfix">
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
           Class
@@ -175,167 +163,6 @@ function cu_class_views_views_pre_render(&$view) {
       </div>
     </div>';
     $view->attachment_before = $view_headers;
-  }
-}
-
-function cu_class_views_colleges_schools() {
-  $groups = array();
-  $groups['arts_and_sciences']['title'] = 'Arts and Sciences';
-  $groups['arts_and_sciences']['subjects'] = array(
-    'PHIL' => 'PHIL',
-    'HIST' => 'HIST',
-    'IAFS' => 'IAFS',
-    'HUMN' => 'HUMN',
-    'ENGL' => 'ENGL',
-    'ECON' => 'ECON',
-    'JPNS' => 'JPNS',
-    'ANTH' => 'ANTH',
-    'CLAS' => 'CLAS',
-    'DNCE' => 'DNCE',
-    'THTR' => 'THTR',
-    'ATOC' => 'ATOC',
-    'PSYC' => 'PSYC',
-    'FREN' => 'FREN',
-    'RUSS' => 'RUSS',
-    'EBIO' => 'EBIO',
-    'PHYS' => 'PHYS',
-    'SPAN' => 'SPAN',
-    'APPM' => 'APPM',
-    'ARTF' => 'ARTF',
-    'ARTH' => 'ARTH',
-    'ARTS' => 'ARTS',
-    'ASIA' => 'ASIA',
-    'ASTR' => 'ASTR',
-    'CHEM' => 'CHEM',
-    'COML' => 'COML',
-    'ENVS' => 'ENVS',
-    'ETHN' => 'ETHN',
-    'FILM' => 'FILM',
-    'FREN' => 'FREN',
-    'GEOG' => 'GEOG',
-    'GEOL' => 'GEOL',
-    'GRMN' => 'GRMN',
-    'HIST' => 'HIST',
-    'HONR' => 'HONR',
-    'IPHY' => 'IPHY',
-    'ITAL' => 'ITAL',
-    'JWST' => 'JWST',
-    'KREN' => 'KREN',
-    'LATN' => 'LATN',
-    'LING' => 'LING',
-    'MATH' => 'MATH',
-    'MCDB' => 'MCDB',
-    'MUSM' => 'MUSM',
-    'NRSC' => 'NRSC',
-    'PHIL' => 'PHIL',
-    'PHYS' => 'PHYS',
-    'PSCI' => 'PSCI',
-    'PSYC' => 'PSYC',
-    'RLST' => 'RLST',
-    'SCAN' => 'SCAN',
-    'SLHS' => 'SLHS',
-    'SOCY' => 'SOCY',
-    'SPAN' => 'SPAN',
-    'WMST' => 'WMST',
-    'WRTG' => 'WRTG',
-    'HIND' => 'HIND',
-  );
-  $groups['business']['title'] = 'Business';
-  $groups['business']['subjects'] = array(
-    'ACCT' => 'ACCT',
-    'BADM' => 'BADM',
-    'BCOR' => 'BCOR',
-    'BPOL' => 'BPOL',
-    'CESR' => 'CESR',
-    'ESBM' => 'ESBM',
-    'FNCE' => 'FNCE',
-    'INBU' => 'INBU',
-    'MGMT' => 'MGMT',
-    'MKTG' => 'MKTG',
-    'REAL' => 'REAL',
-  );
-  $groups['education']['title'] = 'Education';
-  $groups['education']['subjects'] = array(
-    'EDUC' => 'EDUC',
-    'LEAD' => 'LEAD',
-  );
-  $groups['engineering']['title'] = 'Engineering and Applied Sciences';
-  $groups['engineering']['subjects'] = array(
-    'AREN' => 'AREN',
-    'ASEN' => 'ASEN',
-    'ATLS' => 'ATLS',
-    'BMEN' => 'BMEN',
-    'CHEN' => 'CHEN',
-    'COEN' => 'COEN',
-    'CSCI' => 'CSCI',
-    'CVEN' => 'CVEN',
-    'ECEN' => 'ECEN',
-    'EHON' => 'EHON',
-    'EMEN' => 'EMEN',
-    'GEEN' => 'GEEN',
-    'HUEN' => 'HUEN',
-    'MCEN' => 'MCEN',
-    'MCEN' => 'MCEN',
-    'TLEN' => 'TLEN',
-  );
-  $groups['law']['title'] = 'Law';
-  $groups['law']['subjects'] = array(
-    'LAWS' => 'LAWS',
-  );
-  $groups['media']['title'] = 'Media, Communication & Information';
-  $groups['media']['subjects'] = array(
-    'APRD' => 'APRD',
-    'CMDP' => 'CMDP',
-    'COMM' => 'COMM',
-    'JRNL' => 'JRNL',
-    'MDST' => 'MDST',
-  );
-  $groups['music']['title'] = 'Music';
-  $groups['music']['subjects'] = array(
-    'MUEL' => 'MUEL',
-    'MUSC' => 'MUSC',
-    'TMUS' => 'TMUS',
-  );
-  $groups['envd']['title'] = 'Environmental Design';
-  $groups['envd']['subjects'] = array(
-    'ENVD' => 'ENVD',
-  );
-
-  // Putting in Boulder for now since view doesn't have an institution field.
-  // Should add exposed filter to view or make a variable in config form.
-  $institution = 'B-CUBLD';
-
-  if ($cache = cache_get('cu_class_import_colleges:' . $institution)) {
-    $groups = $cache->data;
-  } else {
-    $groups = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_colleges_display' => TRUE));
-  }
-
-  foreach ($groups as $key => $value) {
-    $groups_final[$value]['title'] = $value;
-  }
-
-  asort($groups_final);
-  return $groups_final;
-}
-
-function cu_class_views_colleges_schools_filter($form, $form_state) {
-  if (!empty($form_state['values']['college_school_filter'])) {
-    $url_parts = $_GET;
-    unset($url_parts['q']);
-    $url_parts['college_school'] = $form_state['values']['college_school_filter'];
-    $filter = $form_state['values']['college_school_filter'];
-    $groups = cu_class_views_colleges_schools();
-    $subjects = array();
-    if (isset($groups[$filter]['subjects'])) {
-      foreach ($groups[$filter]['subjects'] as $subject) {
-        $subjects[] = $subject;
-      }
-    }
-    $url = 'courses/search/' . join(',', $subjects);
-    if (empty($_GET['college_school'])) {
-      drupal_goto($url, array('query' => $url_parts));
-    }
   }
 }
 
@@ -376,4 +203,110 @@ function cu_class_views_theme_registry_alter(&$theme_registry) {
       array_unshift($theme_registry[$h]['theme paths'], array_shift($theme_registry[$h]['theme paths']), $module_path);
     }
   }
+}
+
+function cu_class_views_options_top_level() {
+  $available = cu_class_views_available_orgs();
+  $options = array();
+  $query = db_select('cu_courses_organizations', 'orgs');
+  $query->fields('orgs', array('code', 'value', 'readable_value', 'level', 'status'));
+  $query->orderBy('orgs.value', 'ASC');
+  $query->condition('orgs.level', 1, '=');
+  $query->condition('orgs.status', 1, '=');
+  $results = $query->execute()->fetchAllAssoc('code');
+  foreach ($results as $key => $result) {
+    if (isset($available[$key])) {
+      $options[$key] = $result->value;
+    }
+  }
+  return $options;
+}
+
+function cu_class_views_available_orgs() {
+  $options = array();
+  $query = db_select('field_data_field_class_subject_top_level', 'orgs');
+  $query->fields('orgs', array('field_class_subject_top_level_value'));
+  $query->condition('orgs.field_class_subject_top_level_value', 'NULL', '!=');
+  $query->distinct();
+  $query->groupBy('orgs.field_class_subject_top_level_value');
+  $results = $query->execute()->fetchAllAssoc('field_class_subject_top_level_value');
+  foreach ($results as $key => $result) {
+    $options[$key] = $key;
+  }
+  return $options;
+}
+
+function cu_class_views_options_subjects($parent = NULL) {
+  $options = array();
+  $available = cu_class_views_available_subjects();
+  $query = db_select('cu_courses_subjects', 'subjects');
+  $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status'));
+  $query->orderBy('subjects.value', 'ASC');
+  $query->condition('subjects.status', 1, '=');
+  $results = $query->execute()->fetchAllAssoc('code');
+  foreach ($results as $key => $result) {
+    if (isset($available[$key])) {
+      $options[$key] = $result->value;
+    }
+  }
+  return $options;
+}
+
+function cu_class_views_available_subjects() {
+  $options = array();
+  $query = db_select('field_data_field_class_subject', 'subjects');
+  $query->fields('subjects', array('field_class_subject_value'));
+  $query->distinct();
+  $query->groupBy('subjects.field_class_subject_value');
+  $results = $query->execute()->fetchAllAssoc('field_class_subject_value');
+  foreach ($results as $key => $result) {
+    $options[$key] = $key;
+  }
+  return $options;
+}
+
+
+
+function cu_class_views_options_formats() {
+  $available_formats = cu_class_views_available_formats();
+  $options = array();
+  $query = db_select('field_data_field_class_instruction_mode', 'mode');
+  $query->fields('mode', array('field_class_instruction_mode_value'));
+  $query->distinct();
+  $query->groupBy('mode.field_class_instruction_mode_value');
+  $results = $query->execute()->fetchAllAssoc('field_class_instruction_mode_value');
+  foreach ($results as $key => $result) {
+    if (isset($available_formats[$key])) {
+      $options[$key] = $available_formats[$key];
+    }
+
+  }
+  return $options;
+}
+
+function cu_class_views_available_formats($code = NULL) {
+  $formats = array(
+    'HY' => 'Hybrid',
+    'OL' => 'Online',
+    'OS' => 'Online, self-paced',
+    'OT' => 'Online, term-based',
+    'P' => 'On Campus',
+  );
+  if ($code) {
+    return $formats[$code];
+  }
+  return $formats;
+}
+
+function cu_class_views_get_course_title($class_id) {
+  $query = db_select('cu_course', 'course');
+  $query->fields('course', array('course_id', 'title'));
+  $query->join('cu_class', 'class', 'class.course_id = course.course_id');
+  $query->fields('class', array('class_id', 'course_id'));
+  $query->condition('class.class_id', $class_id, '=');
+  $query->distinct();
+  $query->groupBy('course.title');
+  $results = $query->execute()->fetchAssoc();
+
+  return $results['title'];
 }

@@ -11,15 +11,6 @@
 
 .class-wrapper { border-bottom: 1px solid #e7e7e7; }
 
-.class-row-wrapper { padding: 20px 0 10px; border-top: 1px solid #e7e7e7; border-bottom: 1px solid #e7e7e7; margin-bottom: -1px; }
-.class-row-wrapper .class-title-group { display: -webkit-flex; /* Safari */ display: flex; -webkit-flex-direction: column; flex-direction: column; margin-bottom: 10px; }
-.class-row-wrapper .class-title-group .class-title { -webkit-order: 2; order: 2; margin: 0; padding: 5px 0; }
-.class-row-wrapper .class-title-group .class-number { -webkit-order: 1; order: 1; margin: 0; padding: 0; }
-.class-row-wrapper .class-title-group .class-section { -webkit-order: 3; order: 3; margin: 0; padding: 0; text-transform: uppercase; font-size: 75%; color: #757575; }
-.class-row-wrapper h2.class-title { margin: 0; font-size: 110%; font-weight: 400 !important; color: #333; }
-.class-row-wrapper h3.class-number { margin: 0; font-size: 150%; font-weight: 900 !important; text-transform: uppercase; }
-.class-row-wrapper h3.class-format { margin: 0; font-size: 100%; color: #bbb; }
-
 @media screen and (min-width: 768) { .class-row-wrapper { padding: 20px 0; } }
 .class-wrapper h2.class-title { font-weight: 400 !important; }
 .class-wrapper .class-content { padding: 10px; }

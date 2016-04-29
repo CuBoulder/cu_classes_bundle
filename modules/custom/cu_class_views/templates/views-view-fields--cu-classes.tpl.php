@@ -1,9 +1,15 @@
 <?php
-
 // Create class title
+$class_id = $fields['class_id']->raw;
+$course_title = cu_class_views_get_course_title($class_id);
 $class_title = array();
-$class_title[] = '<h2 class="class-title">' .  html_entity_decode($fields['field_class_course_title_long']->content) . '</h2>';
-$class_title[] = '<h3 class="class-number">' .  $fields['field_class_subject']->content . ' ' . $fields['field_class_catalog_nbr']->content . '</h3>';
+
+$course_title_array[] = '<span>' . $fields['field_class_subject']->content . '</span>';
+$course_title_array[] = $fields['field_class_catalog_nbr']->content;
+$course_title_array[] = ':';
+$course_title_array[] = html_entity_decode($course_title);
+$class_title[] = '<h2 class="class-title">' . join(' ', $course_title_array)  . '</h2>';
+//$class_title[] = '<h3 class="class-number">' .  $fields['field_class_subject']->content . ' ' . $fields['field_class_catalog_nbr']->content . '</h3>';
 $section_number = sprintf("%03s", $fields['field_class_class_section']->content);
 $topic = isset($fields['field_class_crs_topic_descr']->content) ? $fields['field_class_crs_topic_descr']->content : '';
 $class_title[] =  '<h3 class="class-section">Section ' . $section_number . '<br />' . $topic . '</h3>';
@@ -40,7 +46,7 @@ if ($fields['field_class_crse_attr']->content == 'BCRQ') {
 }
 
 
-$format = cu_class_format_translate($fields['field_class_instruction_mode']->content);
+$format = cu_class_views_available_formats($fields['field_class_instruction_mode']->content);
 
 // Meeting time
 $meeting_time_raw = $fields['field_class_ssr_mtg_sched_long']->content;
