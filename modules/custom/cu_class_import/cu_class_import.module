@@ -201,8 +201,14 @@ function class_import_admin_settings($form, &$form_state) {
     '#submit' => array('_clear_subjects_data'),
   );
 
+  // Disable importing of subjects if API credentials are not present.
+  $populate_disabled = FALSE;
+  if (variable_get('cu_class_import_api_username', '') === '' || variable_get('cu_class_import_api_password', '') === '') {
+    $populate_disabled = TRUE;
+  }
   $form['lov_service']['populate_data'] = array(
     '#type' => 'submit',
+    '#disabled' => $populate_disabled,
     '#value' => t('Populate Subjects Data'),
     '#submit' => array('_populate_subjects_data'),
   );
