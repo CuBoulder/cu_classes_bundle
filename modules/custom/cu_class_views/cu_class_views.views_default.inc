@@ -285,6 +285,15 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_instruction_mode_des']['element_default_classes'] = FALSE;
+  /* Field: Class: INSTITUTION */
+  $handler->display->display_options['fields']['field_class_institution']['id'] = 'field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['table'] = 'field_data_field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['field'] = 'field_class_institution';
+  $handler->display->display_options['fields']['field_class_institution']['label'] = '';
+  $handler->display->display_options['fields']['field_class_institution']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_institution']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_institution']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_institution']['element_default_classes'] = FALSE;
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
@@ -343,6 +352,27 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value']['value'] = '1';
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Class: INSTITUTION (field_class_institution) */
+  $handler->display->display_options['filters']['field_class_institution_value']['id'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['table'] = 'field_data_field_class_institution';
+  $handler->display->display_options['filters']['field_class_institution_value']['field'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_institution_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['operator_id'] = 'field_class_institution_value_op';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['label'] = 'Campus';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['operator'] = 'field_class_institution_value_op';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['identifier'] = 'field_class_institution_value';
+  $handler->display->display_options['filters']['field_class_institution_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: College/School (field_class_subject_top_level) */
   $handler->display->display_options['filters']['field_class_subject_top_level_value']['id'] = 'field_class_subject_top_level_value';
   $handler->display->display_options['filters']['field_class_subject_top_level_value']['table'] = 'field_data_field_class_subject_top_level';

@@ -11,7 +11,8 @@
               <div class="class-section">
                 <h3>Section</h3>
                 <?php print sprintf("%03s", $content['field_class_class_section'][0]['#markup']); ?>
-                <?php if(!empty($content['field_class_crs_topic_descr'][0]['#markup'])): ?>
+                <?php
+                  if(!empty($content['field_class_crs_topic_descr'][0]['#markup'])): ?>
                   <br /><?php print $content['field_class_crs_topic_descr'][0]['#markup']; ?>
 
                 <?php endif; ?>
@@ -53,6 +54,12 @@
             <div class="class-section">
               <h3>Location</h3>
               <?php print render($content['field_class_ssr_mtg_loc_long']); ?>
+            </div>
+          <?php endif; ?>
+          <?php if(!empty($content['field_class_institution'][0]['#markup'])): ?>
+            <div class="class-section">
+              <h3>Campus</h3>
+              <?php print cu_class_views_institutions($content['field_class_institution'][0]['#markup']); ?>
             </div>
           <?php endif; ?>
 
