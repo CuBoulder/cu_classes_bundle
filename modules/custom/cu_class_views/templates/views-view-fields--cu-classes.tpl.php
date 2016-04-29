@@ -15,11 +15,6 @@ $topic = isset($fields['field_class_crs_topic_descr']->content) ? $fields['field
 $class_title[] =  '<h3 class="class-section">Section ' . $section_number . '<br />' . $topic . '</h3>';
 
 
-if (isset($fields['field_class_instruction_mode']->content)) {
-  $mode = $fields['field_class_instruction_mode']->content;
-  //$class_title[] = '<span>' . cu_class_format_translate($mode) . '</span>';
-}
-
 // Link class title to course page
 $class_title_link = l(join(' ', $class_title), 'course/' . $fields['field_class_crse_id']->content, array('html' => TRUE, 'query' => array('class_id' => $fields['field_class_class_nbr']->content), 'attributes' => array('class' => array('class-title-group'))));
 
@@ -45,8 +40,7 @@ if ($fields['field_class_crse_attr']->content == 'BCRQ') {
   $course_requirements = cu_class_core_requirements($reqs);
 }
 
-
-$format = cu_class_views_available_formats($fields['field_class_instruction_mode']->content);
+$format = $fields['field_class_instruction_mode_des']->content;
 
 // Meeting time
 $meeting_time_raw = $fields['field_class_ssr_mtg_sched_long']->content;
