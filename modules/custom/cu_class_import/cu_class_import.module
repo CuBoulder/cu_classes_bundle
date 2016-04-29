@@ -536,9 +536,12 @@ function cu_course_import_form_submit($form, &$form_state) {
   // Split institution since value differs in API response.
   // Only send second part of institution code.
   $institutions = variable_get('cu_class_import_institutions');
+
   foreach ($institutions as $institution) {
-    $institution = explode('-', $institution);
-    cu_course_import($institution[1], $term, $subject);
+    if ($institution) {
+      $institution = explode('-', $institution);
+      cu_course_import($institution[1], $term, $subject);
+    }
   }
 
   return '';
@@ -1178,9 +1181,9 @@ function cu_course_import($institution, $term, $subject) {
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
 
-          if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
-            dsm(xml2array_parse($subject));
-          }
+          //if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+            //dsm(xml2array_parse($subject));
+          //}
 
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
