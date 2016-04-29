@@ -45,17 +45,25 @@ function cu_class_views_block_view($delta = '') {
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
 
-    // College/School filter
+    $top_selected = isset($form_state['values']['field_class_subject_top_level_value']) ? $form_state['values']['field_class_subject_top_level_value'] : '';
 
+    // College/School filter
     $form['field_class_subject_top_level_value']['#type'] = 'select';
     $form['field_class_subject_top_level_value']['#options'] = cu_class_views_options_top_level();
     $form['field_class_subject_top_level_value']['#multiple'] = FALSE;
     unset($form['field_class_subject_top_level_value']['#size']);
     $form['field_class_subject_top_level_value']['#empty_value'] = '';
 
+    // Ajax for dependent options
+    $form['field_class_subject_top_level_value']['#ajax'] = array(
+
+      'method' => 'replace',
+      'effect' => 'fade',
+      'callback' => 'cu_class_views_subject_dependent_callback',
+      'wrapper' => 'edit-field-class-subject-value',
+    );
+
     $combine = $form['#info']['filter-combine'];
-
-
     // Remove line below and uncomment following two lines to display keyword search
     unset($form['#info']['filter-combine']);
     //$combine = $form['#info']['filter-combine'];
@@ -63,8 +71,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
 
     // Subject
     $form['field_class_subject_value']['#type'] = 'select';
-
-    $form['field_class_subject_value']['#options'] = cu_class_views_options_subjects();
+    $form['field_class_subject_value']['#options'] = cu_class_views_options_subjects($top_selected);
     unset($form['field_class_subject_value']['#size']);
     $form['field_class_subject_value']['#multiple'] = FALSE;
     $form['field_class_subject_value']['#empty_value'] = '';
@@ -78,6 +85,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_instruction_mode_value']['#multiple'] = FALSE;
     $form['field_class_instruction_mode_value']['#empty_value'] = '';
 
+    // Submit button classes
     $form['submit']['#attributes']['class'][] = 'button button-blue';
     $form['reset']['#attributes']['class'][] = 'button button-gray';
 
@@ -95,49 +103,23 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     unset($form['submit']);
     unset($form['reset']);
 
-    // bypass views_exposed_form_validate
-    // added to strip altered -None-
-    //unset($form['#validate']);
-    $form['#validate'][] = 'cu_class_views_form_views_exposed_validation';
-
     // Adding hidden value so we can tell if form has been submitted or not
     $form['submitted'] = array(
       '#type' => 'hidden',
       '#value' => TRUE,
     );
   }
-
-
-
-  if ($form['#id'] == 'views-exposed-form-cu-classes-admin-page') {
-
-    $form['field_class_subject_value']['#size'] = 7;
-    $form['field_class_catalog_nbr_value']['#size'] = 10;
-
-    //$form['field_class_subject_value']['#type'] = 'select';
-    //$form['field_class_subject_value']['#options'] = cu_class_import_get_subjects();
-
-    $status_options = array(
-      '' => 'All',
-      '1' => 'Published',
-      '0' => 'Manually Unpublished',
-      '-1' => 'Unpublished by API',
-      '-2' => 'Bulk Unpublished',
-      '-3' => 'Needs Review',
-    );
-    $form['status']['#size'] = 5;
-    $form['status']['#type'] = 'select';
-    $form['status']['#options'] = $status_options;
-  }
-
 }
 
-function cu_class_views_form_views_exposed_validation($form, &$form_state) {
-  if (empty($form_state['values']['college_school_filter'])) {
-    //$form_state['values']['college_school_filter'] = 'all';
-  }
+function cu_class_views_subject_dependent_callback($form, $form_state) {
+  return $form['field_class_subject_value'];
 }
 
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Adds column headers, removed result counter on default view.
+ */
 function cu_class_views_views_pre_render(&$view) {
   if ($view->name == 'cu_classes') {
 
@@ -237,12 +219,19 @@ function cu_class_views_available_orgs() {
 }
 
 function cu_class_views_options_subjects($parent = NULL) {
+  // edit-field-class-subject-value-wrapper
   $options = array();
   $available = cu_class_views_available_subjects();
   $query = db_select('cu_courses_subjects', 'subjects');
   $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status'));
   $query->orderBy('subjects.value', 'ASC');
   $query->condition('subjects.status', 1, '=');
+
+  if ($parent && ($parent != '')) {
+    $query->join('cu_courses_organizations', 'orgs', 'subjects.parent_org = orgs.code');
+    $query->fields('orgs', array('code', 'parent_org'));
+    $query->condition('orgs.parent_org', $parent, '=');
+  }
   $results = $query->execute()->fetchAllAssoc('code');
   foreach ($results as $key => $result) {
     if (isset($available[$key])) {
