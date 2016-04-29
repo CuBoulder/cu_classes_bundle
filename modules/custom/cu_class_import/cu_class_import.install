@@ -94,7 +94,7 @@ function cu_class_import_schema() {
         'default' => 1,
       ),
     ),
-    'primary key' => array('code'),
+    'primary key' => array('id'),
   );
 
   return $schema;
