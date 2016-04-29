@@ -45,7 +45,7 @@ function cu_class_views_block_view($delta = '') {
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
 
-    $top_selected = isset($form_state['values']['field_class_subject_top_level_value']) ? $form_state['values']['field_class_subject_top_level_value'] : '';
+
 
     // College/School filter
     $form['field_class_subject_top_level_value']['#type'] = 'select';
@@ -56,6 +56,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
 
     // Ajax for dependent options
     /*
+    $top_selected = isset($form_state['values']['field_class_subject_top_level_value']) ? $form_state['values']['field_class_subject_top_level_value'] : '';
     $form['field_class_subject_top_level_value']['#ajax'] = array(
 
       'method' => 'replace',
