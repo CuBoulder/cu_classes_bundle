@@ -71,8 +71,17 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_institution_value']['#multiple'] = FALSE;
     unset($form['field_class_institution_value']['#size']);
     $form['field_class_institution_value']['#empty_value'] = '';
+
+
+
     if (count($campus_options) < 2) {
       $form['field_class_institution_value']['#value'] = key($campus_options);
+      $form['field_class_institution_value']['#type'] = 'hidden';
+      drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
+    }
+    $total_insts = cu_class_views_get_institutions();
+    if (count($total_inst < 2)) {
+      $form['field_class_institution_value']['#value'] = current($total_inst);
       $form['field_class_institution_value']['#type'] = 'hidden';
       drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
     }
@@ -338,4 +347,17 @@ function cu_class_views_institutions($campus) {
     'CUDEV' => 'Denver',
   );
   return $campus_options[$campus];
+}
+
+function cu_class_views_get_institutions() {
+  $insts = array();
+  $query = db_select('field_data_field_class_institution', 'inst');
+  $query->fields('inst', array('field_class_institution_value'));
+  $query->distinct();
+  $query->groupBy('inst.field_class_institution_value');
+  $results = $query->execute()->fetchAll();
+  foreach ($results as $result) {
+    $insts[] = $result->field_class_institution_value;
+  }
+  return $insts;
 }
