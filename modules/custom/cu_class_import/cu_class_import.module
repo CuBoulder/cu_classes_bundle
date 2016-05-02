@@ -397,7 +397,7 @@ function cu_course_import_form($form, &$form_state) {
   $term_options = cu_class_import_get_terms();
   $form['term'] = array(
     '#type' => 'select',
-    '#default_value' => '2164',
+    '#default_value' => variable_get('class_import_current_term', '2167'),
     '#title' => t('Term'),
     '#options' => $term_options,
     '#description' => t('Terms are available some number of days before enrollment opens.  This date is set by the registars and remains an undocumented process and value.'),
@@ -537,16 +537,27 @@ function cu_course_import_form_submit($form, &$form_state) {
   $subject = $form['subject']['#value'];
 
   variable_set('class_import_current_subject', $subject);
+  variable_set('class_import_current_term', $term);
   //variable_set('class_import_current_institution', $institution);
 
   // Split institution since value differs in API response.
   // Only send second part of institution code.
   $institutions = variable_get('cu_class_import_institutions');
+    if (variable_get('cu_class_import_online_only', 0)) {
+    $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
+  }
+  else {
+    array(NULL);
+  }
 
   foreach ($institutions as $institution) {
     if ($institution) {
       $institution = explode('-', $institution);
-      cu_course_import($institution[1], $term, $subject);
+      //check to see if the subject is valid for the instruction by looking for a valid parent
+      // @TODO Cache this result?
+      if (cu_class_import_get_subject_parent($subject, $institution[1])) {
+        cu_course_import($institution[1], $term, $subject, $instructor_modes);
+      }
     }
   }
 
@@ -558,7 +569,7 @@ function cu_course_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_course_import_curl($institution, $term, $subject) {
+function cu_course_import_curl($institution, $term, $subject, $instuctor_mode = NULL) {
 
   // Setup the cURL
   $curl = curl_init();
@@ -597,6 +608,11 @@ function cu_course_import_curl($institution, $term, $subject) {
 
     // Additional data that the API takes
     $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+
+    if ($instuctor_mode) {
+      $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
+    }
+
     if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
       dsm(array($curl_request_body));
     }
@@ -827,8 +843,8 @@ function cu_class_import_course_batch_update() {
   //$results = db_query('SELECT * FROM {cu_course}');
   $subjects = _cu_class_import_subject_options();
 
-  foreach ($subjects as $subject) {
-    $batch['operations'][] = array('cu_class_import_course_batch_process', array($subject));
+  foreach ($subjects as $key => $subject) {
+    $batch['operations'][] = array('cu_class_import_course_batch_process', array($key));
   }
 
   batch_set($batch);
@@ -847,9 +863,16 @@ function cu_class_import_course_batch_process($subject, &$context) {
 
   $terms = variable_get('cu_class_import_active_terms');
 
+  if (variable_get('cu_class_import_online_only', 0)) {
+    $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
+  }
+  else {
+    $instructor_modes = array(NULL);
+  }
+
   foreach ($terms as $term) {
     if ($term) {
-      cu_course_import($institution, $term, $subject);
+      cu_course_import($institution, $term, $subject, $instructor_modes);
     }
   }
   // this is so we don't overwhelm the servers
@@ -1182,12 +1205,13 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 /**
  * process the import
  */
-function cu_course_import($institution, $term, $subject) {
+function cu_course_import($institution, $term, $subject, $instructor_modes) {
+  dsm($instructor_modes);
+  foreach($instructor_modes as $instructor_mode) {
+    $response = cu_course_import_curl($institution, $term, $subject, $instructor_mode);
+    $xml = simplexml_load_string($response);
 
-  $response = cu_course_import_curl($institution, $term, $subject);
-  $xml = simplexml_load_string($response);
-
-  if (is_object($xml)) {
+    if (is_object($xml)) {
 
       if ($xml->IS_FAULT) {
 
@@ -1199,9 +1223,9 @@ function cu_course_import($institution, $term, $subject) {
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
         foreach ($xml->SEARCH_RESULT->SUBJECTS->children() as $subject) {
 
-          //if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
-            //dsm(xml2array_parse($subject));
-          //}
+          if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+            dsm(xml2array_parse($subject));
+          }
 
           $course_id = (string) $subject->CRSE_ID;
           $catalog_number = (string) $subject->CATALOG_NBR;
@@ -1212,10 +1236,8 @@ function cu_course_import($institution, $term, $subject) {
           // check to see if already exists...˝
           // if doesn't exist, add it
           $result = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $subject->CRSE_ID));
-          if($result->rowCount() > 0) {
 
-          }
-          else {
+          if(!$result->rowCount()) {
 
             $result = db_insert('cu_course')
               ->fields(array(
@@ -1235,11 +1257,11 @@ function cu_course_import($institution, $term, $subject) {
             if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
               drupal_set_message('Created local copy of Course: ' . (string) $subject->COURSE_TITLE_LONG);
             }
-          }
-        }
+          }  //rowCount
+        }  // foreach subject
       } // isset
-    }
-
+    }  // is_object
+  } // foreach instructor_mode
   return $output;
 }
 
@@ -1579,6 +1601,9 @@ function cu_class_import_org_name_fix($name) {
   return $name;
 }
 
+/**
+ * Helper funciton to parent org related to a subject code
+ */
 function cu_class_import_get_subject_parent($subject, $institution) {
 
   if ($institution == 'CUBLD') {
@@ -1591,11 +1616,13 @@ function cu_class_import_get_subject_parent($subject, $institution) {
     $prefix = 'D-%';
   }
 
-  $parent = db_query('SELECT parent_org FROM {cu_courses_subjects} WHERE code = :code AND parent_org LIKE :prefix', array(':code' => $subject, ':prefix' => $prefix))->fetchField();
+  return db_query('SELECT parent_org FROM {cu_courses_subjects} WHERE code = :code AND parent_org LIKE :prefix', array(':code' => $subject, ':prefix' => $prefix))->fetchField();
 
-  return $parent;
 }
 
+/**
+ * Helper funciton to get the top level of the org tree
+ */
 function cu_class_import_get_subject_top($org) {
 
   do {
@@ -1607,3 +1634,4 @@ function cu_class_import_get_subject_top($org) {
 
   return $patent_org->code;
 }
+
