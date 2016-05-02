@@ -294,6 +294,19 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_institution']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_institution']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_institution']['element_default_classes'] = FALSE;
+  /* Field: Class: STRM */
+  $handler->display->display_options['fields']['field_class_strm']['id'] = 'field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['table'] = 'field_data_field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['field'] = 'field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['label'] = '';
+  $handler->display->display_options['fields']['field_class_strm']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_strm']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_strm']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_strm']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_class_strm']['settings'] = array(
+    'thousand_separator' => '',
+    'prefix_suffix' => 0,
+  );
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
