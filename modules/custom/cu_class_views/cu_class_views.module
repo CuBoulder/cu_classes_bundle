@@ -54,6 +54,36 @@ function cu_class_views_block_view($delta = '') {
 function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#id'] == 'views-exposed-form-cu-classes-page') {
 
+    // Term Filter
+    $term_options_saved = variable_get('cu_class_search_term', array());
+    foreach ($term_options_saved as $key => $option) {
+      if ($option) {
+        $term = cu_class_view_term_code_translate($option);
+        $options[$key] =  ucfirst($term['term'] . ' ' . $term['year']);
+      }
+    }
+    $form['field_class_strm_value']['#type'] = 'select';
+    $form['field_class_strm_value']['#options'] = $options;
+    $form['field_class_strm_value']['#multiple'] = FALSE;
+    unset($form['field_class_strm_value']['#size']);
+    $form['field_class_strm_value']['#empty_value'] = '';
+
+    // Check class view settings for what campuses to display
+    if (count($options) < 2) {
+      $form['field_class_strm_value']['#value'] = key($options);
+      $form['field_class_strm_value']['#type'] = 'hidden';
+      drupal_add_css('#edit-field-class-strm-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
+    }
+
+    // Check to see if there is only 1 campus imported
+    $total_terms = cu_class_views_get_terms();
+    if (count($total_terms) < 2) {
+      $form['field_class_strm_value']['#value'] = current($total_terms);
+      $form['field_class_strm_value']['#type'] = 'hidden';
+      drupal_add_css('#edit-field-class-strm-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
+    }
+
+
     // Campus Filter
     $campus_options_saved = variable_get('cu_class_search_campus', array());
     $campus_options = array(
@@ -80,7 +110,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     }
     // Check to see if there is only 1 campus imported
     $total_insts = cu_class_views_get_institutions();
-    if (count($total_inst < 2)) {
+    if (count($total_inst) < 2) {
       $form['field_class_institution_value']['#value'] = current($total_inst);
       $form['field_class_institution_value']['#type'] = 'hidden';
       drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
@@ -360,6 +390,19 @@ function cu_class_views_institutions($campus) {
     'CUDEV' => 'Denver',
   );
   return $campus_options[$campus];
+}
+
+function cu_class_views_get_terms() {
+  $terms = array();
+  $query = db_select('field_data_field_class_strm', 'term');
+  $query->fields('term', array('field_class_strm_value'));
+  $query->distinct();
+  $query->groupBy('term.field_class_strm_value');
+  $results = $query->execute()->fetchAll();
+  foreach ($results as $result) {
+    $terms[] = $result->field_class_strm_value;
+  }
+  return $terms;
 }
 
 function cu_class_views_get_institutions() {
