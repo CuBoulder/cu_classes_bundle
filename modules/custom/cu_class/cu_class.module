@@ -434,28 +434,44 @@ function cu_class_preprocess_entity(&$vars) {
     else {
       $vars['course_requirements'] = '';
     }
-    $mode = $vars['content']['field_class_instruction_mode'][0]['#markup'];
-    $vars['format'] = cu_class_format_translate($mode);
+    $format = $vars['content']['field_class_instruction_mode_des'][0]['#markup'];
+    $format_parts = explode('/', $format);
+    foreach ($format_parts as $key => $part) {
+      $format_parts[$key] = '<span>' . $part . '</span>';
+    }
+    $format = join(' / ', $format_parts);
+    $vars['format'] = $format;
 
     $session = $vars['content']['field_class_session_code'][0]['#markup'];
     $vars['session'] = cu_class_session_translator($session);
 
     // Meeting time
     $meeting_time_raw = $vars['content']['field_class_ssr_mtg_sched_long'][0]['#markup'];
-    $meeting_time_parts = explode(' ', $meeting_time_raw);
-    // Meeting schedule display
-    foreach ($meeting_time_parts as $key => $part) {
-      // Add spaces to days
-      if (ctype_alpha($part)) {
-        $regex = '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/';
-        $meeting_time_parts[$key] = preg_replace( $regex, ' $1', $part ) . '<br />';
+    $meeting_time_exempt = array (
+      'tba',
+      'TBA',
+      'tbd',
+      'TBD',
+    );
+    if (!in_array($meeting_time_raw, $meeting_time_exempt)) {
+      $meeting_time_parts = explode(' ', $meeting_time_raw);
+      // Meeting schedule display
+      foreach ($meeting_time_parts as $key => $part) {
+        // Add spaces to days
+        if (ctype_alpha($part)) {
+          $regex = '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/';
+          $meeting_time_parts[$key] = preg_replace( $regex, ' $1', $part ) . '<br />';
+        }
+        // Convert to 12hour time
+        if (strpos($part, ':') !== FALSE) {
+          $meeting_time_parts[$key] = date('g:i a', strtotime($part));
+        }
       }
-      // Convert to 12hour time
-      if (strpos($part, ':') !== FALSE) {
-        $meeting_time_parts[$key] = date('g:i a', strtotime($part));
-      }
+      $vars['meeting_time'] = join(' ',$meeting_time_parts);
     }
-    $vars['meeting_time'] = join(' ',$meeting_time_parts);
+    else {
+      $vars['meeting_time'] = $meeting_time_raw;
+    }
   }
 }
 
