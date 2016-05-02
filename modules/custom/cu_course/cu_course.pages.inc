@@ -41,6 +41,7 @@ function cu_course_display($course) {
     $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
     $query->orderBy('courseid.field_class_crse_id_value', 'DESC');
     $highlight_class_ids = $query->execute()->fetchCol();
+
   }
 
 
@@ -52,16 +53,12 @@ function cu_course_display($course) {
   $query->join('cu_class', 'class', 'class.class_id = courseid.entity_id');
   $query->fields('class', array('class_id'));
 
-  // Join to get cancel_dt for classes
-  $query->join('field_data_field_class_cancel_dt', 'cancel_dt', 'class.class_id = cancel_dt.entity_id');
-  $query->fields('cancel_dt', array('field_class_cancel_dt_value'));
+
 
   // Get only published class entities
   $query->condition('class.type', 'class', '=');
   $query->condition('class.status', 1, '=');
   $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
-  $query->condition('cancel_dt.field_class_cancel_dt_value', '2015-10-23', '>');
-
 
   // Join for section number
   $query->join('field_data_field_class_class_section', 'section', 'section.entity_id = courseid.entity_id');
@@ -93,16 +90,14 @@ function cu_course_display($course) {
     // if multiple classes get description here
     $class = current($output['classes']['cu_class']);
     $output['description']['credits']['#markup'] = number_format($class['field_class_units_acad_prog'][0]['#markup'], 1, '.', '') . ' Credit Hours';
-    $output['description']['credits']['#prefix'] = '<h3 class="course-credits">';
-    $output['description']['credits']['#suffix'] = '</h3>';
+    $output['description']['credits']['#prefix'] = '<h2 class="course-credits">';
+    $output['description']['credits']['#suffix'] = '</h2>';
     $output['description']['text'] = $class['field_class_ssr_descrlong'];
   }
 
 
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
-
-  dsm($classes[$class_id]);
 
   // Check to see if the requested class is published
   if (isset($classes[$class_id]->status) && $classes[$class_id]->status < 1) {
@@ -139,8 +134,8 @@ function cu_course_display($course) {
     // If single class get description here
     $class = current($output['classes_highlighted']['cu_class']);
     $output['description']['credits']['#markup'] = number_format($class['field_class_units_acad_prog'][0]['#markup'], 1, '.', '')  . ' Credit Hours';
-    $output['description']['credits']['#prefix'] = '<h3 class="course-credits">';
-    $output['description']['credits']['#suffix'] = '</h3>';
+    $output['description']['credits']['#prefix'] = '<h2 class="course-credits">';
+    $output['description']['credits']['#suffix'] = '</h2>';
     $output['description']['text'] = $class['field_class_ssr_descrlong'];
 
     // Put the rest of the classes in an expandable section
