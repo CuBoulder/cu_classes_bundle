@@ -46,3 +46,6 @@
 .view-cu-classes .views-widget-filter-combine label.icon-closed:before { content: "\f196"; padding-right: 5px; font-family: FontAwesome; }
 .view-cu-classes .views-widget-filter-combine label.icon-open:before { content: "\f147"; padding-right: 5px; font-family: FontAwesome; }
 .view-cu-classes .views-exposed-widget input:not(:first-child) { margin-left: 15px; }
+
+/* Course entity */
+h2.course-credits { font-size: 100%; }
