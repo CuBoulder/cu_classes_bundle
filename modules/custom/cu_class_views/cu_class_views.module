@@ -172,17 +172,20 @@ function cu_class_views_views_pre_render(&$view) {
 
     $view_headers = '<div class="class-view-column-headers" aria-hidden="true" role="presentation">
       <div class="row clearfix">
-        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
           Class
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-          Schedule/Campus
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+          Campus
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
-          Credits
+          Term
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+          Format
         </div>
         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-          Format
+          Schedule
         </div>
       </div>
     </div>';
@@ -370,4 +373,17 @@ function cu_class_views_get_institutions() {
     $insts[] = $result->field_class_institution_value;
   }
   return $insts;
+}
+
+/**
+ * Translate a term code to year and semester.
+ */
+function cu_class_view_term_code_translate($term_code) {
+  $codes[1] = 'spring';
+  $codes[4] = 'summer';
+  $codes[7] = 'fall';
+  $code = substr($term_code, -1, 1);
+  $term['term'] = $codes[$code];
+  $term['year'] = '20' . substr($term_code, -3, 2);
+  return $term;
 }
