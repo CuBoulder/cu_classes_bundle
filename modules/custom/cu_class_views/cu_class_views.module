@@ -286,6 +286,10 @@ function cu_class_views_options_top_level() {
     }
   }
 
+  // Remove option group if only one campus present.
+  if (count($options) === 1) {
+    $options = array_shift($options);
+  }
   return $options;
 }
 
