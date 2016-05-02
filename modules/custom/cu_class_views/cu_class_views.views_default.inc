@@ -469,6 +469,11 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
+  /* Filter criterion: Class: CANCEL_DT (field_class_cancel_dt) */
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['id'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['table'] = 'field_data_field_class_cancel_dt';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['field'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['operator'] = 'empty';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
