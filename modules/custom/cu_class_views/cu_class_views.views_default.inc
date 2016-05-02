@@ -294,6 +294,19 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['fields']['field_class_institution']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_class_institution']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_class_institution']['element_default_classes'] = FALSE;
+  /* Field: Class: STRM */
+  $handler->display->display_options['fields']['field_class_strm']['id'] = 'field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['table'] = 'field_data_field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['field'] = 'field_class_strm';
+  $handler->display->display_options['fields']['field_class_strm']['label'] = '';
+  $handler->display->display_options['fields']['field_class_strm']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_class_strm']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_class_strm']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_class_strm']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_class_strm']['settings'] = array(
+    'thousand_separator' => '',
+    'prefix_suffix' => 0,
+  );
   /* Sort criterion: Class: SUBJECT (field_class_subject) */
   $handler->display->display_options['sorts']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['sorts']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
@@ -352,6 +365,27 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value']['value'] = '1';
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Class: STRM (field_class_strm) */
+  $handler->display->display_options['filters']['field_class_strm_value']['id'] = 'field_class_strm_value';
+  $handler->display->display_options['filters']['field_class_strm_value']['table'] = 'field_data_field_class_strm';
+  $handler->display->display_options['filters']['field_class_strm_value']['field'] = 'field_class_strm_value';
+  $handler->display->display_options['filters']['field_class_strm_value']['group'] = 2;
+  $handler->display->display_options['filters']['field_class_strm_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_class_strm_value']['expose']['operator_id'] = 'field_class_strm_value_op';
+  $handler->display->display_options['filters']['field_class_strm_value']['expose']['label'] = 'Term';
+  $handler->display->display_options['filters']['field_class_strm_value']['expose']['operator'] = 'field_class_strm_value_op';
+  $handler->display->display_options['filters']['field_class_strm_value']['expose']['identifier'] = 'field_class_strm_value';
+  $handler->display->display_options['filters']['field_class_strm_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    6 => 0,
+    4 => 0,
+    7 => 0,
+    3 => 0,
+    5 => 0,
+    8 => 0,
+    9 => 0,
+  );
   /* Filter criterion: Class: INSTITUTION (field_class_institution) */
   $handler->display->display_options['filters']['field_class_institution_value']['id'] = 'field_class_institution_value';
   $handler->display->display_options['filters']['field_class_institution_value']['table'] = 'field_data_field_class_institution';
@@ -435,6 +469,11 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
+  /* Filter criterion: Class: CANCEL_DT (field_class_cancel_dt) */
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['id'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['table'] = 'field_data_field_class_cancel_dt';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['field'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['operator'] = 'empty';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
