@@ -24,6 +24,11 @@
             $term = ucfirst(join(' ', $term));
             print $term;
           ?>
+          <?php
+            if (!empty($content['field_class_session_code'][0]['#markup'])):
+          ?>
+            <br /> <?php print cu_class_views_session_translator($content['field_class_session_code'][0]['#markup']); ?>
+          <?php endif; ?>
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
           <h4 class="class-label">Format:</h4>

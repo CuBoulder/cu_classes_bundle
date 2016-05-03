@@ -434,3 +434,19 @@ function cu_class_view_term_code_translate($term_code) {
   $term['year'] = '20' . substr($term_code, -3, 2);
   return $term;
 }
+
+function cu_class_views_session_translator($session) {
+  $sessions = array(
+    'BAM'	=> 'Maymester',
+    'BAS'	=> 'Session A',
+    'BBS'	=> 'Session B',
+    'BCS'	=> 'Session C',
+    'BD1'	=> 'Session D',
+    'BES'	=> 'Session E',
+    'BFS'	=> 'Session F',
+    'BGS'	=> 'Augmester',
+  );
+  if (isset($sessions[$session])) {
+    return $sessions[$session];
+  }
+}
