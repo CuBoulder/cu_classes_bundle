@@ -582,8 +582,7 @@ function cu_course_import_curl($institution, $term, $subject, $instuctor_mode = 
   else {
     $request_path = variable_get('cu_class_import_api_url', 'https://esbprd.prod.cu.edu/') . 'Bld_Cs_Any_ClassSearch/' . variable_get('cu_class_import_api_version', '2a1') . '/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en';
   }
-  //https://esbprd.prod.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en
-  //https://osbtest.dev.cu.edu/Bld_Cs_Any_ClassSearch/2a1/SSR_GET_CLASSES_R.v1/get/classes?type=cu_master&languageCd=en
+
   if (variable_get('cu_class_import_adv_debug', 0) && user_access('administer class content')) {
     drupal_set_message('Attempting to import from ' . $request_path, 'status');
   }
@@ -731,9 +730,9 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
     $curl_request_body = '<CLASS_SEARCH_REQUEST>';
     $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
-    if ($instuctor_mode) {
-      $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
-    }
+    //if ($instuctor_mode) {
+      //$curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
+    //}
 
     if (variable_get('cu_class_import_exclude_ce', 1)) {
       // @TODO: Add code to handle other institutions
@@ -928,15 +927,15 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
     ->execute();
   }
 
-  if(variable_get('cu_class_import_online_only', 0)) {
+  //if(variable_get('cu_class_import_online_only', 0)) {
     // combine the resposes for each instructor mode
-    $response = cu_class_import_curl($institution, $term, $subject, $course_id, 'OL');
+    //$response = cu_class_import_curl($institution, $term, $subject, $course_id, 'OL');
     //dsm(array($response));
-  }
-  else {
+  //}
+  //else {
     // get all the insructor modes
     $response = cu_class_import_curl($institution, $term, $subject, $course_id);
-  }
+  //}
 
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
