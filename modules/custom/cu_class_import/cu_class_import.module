@@ -556,6 +556,7 @@ function cu_course_import_form_submit($form, &$form_state) {
       //check to see if the subject is valid for the instruction by looking for a valid parent
       // @TODO Cache this result?
       if (cu_class_import_get_subject_parent($subject, $institution[1])) {
+        dsm($institution[1]);
         cu_course_import($institution[1], $term, $subject, $instructor_modes);
       }
     }
@@ -858,24 +859,28 @@ function cu_class_import_course_batch_update() {
  * The batch processor.
  */
 function cu_class_import_course_batch_process($subject, &$context) {
+  $institutions = variable_get('cu_class_import_institutions');
 
-  //@TODO: set active insitutions
-  $institution = 'CUBLD';
+  foreach ($institutions as $institution) {
+    if ($institution) {
+      $institution = explode('-', $institution);
 
-  $context['message'] = "Now processing all Courses with Subject of $subject...";
+      $context['message'] = "Now processing all Courses with Subject of $subject for $institution[1]...";
 
-  $terms = variable_get('cu_class_import_active_terms');
+      $terms = variable_get('cu_class_import_active_terms');
 
-  if (variable_get('cu_class_import_online_only', 0)) {
-    $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
-  }
-  else {
-    $instructor_modes = array(NULL);
-  }
+      if (variable_get('cu_class_import_online_only', 0)) {
+        $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
+      }
+      else {
+        $instructor_modes = array(NULL);
+      }
 
-  foreach ($terms as $term) {
-    if ($term) {
-      cu_course_import($institution, $term, $subject, $instructor_modes);
+      foreach ($terms as $term) {
+        if ($term) {
+          cu_course_import($institution[1], $term, $subject, $instructor_modes);
+        }
+      }
     }
   }
   // this is so we don't overwhelm the servers
