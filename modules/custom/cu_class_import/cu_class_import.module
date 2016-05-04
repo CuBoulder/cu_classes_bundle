@@ -606,11 +606,15 @@ function cu_course_import_curl($institution, $term, $subject, $instuctor_mode = 
     curl_setopt($curl, CURLOPT_USERPWD, $request_auth_string);
 
     // Additional data that the API takes
-    $curl_request_body = '<CLASS_SEARCH_REQUEST><INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><SUBJECT>' . $subject . '</SUBJECT></CLASS_SEARCH_REQUEST>';
+    $curl_request_body = '<CLASS_SEARCH_REQUEST>';
+
+    $curl_request_body .= '<INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
     if ($instuctor_mode) {
       $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
     }
+
+    $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
 
     if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
       dsm(array($curl_request_body));
