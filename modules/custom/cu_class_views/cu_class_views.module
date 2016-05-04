@@ -89,7 +89,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $campus_options = array(
       'CUBLD' => 'Boulder',
       'CUSPG' => 'Colorado Springs',
-      'CUDEV' => 'Denver',
+      'CUDEN' => 'Denver',
     );
     foreach ($campus_options as $key => $option) {
       if (empty($campus_options_saved[$key])) {
