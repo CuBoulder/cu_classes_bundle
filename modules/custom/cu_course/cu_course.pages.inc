@@ -44,7 +44,6 @@ function cu_course_display($course) {
 
   }
 
-
   // Query course id table
   $query = db_select('field_data_field_class_crse_id', 'courseid');
   $query->fields('courseid', array('entity_id'));
@@ -61,6 +60,9 @@ function cu_course_display($course) {
   $query->condition('class.type', 'class', '=');
   $query->condition('class.status', 1, '=');
   $query->condition('courseid.field_class_crse_id_value', $course->course_id, '=');
+  $query->condition(db_or()
+    ->isNull('cancel_dt.field_class_cancel_dt_value')
+    ->condition('cancel_dt.field_class_cancel_dt_value', date("Y-m-d H:i:s", time() - (7 * 24 * 60 * 60)), '>'));
 
   // Join for section number
   $query->join('field_data_field_class_class_section', 'section', 'section.entity_id = courseid.entity_id');
@@ -70,7 +72,7 @@ function cu_course_display($course) {
   $query->orderBy('section.field_class_class_section_value', 'ASC');
 
   $class_ids = $query->execute()->fetchCol();
-
+  dpm($class_ids);
   // Put loaded class entities into an array for viewing
   $classes = array();
   foreach ($class_ids as $class_id) {
