@@ -104,7 +104,8 @@ function cu_course_display($course) {
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
 
-  // Check to see if the requested class is published
+  // Check to see if the requested class is published.
+  // @todo Remove this since the query filters out unpublished classes.
   if (isset($highlighted_class->status) && $highlighted_class->status < 1) {
     if ($class_multiple) {
       drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
@@ -114,8 +115,7 @@ function cu_course_display($course) {
     }
   }
 
-  // Check to see if the requested class cancelled
-  // @todo Remove this since the query filters out unpublished classes.
+  // Check to see if the requested class cancelled.
   if ($highlighted_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
     if ($class_multiple) {
       drupal_set_message("This section of this course has been cancelled. Other sections listed bellow.", 'error');
