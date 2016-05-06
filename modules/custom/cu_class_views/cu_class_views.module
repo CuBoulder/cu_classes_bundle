@@ -324,10 +324,11 @@ function cu_class_views_options_subjects($parent = NULL) {
   $results = $query->execute()->fetchAllAssoc('code');
   foreach ($results as $key => $result) {
     if (isset($available[$key])) {
-      $options[$key] = $result->value;
+      $options[$result->value] = $result->value;
     }
   }
-  return $options;
+  // Return unique values to avoid duplicates in display.
+  return array_unique($options);
 }
 
 function cu_class_views_available_subjects() {
