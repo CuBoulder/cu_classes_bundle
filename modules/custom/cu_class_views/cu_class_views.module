@@ -391,7 +391,7 @@ function cu_class_views_institutions($campus) {
   $campus_options = array(
     'CUBLD' => 'Boulder',
     'CUSPG' => 'Colorado Springs',
-    'CUDEV' => 'Denver',
+    'CUDEN' => 'Denver',
   );
   return $campus_options[$campus];
 }
