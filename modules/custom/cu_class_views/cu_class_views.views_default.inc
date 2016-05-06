@@ -432,7 +432,7 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
   $handler->display->display_options['filters']['field_class_subject_value']['field'] = 'field_class_subject_value';
-  $handler->display->display_options['filters']['field_class_subject_value']['operator'] = 'contains';
+  $handler->display->display_options['filters']['field_class_subject_value']['operator'] = 'regular_expression';
   $handler->display->display_options['filters']['field_class_subject_value']['group'] = 2;
   $handler->display->display_options['filters']['field_class_subject_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator_id'] = 'field_class_subject_value_op';
