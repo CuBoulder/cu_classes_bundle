@@ -10,6 +10,8 @@ function cu_course_view($course) {
 
 function cu_course_display($course) {
 
+  $highlighted_class = NULL;
+
   //before a course is displayed, check to see if we need to udpate the classes
   if (module_exists('cu_class_import') && variable_get('cu_class_import_on_load', 1)) {
     cu_class_import($course->inst, $course->term_id, $course->subject, $course->course_id);
@@ -67,20 +69,20 @@ function cu_course_display($course) {
   // Join for section number
   $query->join('field_data_field_class_class_section', 'section', 'section.entity_id = courseid.entity_id');
   $query->fields('section', array('field_class_class_section_value'));
-
   $query->orderBy('courseid.field_class_crse_id_value', 'ASC');
   $query->orderBy('section.field_class_class_section_value', 'ASC');
-
   $class_ids = $query->execute()->fetchCol();
-  dpm($class_ids);
+
   // Put loaded class entities into an array for viewing
   $classes = array();
   foreach ($class_ids as $class_id) {
     $classes[$class_id] = entity_load_single('cu_class', $class_id);
   }
+
   // Remove highlighted class from list
   if (!empty($highlight_class_ids)) {
     $current_class = current($highlight_class_ids);
+    $highlighted_class = $classes[$current_class];
     unset($classes[$current_class]);
   }
   $class_multiple = !empty($classes) ? TRUE : FALSE;
@@ -99,12 +101,11 @@ function cu_course_display($course) {
     $output['description']['text'] = $class['field_class_ssr_descrlong'];
   }
 
-
   $output['#prefix'] = '<div class="course-class-list">';
   $output['#suffix'] = '</div>';
 
   // Check to see if the requested class is published
-  if (isset($classes[$class_id]->status) && $classes[$class_id]->status < 1) {
+  if (isset($highlighted_class->status) && $highlighted_class->status < 1) {
     if ($class_multiple) {
       drupal_set_message("This section of this course is no longer available. Other sections listed bellow.", 'error');
     }
@@ -114,7 +115,8 @@ function cu_course_display($course) {
   }
 
   // Check to see if the requested class cancelled
-  if ($classes[$class_id]->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
+  // @todo Remove this since the query filters out unpublished classes.
+  if ($highlighted_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
     if ($class_multiple) {
       drupal_set_message("This section of this course has been cancelled. Other sections listed bellow.", 'error');
     }
