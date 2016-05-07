@@ -1006,7 +1006,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           $online_codes = array('OL', 'HY', 'SO', 'H2', 'H1');
            if(!in_array($instruction_mode, $online_codes)) {
              $ignore = TRUE;
-             dsm('ignoring because of instructor mode');
+             if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+               dsm('ignoring because of instructor mode');
+             }
            }
         }
 
