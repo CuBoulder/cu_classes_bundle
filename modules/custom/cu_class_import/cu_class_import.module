@@ -556,7 +556,7 @@ function cu_course_import_form_submit($form, &$form_state) {
       //check to see if the subject is valid for the instruction by looking for a valid parent
       // @TODO Cache this result?
       if (cu_class_import_get_subject_parent($subject, $institution[1])) {
-        dsm($institution[1]);
+        //dsm($institution[1]);
         cu_course_import($institution[1], $term, $subject, $instructor_modes);
       }
     }
