@@ -1579,16 +1579,30 @@ function cu_class_import_cron_queue_info() {
     'worker callback' => 'cu_class_import_course_queue_process',
     'time' => 60*120,  // allow this to run for 2 hours in the background?
   );
+  $queues['cu_subject_update'] = array(
+    'worker callback' => 'cu_class_import_subject_queue_process',
+    'time' => 60*120,  // allow this to run for 2 hours in the background?
+  );
   return $queues;
 }
 
 /**
  * Worker callback defined in hook_cron_queue_info().
  *
- * @param array $institution
+ * @param string $subject
  *   Code of institution to pull courses from.
  */
-function cu_class_import_course_queue_process($institution) {
+function cu_class_import_course_queue_process($subject) {
+  cu_class_import_course_batch_process($subject, $context = NULL);
+}
+
+/**
+ * Worker callback defined in hook_cron_queue_info().
+ *
+ * @param string $institution
+ *   Code of institution to pull courses from.
+ */
+function cu_class_import_subject_queue_process($institution) {
   cu_class_import_populate_subjects($institution);
 }
 
@@ -1614,6 +1628,7 @@ function cu_class_import_queue_process($course) {
  */
 function cu_class_import_cron() {
   if (variable_get('cu_class_import_on_cron', 1)) {
+
     $queue = DrupalQueue::get('cu_class_update');
     // get all courses
     $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
@@ -1622,10 +1637,17 @@ function cu_class_import_cron() {
     }
 
     $course_queue = DrupalQueue::get('cu_course_update');
+    // get all subjects
+    $subjects = _cu_class_import_subject_options();
+    foreach ($subjects as $key => $subject) {
+      $course_queue->createItem($key);
+    }
+
+    $subject_queue = DrupalQueue::get('cu_subject_update');
     // get all institutions
     $institutions = variable_get('cu_class_import_institutions', array());
     foreach ($institutions as $institution) {
-      $course_queue->createItem($institution);
+      $subject_queue->createItem($institution);
     }
   }
 }
