@@ -315,11 +315,14 @@ function class_import_admin_settings($form, &$form_state) {
     '#description' => t('Update all classes in a course when course is viewed'),
   );
 
-  $form['adv']['cu_class_import_online_only'] = array(
-    '#type' => 'checkbox',
-    '#default_value' => variable_get('cu_class_import_online_only', 0),
-    '#title' => t('Limit to Online Classes'),
-    '#description' => t(''),
+  if ($instructor_modes = variable_get('cu_class_import_course_instructor_modes', '')) {
+    $instructor_modes = implode(',', $instructor_modes);
+  }
+  $form['adv']['cu_class_import_course_instructor_modes'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $instructor_modes,
+    '#title' => t('Modes'),
+    '#description' => t('Limit the course import to these instruction modes. Leave black to import all courses from all instruction modes.'),
   );
 
   $form['adv']['cu_class_import_api_version'] = array(
@@ -343,7 +346,18 @@ function class_import_admin_settings($form, &$form_state) {
     '#description' => t('This will import from all campuses for an instution.  NEEDS WORK to handle Anschutz Medical Campus.'),
   );
 
-  return system_settings_form($form);
+
+  $form = system_settings_form($form);
+  $form['#submit'][] = 'class_import_admin_settings_form_submit';
+
+  return $form;
+}
+
+function class_import_admin_settings_form_submit(&$form, &$form_state) {
+
+  if ($instructor_modes = $form_state['values']['cu_class_import_course_instructor_modes']) {
+    variable_set('cu_class_import_course_instructor_modes', explode(',', $instructor_modes));
+  }
 }
 
 /**
@@ -543,12 +557,8 @@ function cu_course_import_form_submit($form, &$form_state) {
   // Split institution since value differs in API response.
   // Only send second part of institution code.
   $institutions = variable_get('cu_class_import_institutions');
-    if (variable_get('cu_class_import_online_only', 0)) {
-    $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
-  }
-  else {
-    array(NULL);
-  }
+
+  $instructor_modes = variable_get('cu_class_import_course_instructor_modes', array(NULL));
 
   foreach ($institutions as $institution) {
     if ($institution) {
@@ -570,7 +580,13 @@ function cu_course_import_form_submit($form, &$form_state) {
  * Setup the cURL, run it, and write the result to a _latest file.
  * If there is an error it will be logged to the normal php error log.
  */
-function cu_course_import_curl($institution, $term, $subject, $instuctor_mode = NULL) {
+function cu_course_import_curl($institution, $term, $subject, $instructor_mode = NULL) {
+
+  // Trim whitespace from variables.
+  $institution = trim($institution);
+  $term = trim($term);
+  $subject = trim($subject);
+  $instructor_mode = trim($instructor_mode);
 
   // Setup the cURL
   $curl = curl_init();
@@ -611,8 +627,8 @@ function cu_course_import_curl($institution, $term, $subject, $instuctor_mode = 
 
     $curl_request_body .= '<INSTITUTION>' . $institution . '</INSTITUTION><STRM>' . $term . '</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
-    if ($instuctor_mode) {
-      $curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
+    if ($instructor_mode) {
+      $curl_request_body .= '<INSTRUCTION_MODE>' . $instructor_mode .'</INSTRUCTION_MODE>';
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';
@@ -864,17 +880,9 @@ function cu_class_import_course_batch_process($subject, &$context) {
   foreach ($institutions as $institution) {
     if ($institution) {
       $institution = explode('-', $institution);
-
       $context['message'] = "Now processing all Courses with Subject of $subject for $institution[1]...";
-
       $terms = variable_get('cu_class_import_active_terms');
-
-      if (variable_get('cu_class_import_online_only', 0)) {
-        $instructor_modes = array('OL', 'HY', 'SO', 'H2', 'H1');
-      }
-      else {
-        $instructor_modes = array(NULL);
-      }
+      $instructor_modes = variable_get('cu_class_import_course_instructor_modes', array(NULL));
 
       foreach ($terms as $term) {
         if ($term) {
@@ -936,15 +944,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
     ->execute();
   }
 
-  //if(variable_get('cu_class_import_online_only', 0)) {
-    // combine the resposes for each instructor mode
-    //$response = cu_class_import_curl($institution, $term, $subject, $course_id, 'OL');
-    //dsm(array($response));
-  //}
-  //else {
-    // get all the insructor modes
-    $response = cu_class_import_curl($institution, $term, $subject, $course_id);
-  //}
+  $response = cu_class_import_curl($institution, $term, $subject, $course_id);
 
   //strip ser namespace for now
   $response  = str_replace("ser:", "", $response);
@@ -1000,16 +1000,14 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $campus_codes = str_replace(" ", "", variable_get('cu_class_import_campus', ''));
         $campus_codes_to_ignore = explode(",", $campus_codes);
 
-        // Online Only
-
-        if (variable_get('cu_class_import_online_only', 0)) {
-          $online_codes = array('OL', 'HY', 'SO', 'H2', 'H1');
-           if(!in_array($instruction_mode, $online_codes)) {
-             $ignore = TRUE;
-             if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
-               dsm('ignoring because of instructor mode');
-             }
-           }
+        // Limited instructor modes.
+        if ($instruction_modes = variable_get('cu_class_import_course_instructor_modes', array(NULL))) {
+          if (!in_array($instruction_mode, $instruction_modes)) {
+            $ignore = TRUE;
+            if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+              dsm('ignoring because of instructor mode');
+            }
+          }
         }
 
         if (in_array($session_code, $session_code_to_ignore)) {
@@ -1026,13 +1024,13 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           }
         }
 
-       // ignored classes need to
-       if (!$ignore) {
-         //add to array to unpublish any additional classes in course
-         $classes[] = $class_id;
-       }
+        // ignored classes need to
+        if (!$ignore) {
+          //add to array to unpublish any additional classes in course
+          $classes[] = $class_id;
+        }
 
-       foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
+        foreach ($class->CLASSES_MEETING_PATTERNS->children() as $meeting) {
           $start = (string) $meeting->START_DT;
           $end = (string) $meeting->END_DT;
 
@@ -1075,7 +1073,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
         if (variable_get('cu_class_import_as_needs_review', 0)) {
           $status = -3;
-        } else {
+        }
+        else {
           $status = 1;
         }
 
@@ -1157,28 +1156,21 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           }
           else {
 
-           //
+            $existing_class = entity_load_single('cu_class', $class_id);
+            $class = (object) $values;
 
-           $existing_class = entity_load_single('cu_class', $class_id);
+            // keep status and any other fields we give users control over
+            $class->status = $existing_class->status;
 
-           $class = (object) $values;
-
-           //dsm($class);
-           //dsm($existing_class);
-
-           // keep status and any other fields we give users control over
-           $class->status = $existing_class->status;
-
-           $updated = entity_save('cu_class', $class);
-           if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
-             drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
-           }
+            $updated = entity_save('cu_class', $class);
+            if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
+              drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
+            }
           }
         }
         else {
           // if doesn't exist, add it if it's not in the list to ignore
           if (!$ignore) {
-
 
             $class = entity_create('cu_class', $values);
             $created = entity_save('cu_class', $class);
@@ -1201,14 +1193,12 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
             $existing_class->status = -1;
             $updated = entity_save('cu_class', $existing_class);
             if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
-              drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title . ' (' .$class->class_id .')', 'status');
+              drupal_set_message('Unpublished ' . $existing_class->field_class_subject[LANGUAGE_NONE][0]['value'] . " " . $existing_class->field_class_catalog_nbr[LANGUAGE_NONE][0]['value'] . " - " . $existing_class->title . ' (' . $class->class_id . ')', 'status');
             }
           }
         }
       }
-
-    } // isset
-
+    } //isset()
   } //is_object($xml)
 }
 
@@ -1233,17 +1223,17 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
   }
 
   foreach($instructor_modes as $instructor_mode) {
-    //dsm('now checking ' . $instructor_mode);
+    if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+      dsm('now checking ' . $instructor_mode);
+    }
     $response = cu_course_import_curl($institution, $term, $subject, $instructor_mode);
     $xml = simplexml_load_string($response);
 
     if (is_object($xml)) {
-
       if ($xml->IS_FAULT) {
-
         $error = (string) $xml->SCC_FAULT_RESP->detail->MSGS->MSG->DESCR;
         drupal_set_message($error, 'error');
-        return;
+        continue;
       }
 
       if(isset($xml->SEARCH_RESULT->SUBJECTS)){
