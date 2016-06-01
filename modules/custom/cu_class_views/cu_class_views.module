@@ -109,7 +109,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
     }
     // Check to see if there is only 1 campus imported
-    $total_insts = cu_class_views_get_institutions();
+    $total_inst = cu_class_views_get_institutions();
     if (count($total_inst) < 2) {
       $form['field_class_institution_value']['#value'] = current($total_inst);
       $form['field_class_institution_value']['#type'] = 'hidden';
