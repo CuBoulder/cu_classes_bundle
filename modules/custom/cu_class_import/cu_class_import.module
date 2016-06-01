@@ -1704,7 +1704,7 @@ function cu_class_import_get_subject_parent($subject, $institution) {
  * Helper funciton to get the top level of the org tree
  */
 function cu_class_import_get_subject_top($org) {
-
+  $count = 0;
   do {
     $count++;
     $patent_org = db_query('SELECT * FROM {cu_courses_organizations} WHERE code = :code', array(':code' => $org))->fetchObject();
