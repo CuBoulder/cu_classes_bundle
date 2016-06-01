@@ -109,7 +109,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
       drupal_add_css('#edit-field-class-institution-value-wrapper { display:none; }', array('group' => CSS_THEME, 'type' => 'inline'));
     }
     // Check to see if there is only 1 campus imported
-    $total_insts = cu_class_views_get_institutions();
+    $total_inst = cu_class_views_get_institutions();
     if (count($total_inst) < 2) {
       $form['field_class_institution_value']['#value'] = current($total_inst);
       $form['field_class_institution_value']['#type'] = 'hidden';
@@ -124,6 +124,7 @@ function cu_class_views_form_views_exposed_form_alter(&$form, &$form_state, $for
     $form['field_class_subject_top_level_value']['#empty_value'] = '';
 
     // Ajax for dependent options
+    $top_selected = NULL;
     /*
     $top_selected = isset($form_state['values']['field_class_subject_top_level_value']) ? $form_state['values']['field_class_subject_top_level_value'] : '';
     $form['field_class_subject_top_level_value']['#ajax'] = array(
@@ -263,33 +264,42 @@ function cu_class_views_theme_registry_alter(&$theme_registry) {
 }
 
 function cu_class_views_options_top_level() {
-  $available = cu_class_views_available_orgs();
-  $options = array();
-  $query = db_select('cu_courses_organizations', 'orgs');
-  $query->fields('orgs', array('code', 'value', 'readable_value', 'level', 'status'));
-  $query->orderBy('orgs.value', 'ASC');
-  $query->condition('orgs.level', 1, '=');
-  $query->condition('orgs.status', 1, '=');
-  $results = $query->execute()->fetchAllAssoc('code');
+  if ($cache = cache_get('cu_class_search_top_level')) {
+    $options = $cache->data;
+  } else {
 
-  $institution_codes = array(
-    'B' => 'Boulder Campus',
-    'C' => 'Colorado Springs Campus',
-    'D' => 'Denver Campus',
-  );
+    $available = cu_class_views_available_orgs();
+    $options = array();
+    $query = db_select('cu_courses_organizations', 'orgs');
+    $query->fields('orgs', array('code', 'value', 'readable_value', 'level', 'status'));
+    $query->orderBy('orgs.value', 'ASC');
+    $query->condition('orgs.level', 1, '=');
+    $query->condition('orgs.status', 1, '=');
+    $results = $query->execute()->fetchAllAssoc('code');
 
-  foreach ($results as $key => $result) {
-    if (isset($available[$key])) {
-      // Get institution code.
-      $code= substr($key, 0, 1);
-      $options[$institution_codes[$code]][$key] = $result->value;
+    $institution_codes = array(
+      'B' => 'Boulder Campus',
+      'C' => 'Colorado Springs Campus',
+      'D' => 'Denver Campus',
+    );
+
+    foreach ($results as $key => $result) {
+      if (isset($available[$key])) {
+        // Get institution code.
+        $code= substr($key, 0, 1);
+        $options[$institution_codes[$code]][$key] = $result->value;
+      }
     }
+
+    // Remove option group if only one campus present.
+    if (count($options) === 1) {
+      $options = array_shift($options);
+    }
+
+    // Save to cache
+    cache_set('cu_class_search_top_level', $options, 'cache', time() + 60 * 60 * 24);
   }
 
-  // Remove option group if only one campus present.
-  if (count($options) === 1) {
-    $options = array_shift($options);
-  }
   return $options;
 }
 
@@ -308,7 +318,6 @@ function cu_class_views_available_orgs() {
 }
 
 function cu_class_views_options_subjects($parent = NULL) {
-  // edit-field-class-subject-value-wrapper
   $options = array();
   $available = cu_class_views_available_subjects();
   $query = db_select('cu_courses_subjects', 'subjects');
@@ -324,7 +333,7 @@ function cu_class_views_options_subjects($parent = NULL) {
   $results = $query->execute()->fetchAllAssoc('code');
   foreach ($results as $key => $result) {
     if (isset($available[$key])) {
-      $options[$result->value] = $result->value;
+      $options[$key] = $result->value;
     }
   }
   // Return unique values to avoid duplicates in display.
@@ -348,16 +357,23 @@ function cu_class_views_available_subjects() {
 
 function cu_class_views_options_formats() {
   //$available_formats = cu_class_views_available_formats();
-  $options = array();
-  $query = db_select('field_data_field_class_instruction_mode_des', 'mode');
-  $query->fields('mode', array('field_class_instruction_mode_des_value'));
-  $query->distinct();
-  $query->groupBy('mode.field_class_instruction_mode_des_value');
-  $results = $query->execute()->fetchAllAssoc('field_class_instruction_mode_des_value');
-  foreach ($results as $key => $result) {
-    $options[$key] = $key;
-
+  if ($cache = cache_get('cu_class_search_formats')) {
+    $options = $cache->data;
   }
+  else {
+    $options = array();
+    $query = db_select('field_data_field_class_instruction_mode_des', 'mode');
+    $query->fields('mode', array('field_class_instruction_mode_des_value'));
+    $query->distinct();
+    $query->groupBy('mode.field_class_instruction_mode_des_value');
+    $results = $query->execute()->fetchAllAssoc('field_class_instruction_mode_des_value');
+    foreach ($results as $key => $result) {
+      $options[$key] = $key;
+    }
+    // Save to cache
+    cache_set('cu_class_search_formats', $options, 'cache', time() + 60 * 60 * 24);
+  }
+
   return $options;
 }
 
@@ -392,33 +408,47 @@ function cu_class_views_institutions($campus) {
   $campus_options = array(
     'CUBLD' => 'Boulder',
     'CUSPG' => 'Colorado Springs',
-    'CUDEV' => 'Denver',
+    'CUDEN' => 'Denver',
   );
   return $campus_options[$campus];
 }
 
 function cu_class_views_get_terms() {
-  $terms = array();
-  $query = db_select('field_data_field_class_strm', 'term');
-  $query->fields('term', array('field_class_strm_value'));
-  $query->distinct();
-  $query->groupBy('term.field_class_strm_value');
-  $results = $query->execute()->fetchAll();
-  foreach ($results as $result) {
-    $terms[] = $result->field_class_strm_value;
+  if ($cache = cache_get('cu_class_search_terms')) {
+    $terms = $cache->data;
+  }
+  else {
+    $terms = array();
+    $query = db_select('field_data_field_class_strm', 'term');
+    $query->fields('term', array('field_class_strm_value'));
+    $query->distinct();
+    $query->groupBy('term.field_class_strm_value');
+    $results = $query->execute()->fetchAll();
+    foreach ($results as $result) {
+      $terms[] = $result->field_class_strm_value;
+    }
+    // Save to cache
+    cache_set('cu_class_search_terms', $terms, 'cache', time() + 60 * 60 * 24);
   }
   return $terms;
 }
 
 function cu_class_views_get_institutions() {
-  $insts = array();
-  $query = db_select('field_data_field_class_institution', 'inst');
-  $query->fields('inst', array('field_class_institution_value'));
-  $query->distinct();
-  $query->groupBy('inst.field_class_institution_value');
-  $results = $query->execute()->fetchAll();
-  foreach ($results as $result) {
-    $insts[] = $result->field_class_institution_value;
+  if ($cache = cache_get('cu_class_search_institutions')) {
+    $insts = $cache->data;
+  }
+  else {
+    $insts = array();
+    $query = db_select('field_data_field_class_institution', 'inst');
+    $query->fields('inst', array('field_class_institution_value'));
+    $query->distinct();
+    $query->groupBy('inst.field_class_institution_value');
+    $results = $query->execute()->fetchAll();
+    foreach ($results as $result) {
+      $insts[] = $result->field_class_institution_value;
+    }
+    // Save to cache
+    cache_set('cu_class_search_institutions', $insts, 'cache', time() + 60 * 60 * 24);
   }
   return $insts;
 }

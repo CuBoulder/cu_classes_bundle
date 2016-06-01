@@ -556,7 +556,7 @@ function cu_course_import_form_submit($form, &$form_state) {
       //check to see if the subject is valid for the instruction by looking for a valid parent
       // @TODO Cache this result?
       if (cu_class_import_get_subject_parent($subject, $institution[1])) {
-        dsm($institution[1]);
+        //dsm($institution[1]);
         cu_course_import($institution[1], $term, $subject, $instructor_modes);
       }
     }
@@ -1006,7 +1006,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           $online_codes = array('OL', 'HY', 'SO', 'H2', 'H1');
            if(!in_array($instruction_mode, $online_codes)) {
              $ignore = TRUE;
-             dsm('ignoring because of instructor mode');
+             if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
+               dsm('ignoring because of instructor mode');
+             }
            }
         }
 
@@ -1215,6 +1217,21 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
  */
 function cu_course_import($institution, $term, $subject, $instructor_modes) {
 
+  // Check to see if subject has been updated recently.
+  // If so, skip the import.
+  $institution_codes = array(
+    'CUBLD' => 'B',
+    'CUSPG' => 'C',
+    'CUDEN' => 'D',
+  );
+
+  $subject_last_update = db_query('SELECT c.updated FROM {cu_courses_subjects} c WHERE c.code = :code AND c.parent_org LIKE :org', array(':code' => $subject, ':org' => db_like($institution_codes[$institution]) . '%'))->fetchCol();
+  $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
+
+  if (REQUEST_TIME - $subject_last_update[0] <= $cache_duration && $subject_last_update[0] != NULL) {
+    return;
+  }
+
   foreach($instructor_modes as $instructor_mode) {
     //dsm('now checking ' . $instructor_mode);
     $response = cu_course_import_curl($institution, $term, $subject, $instructor_mode);
@@ -1274,6 +1291,13 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
       } // isset
     }  // is_object
   } // foreach instructor_mode
+
+  // Update subject updated time for caching.
+  db_update('cu_courses_subjects')
+    ->fields(array('updated' => REQUEST_TIME))
+    ->condition('code', $subject, '=')
+    ->execute();
+
   return '';
 }
 
@@ -1325,7 +1349,7 @@ function cu_class_import_truncate_subjects() {
  * Get a list of subjects to send to /course/import form.
  */
 function _cu_class_import_subject_options() {
-  $query = db_query("SELECT code, CONCAT(code,' - ',value) as value FROM {cu_courses_subjects}");
+  $query = db_query("SELECT code, CONCAT(code,' - ',value) as value FROM {cu_courses_subjects} ORDER BY updated ASC");
   $result = $query->fetchAllKeyed();
   return $result;
 }
@@ -1416,6 +1440,7 @@ function _cu_class_import_get_organizations($institution = 'C-CUBLD', $level = 0
         'parent_org' => $institution,
         'status' => 1,
         'readable_value' => $readable_name,
+        //'updated' => REQUEST_TIME,
       ))
       ->execute();
 
@@ -1508,6 +1533,7 @@ function _cu_class_import_get_subjects($departments) {
         'parent_org' => $subject['organization'],
         'status' => 1,
         'readable_value' => $readable_name,
+        'updated' => REQUEST_TIME,
       ))
       ->execute();
   }
@@ -1551,11 +1577,39 @@ function cu_class_import_cron_queue_info() {
     'worker callback' => 'cu_class_import_queue_process',
     'time' => 60*120,  // allow this to run for 2 hours in the background?
   );
+  $queues['cu_course_update'] = array(
+    'worker callback' => 'cu_class_import_course_queue_process',
+    'time' => 60*120,  // allow this to run for 2 hours in the background?
+  );
+  $queues['cu_subject_update'] = array(
+    'worker callback' => 'cu_class_import_subject_queue_process',
+    'time' => 60*120,  // allow this to run for 2 hours in the background?
+  );
   return $queues;
 }
 
 /**
- * Worker callback defined in hook_cron_queue_info()
+ * Worker callback defined in hook_cron_queue_info().
+ *
+ * @param string $subject
+ *   Code of institution to pull courses from.
+ */
+function cu_class_import_course_queue_process($subject) {
+  cu_class_import_course_batch_process($subject, $context = NULL);
+}
+
+/**
+ * Worker callback defined in hook_cron_queue_info().
+ *
+ * @param string $institution
+ *   Code of institution to pull courses from.
+ */
+function cu_class_import_subject_queue_process($institution) {
+  cu_class_import_populate_subjects($institution);
+}
+
+/**
+ * Worker callback defined in hook_cron_queue_info().
  */
 function cu_class_import_queue_process($course) {
 
@@ -1576,12 +1630,26 @@ function cu_class_import_queue_process($course) {
  */
 function cu_class_import_cron() {
   if (variable_get('cu_class_import_on_cron', 1)) {
+
     $queue = DrupalQueue::get('cu_class_update');
     // get all courses
     $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
-
     foreach ($courses as $course) {
       $queue->createItem($course);
+    }
+
+    $course_queue = DrupalQueue::get('cu_course_update');
+    // get all subjects
+    $subjects = _cu_class_import_subject_options();
+    foreach ($subjects as $key => $subject) {
+      $course_queue->createItem($key);
+    }
+
+    $subject_queue = DrupalQueue::get('cu_subject_update');
+    // get all institutions
+    $institutions = variable_get('cu_class_import_institutions', array());
+    foreach ($institutions as $institution) {
+      $subject_queue->createItem($institution);
     }
   }
 }
@@ -1636,7 +1704,7 @@ function cu_class_import_get_subject_parent($subject, $institution) {
  * Helper funciton to get the top level of the org tree
  */
 function cu_class_import_get_subject_top($org) {
-
+  $count = 0;
   do {
     $count++;
     $patent_org = db_query('SELECT * FROM {cu_courses_organizations} WHERE code = :code', array(':code' => $org))->fetchObject();
