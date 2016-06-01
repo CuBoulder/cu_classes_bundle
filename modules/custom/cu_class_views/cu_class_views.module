@@ -300,6 +300,7 @@ function cu_class_views_options_top_level() {
     cache_set('cu_class_search_top_level', $options, 'cache', time() + 60 * 60 * 24);
   }
 
+
   return $options;
 }
 
@@ -318,23 +319,30 @@ function cu_class_views_available_orgs() {
 }
 
 function cu_class_views_options_subjects($parent = NULL) {
-  $options = array();
-  $available = cu_class_views_available_subjects();
-  $query = db_select('cu_courses_subjects', 'subjects');
-  $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status'));
-  $query->orderBy('subjects.value', 'ASC');
-  $query->condition('subjects.status', 1, '=');
-
-  if ($parent && ($parent != '')) {
-    $query->join('cu_courses_organizations', 'orgs', 'subjects.parent_org = orgs.code');
-    $query->fields('orgs', array('code', 'parent_org'));
-    $query->condition('orgs.parent_org', $parent, '=');
+  if ($cache = cache_get('cu_class_search_subjects')) {
+    $options = $cache->data;
   }
-  $results = $query->execute()->fetchAllAssoc('code');
-  foreach ($results as $key => $result) {
-    if (isset($available[$key])) {
-      $options[$key] = $result->value;
+  else {
+    $options = array();
+    $available = cu_class_views_available_subjects();
+    $query = db_select('cu_courses_subjects', 'subjects');
+    $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status'));
+    $query->orderBy('subjects.value', 'ASC');
+    $query->condition('subjects.status', 1, '=');
+
+    if ($parent && ($parent != '')) {
+      $query->join('cu_courses_organizations', 'orgs', 'subjects.parent_org = orgs.code');
+      $query->fields('orgs', array('code', 'parent_org'));
+      $query->condition('orgs.parent_org', $parent, '=');
     }
+    $results = $query->execute()->fetchAllAssoc('code');
+    foreach ($results as $key => $result) {
+      if (isset($available[$key])) {
+        $options[$result->value] = $result->value;
+      }
+    }
+    // Save to cache
+    cache_set('cu_class_search_subjects', $options, 'cache', time() + 60 * 60 * 24);
   }
   // Return unique values to avoid duplicates in display.
   return array_unique($options);
