@@ -1430,7 +1430,7 @@ function _cu_class_import_get_organizations($institution = 'C-CUBLD', $level = 0
         'parent_org' => $institution,
         'status' => 1,
         'readable_value' => $readable_name,
-        //'updated' => REQUEST_TIME,
+        'updated' => REQUEST_TIME,
       ))
       ->execute();
 
