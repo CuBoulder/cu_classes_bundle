@@ -10,6 +10,9 @@
              : <?php print $content['field_class_crs_topic_descr'][0]['#markup']; ?>
 
           <?php endif; ?>
+          <?php if (!empty($content['field_class_units_acad_prog'])): ?>
+            <p><?php print number_format($content['field_class_units_acad_prog'][0]['#markup'], 1, '.', '') ?> Credit Hours</p>
+          <?php endif; ?>
           </h3>
         </div>
 
