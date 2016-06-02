@@ -795,7 +795,7 @@ function cu_class_import_batch_update() {
   );
 
   // get all courses
-  $results = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
+  $results = db_query('SELECT * FROM {cu_course} ORDER BY changed ASC');
 
   // @TODO: Check to see when the last time this course was updated?
   // Currently the changed timestamp is only updated when the course
@@ -932,16 +932,6 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
   if (!isset($subject)) {
     $course = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => (string) $course_id))->fetchObject();
     $subject = $course->subject;
-
-
-    // any time we import classes for a course, update the course
-    // this will change the sort order of the next batch
-    $result = db_update('cu_course')
-    ->fields(array(
-        'changed' => REQUEST_TIME,
-      ))
-    ->condition('course_id', $course_id, '=')
-    ->execute();
   }
 
   $response = cu_class_import_curl($institution, $term, $subject, $course_id);
@@ -1162,6 +1152,8 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
             // keep status and any other fields we give users control over
             $class->status = $existing_class->status;
 
+            dpm($class);
+
             $updated = entity_save('cu_class', $class);
             if (variable_get('cu_class_import_debug', 0) && user_access('administer class content')) {
               drupal_set_message('Updated local copy of Class: ' . $subject . ' ' . $catalog_nbr . ' ' . $section . ' - ' . $title . ' (' . $class_id . ')');
@@ -1198,6 +1190,16 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           }
         }
       }
+      // any time we import classes for a course, update the course
+      // this will change the sort order of the next batch
+      $result = db_update('cu_course')
+        ->fields(array(
+          'changed' => REQUEST_TIME,
+        ))
+        ->condition('course_id', $course_id, '=')
+        ->execute();
+      dpm('updated timestamp for: ' . $course_id);
+
     } //isset()
   } //is_object($xml)
 }
