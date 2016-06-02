@@ -53,7 +53,7 @@ function cu_class_import_schema() {
       'updated' => array(
         'description' => 'Last time updated',
         'type' => 'int',
-        'not null' => TRUE,
+        'not null' => FALSE,
       ),
     ),
     'primary key' => array('code'),
@@ -101,7 +101,7 @@ function cu_class_import_schema() {
       'updated' => array(
         'description' => 'Last time updated',
         'type' => 'int',
-        'not null' => TRUE,
+        'not null' => FALSE,
       ),
     ),
     'primary key' => array('id'),
@@ -222,7 +222,7 @@ function cu_class_import_update_7002() {
   $spec = array(
     'description' => 'Last time updated',
     'type' => 'int',
-    'not null' => TRUE,
+    'not null' => FALSE,
   );
 
   if (!db_field_exists('cu_courses_subjects', 'updated')) {
