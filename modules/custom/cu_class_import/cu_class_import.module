@@ -1222,8 +1222,6 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         ))
         ->condition('course_id', $course_id, '=')
         ->execute();
-      dpm('updated timestamp for: ' . $course_id);
-
     } //isset()
   } //is_object($xml)
 }
@@ -1658,16 +1656,16 @@ function cu_class_import_cron() {
     // get all subjects
     $subjects = _cu_class_import_subject_options();
     // Limit by cron batch size.
-    $batch_size = (int) variable_get('cu_class_import_course_cron_batch_size', 50);
-    $subjects = array_slice($subjects, 0, $batch_size);
+    $course_batch_size = (int) variable_get('cu_class_import_course_cron_batch_size', 50);
+    $subjects = array_slice($subjects, 0, $course_batch_size);
     foreach ($subjects as $key => $subject) {
       $course_queue->createItem($key);
     }
 
     $queue = DrupalQueue::get('cu_class_update');
     // get all courses limited by cron batch size.
-    $batch_size = (int) variable_get('cu_class_import_class_cron_batch_size', 50);
-    $courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $batch_size);
+    $class_batch_size = (int) variable_get('cu_class_import_class_cron_batch_size', 50);
+    $courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $class_batch_size);
     foreach ($courses as $course) {
       $queue->createItem($course);
     }
