@@ -794,7 +794,7 @@ function cu_class_import_batch_update() {
     'error_message' => t('Update has encountered an error.')
   );
 
-  // get all courses
+  // get all courses.
   $results = db_query('SELECT * FROM {cu_course} ORDER BY changed ASC');
 
   // @TODO: Check to see when the last time this course was updated?
@@ -1623,25 +1623,30 @@ function cu_class_import_queue_process($course) {
 function cu_class_import_cron() {
   if (variable_get('cu_class_import_on_cron', 1)) {
 
-    $queue = DrupalQueue::get('cu_class_update');
-    // get all courses
-    $courses = db_query('SELECT * FROM {cu_course} ORDER BY changed DESC');
-    foreach ($courses as $course) {
-      $queue->createItem($course);
-    }
-
-    $course_queue = DrupalQueue::get('cu_course_update');
-    // get all subjects
-    $subjects = _cu_class_import_subject_options();
-    foreach ($subjects as $key => $subject) {
-      $course_queue->createItem($key);
-    }
-
     $subject_queue = DrupalQueue::get('cu_subject_update');
     // get all institutions
     $institutions = variable_get('cu_class_import_institutions', array());
     foreach ($institutions as $institution) {
       $subject_queue->createItem($institution);
+    }
+
+    $course_queue = DrupalQueue::get('cu_course_update');
+    // get all subjects
+    $subjects = _cu_class_import_subject_options();
+    // Limit by cron batch size.
+    $batch_size = (int) variable_get('cu_class_import_course_batch_size', 50);
+    $subjects = array_slice($subjects, 0, $batch_size);
+    foreach ($subjects as $key => $subject) {
+      $course_queue->createItem($key);
+    }
+
+    $queue = DrupalQueue::get('cu_class_update');
+    // get all courses limited by cron batch size.
+    $batch_size = (int) variable_get('cu_class_import_class_batch_size', 50);
+    $courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $batch_size);
+    dpm($courses);
+    foreach ($courses as $course) {
+      $queue->createItem($course);
     }
   }
 }
