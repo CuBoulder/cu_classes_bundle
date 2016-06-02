@@ -308,6 +308,32 @@ function class_import_admin_settings($form, &$form_state) {
     '#description' => t('This will update all classes for all courses when cron is run'),
   );
 
+  $form['adv']['cron_settings'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      // Hide the settings when the cancel notify checkbox is disabled.
+      'visible' => array(
+        ':input[name="cu_class_import_on_cron"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['adv']['cron_settings']['cu_class_import_course_cron_batch_size'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_course_cron_batch_size', 50),
+    '#title' => t('Course Batch Size'),
+    '#description' => t('Limit the number of courses imported at a time via cron.'),
+    '#element_validate' => array('element_validate_integer_positive'),
+  );
+
+  $form['adv']['cron_settings']['cu_class_import_class_cron_batch_size'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cu_class_import_class_cron_batch_size', 50),
+    '#title' => t('Class Batch Size'),
+    '#description' => t('Limit the number of classes imported at a time via cron.'),
+    '#element_validate' => array('element_validate_integer_positive'),
+  );
+
   $form['adv']['cu_class_import_on_load'] = array(
     '#type' => 'checkbox',
     '#default_value' => variable_get('cu_class_import_on_load', 1),
@@ -1644,7 +1670,6 @@ function cu_class_import_cron() {
     // get all courses limited by cron batch size.
     $batch_size = (int) variable_get('cu_class_import_class_batch_size', 50);
     $courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $batch_size);
-    dpm($courses);
     foreach ($courses as $course) {
       $queue->createItem($course);
     }
