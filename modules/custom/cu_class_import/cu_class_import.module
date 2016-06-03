@@ -169,14 +169,14 @@ function class_import_admin_settings($form, &$form_state) {
 
   $form['lov_service']['cu_organization_import_api_url'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root='),
+    '#default_value' => variable_get('cu_organization_import_api_url', 'esbprd.prod.cu.edu/All_Cs_Lov_OrgTree?root='),
     '#title' => t('Base URL of Org LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
   );
 
   $form['lov_service']['cu_subject_import_api_url'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root='),
+    '#default_value' => variable_get('cu_subject_import_api_url', 'esbprd.prod.cu.edu/All_Cs_Lov_Subject?root='),
     '#title' => t('Base URL of Subject LoV (Lookup of Value Service)'),
     '#description' => t('Do not include "https://" in URL. All requests will be made over a secure connection.'),
   );
@@ -1400,7 +1400,7 @@ function _cu_class_import_get_organizations($institution = 'C-CUBLD', $level = 0
   // Setup the cURL request.
   // Using basic authentication this way, instead of curl_setopt() because
   // authentication wasn't working with that method.
-  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_organization_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
+  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_organization_import_api_url', 'esbprd.prod.cu.edu/All_Cs_Lov_OrgTree?root=') . $institution);
 
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
@@ -1496,7 +1496,7 @@ function _cu_class_import_get_subjects($departments) {
     // Setup the cURL request.
     // Using basic authentication this way, instead of curl_setopt() because
     // authentication wasn't working with that method.
-    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'osbtst.dev.cu.edu/All_Cs_Lov_Subject?root=') . $key);
+    $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'esbprd.prod.cu.edu/All_Cs_Lov_Subject?root=') . $key);
 
     // Return the transfer as a string of the values if the curl succeeds.
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
