@@ -13,7 +13,7 @@ function cu_class_search_settings($form, $form_state) {
   $options = array(
     'CUBLD' => 'Boulder',
     'CUSPG' => 'Colorado Springs',
-    'CUDEV' => 'Denver',
+    'CUDEN' => 'Denver',
   );
   $form['cu_class_search_campus'] = array(
     '#type' => 'checkboxes',
