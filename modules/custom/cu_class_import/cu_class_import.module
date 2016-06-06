@@ -1022,7 +1022,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $campus_codes_to_ignore = explode(",", $campus_codes);
 
         // Limited instructor modes.
-        if ($instruction_modes = variable_get('cu_class_import_course_instructor_modes', array(NULL))) {
+        if (($instruction_modes = variable_get('cu_class_import_course_instructor_modes', array(NULL))) !== array(NULL)) {
           if (!in_array($instruction_mode, $instruction_modes)) {
             $ignore = TRUE;
             if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
