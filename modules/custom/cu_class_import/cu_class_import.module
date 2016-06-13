@@ -1279,17 +1279,17 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
           $catalog_number = (string) $course->CATALOG_NBR;
           $title = (string) $course->COURSE_TITLE_LONG;
 
-          // check to see if already exists...˝
-          // if doesn't exist, add it
-          $count = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->rowCount();
+          // Check to see if already exists. If doesn't exist, add it.
+          $course_uuid = $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+          $count = db_query('SELECT * FROM {cu_course} WHERE id = :id', array(':id' => $course_uuid))->rowCount();
 
-          if($count) {
+          if ($count) {
             if (variable_get('cu_class_import_debug', 0)) {
               drupal_set_message('Skipped - Course Already Existed: ' . $title);
             }
-          } else {
-            // temp check to see if title exists before importing
-            if ($title)
+          }
+          // Temp check to see if title exists before importing.
+          elseif ($title) {
             $result = db_insert('cu_course')
               ->fields(array(
                 'course_id' => $course_id,
@@ -1300,6 +1300,7 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
                 'term_id' => $term,
                 'inst' => $institution,
                 'catalog_nbr' => $catalog_number,
+                'id' => $course_uuid,
               ))
               ->execute();
 
