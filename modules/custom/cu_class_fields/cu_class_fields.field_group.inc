@@ -24,12 +24,12 @@ function cu_class_fields_field_group_info() {
     'weight' => '12',
     'children' => array(
       0 => 'field_class_campus_des',
-      1 => 'field_class_ssr_component',
-      2 => 'field_class_units_acad_prog',
-      3 => 'field_class_acad_career',
-      4 => 'field_class_cancel_dt',
-      5 => 'field_class_crs_topic_descr',
-      6 => 'field_class_crse_attr_value_brcq',
+      1 => 'field_class_cancel_dt',
+      2 => 'field_class_crs_topic_descr',
+      3 => 'field_class_crse_attr_value_brcq',
+      4 => 'field_class_ssr_component',
+      5 => 'field_class_units_acad_prog',
+      6 => 'field_class_acad_career',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
