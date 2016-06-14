@@ -1319,6 +1319,46 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_uuid'.
+  $field_instances['cu_class-class-field_class_uuid'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'The unique identifier for the class combing course id, institution, term, and subject. ',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 38,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_uuid',
+    'label' => 'UUID',
+    'required' => 0,
+    'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 31,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_wait_tot'.
   $field_instances['cu_class-class-field_class_wait_tot'] = array(
     'bundle' => 'class',
@@ -1395,7 +1435,9 @@ function cu_class_fields_field_default_field_instances() {
   t('START_DT');
   t('STRM');
   t('SUBJECT');
+  t('The unique identifier for the class combing course id, institution, term, and subject. ');
   t('UNITS_ACAD_PROG');
+  t('UUID');
   t('WAIT_TOT');
 
   return $field_instances;

@@ -46,23 +46,57 @@ function cu_class_schema() {
 }
 
 /**
- * Add status to class entity
- */
-function cu_class_update_7001() {
-  db_add_field('cu_class', 'status',
-    array(
-        'description' => 'Status',
-        'type' => 'int',
-        'not null' => FALSE,
-        'default' => '1',
-      )
-  );
-}
-
-/**
  * Implements hook_uninstall().
  */
 function cu_class_uninstall() {
   // Delete field instances related to Class entity
   field_attach_delete_bundle('cu_class', 'cu_class');
+}
+
+/**
+ * Add status to class entity
+ */
+function cu_class_update_7001() {
+  db_add_field('cu_class', 'status',
+    array(
+      'description' => 'Status',
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => '1',
+    )
+  );
+}
+
+/**
+ * Add UUID field to classes.
+ */
+function cu_class_update_7003() {
+
+  // Revert field bases to add UUID field.
+  print_r('starting feature revert');
+  $start = microtime(true);
+  //features_revert_module('cu_class_fields');
+  $f = features_get_features('cu_class_fields');
+  $components = array_keys($f->info['features']);
+  features_revert(array($f->name => $components));
+  $end = microtime(true);
+  print_r($end - $start);
+
+  print_r('starting entity load');
+  $start = microtime(true);
+  $classes = entity_load('cu_class');
+  $end = microtime(true);
+  print_r($end - $start);
+
+  print_r('saving classes');
+  $start = microtime(true);
+  foreach($classes as $key => $class) {
+    $class->field_class_uuid[LANGUAGE_NONE][0]['value'] = $class->field_class_institution[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_strm[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_crse_id[LANGUAGE_NONE][0]['value'];
+    entity_save('cu_class', $class);
+  }
+  $end = microtime(true);
+  print_r($end - $start);
+
+  // Combine values for new key.
+  //$result = db_query("UPDATE {cu_course} SET id = CONCAT(inst, '-', subject, '-', term_id, '-', course_id)");
 }

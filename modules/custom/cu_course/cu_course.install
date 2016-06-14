@@ -56,8 +56,15 @@ function cu_course_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'id' => array(
+        'description' => 'Unique ID of course',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 128,
+      ),
     ),
-    'primary key' => array('course_id'),
+    'primary key' => array('id'),
   );
 
   return $schema;

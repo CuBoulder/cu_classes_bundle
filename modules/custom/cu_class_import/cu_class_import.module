@@ -725,7 +725,7 @@ function cu_class_import_form_submit($form, &$form_state) {
 
   //@TODO: Term and Institution could come from form.
   $course = db_query('SELECT subject, inst, term_id FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchObject();
-
+  //$course->term_id = 2167;
   cu_class_import($course->inst, $course->term_id, $course->subject, $course_id);
 
   cache_clear_all('cu_class_search_subjects_available', 'cache');
@@ -1150,6 +1150,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE_LOVDescr;
         $values['field_class_ssr_component'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_COMPONENT;
 
+        // Combine values to make UUID field.
+        $uuid = (string) $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+        $values['field_class_uuid'][LANGUAGE_NONE][0]['value'] = $uuid;
 
         //SSR_COMPONENT Description?
 
@@ -1162,7 +1165,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
         // check to see if class already exists and when it was last updated
-        $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
+        $last_updated = db_query('SELECT field_class_uuid_value FROM {field_data_field_class_uuid} WHERE entity_id = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 
@@ -1205,7 +1208,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
       // remove classes for this course that are no longer returned by API or Primer
       // $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
-      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
+      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_uuid} WHERE field_class_uuid_value = :id', array(':id' => $uuid));
 
       foreach ($all_classes as $class) {
         if (!in_array($class->class_id, $classes)) {
