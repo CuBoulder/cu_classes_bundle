@@ -70,7 +70,7 @@ function cu_class_update_7001() {
 /**
  * Add UUID field to classes.
  */
-function cu_class_update_7003() {
+function cu_class_update_7002() {
 
   // Revert field bases to add UUID field.
   $f = features_get_features('cu_class_fields');
