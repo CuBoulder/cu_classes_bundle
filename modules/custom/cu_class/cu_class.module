@@ -427,7 +427,7 @@ function cu_class_preprocess_entity(&$vars) {
     } else {
       $vars['available'] = $available . ' seats available';
     }
-    if ($vars['content']['field_class_crse_attr'][0]['#markup'] == 'BCRQ') {
+    if (isset($vars['content']['field_class_crse_attr']) && $vars['content']['field_class_crse_attr'][0]['#markup'] == 'BCRQ') {
       $reqs = $vars['content']['field_class_crse_attr_value'][0]['#markup'];
       $vars['course_requirements'] = cu_class_core_requirements($reqs);
     }
