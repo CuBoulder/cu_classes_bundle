@@ -345,7 +345,10 @@ function cu_class_views_options_subjects($parent = NULL) {
     cache_set('cu_class_search_subjects', $options, 'cache', time() + 60 * 60 * 24);
   }
   // Return unique values to avoid duplicates in display.
-  return array_unique($options);
+  $options = array_unique($options);
+  // Sort options alphabetically since first unique value might be out of order.
+  asort($options);
+  return $options;
 }
 
 function cu_class_views_available_subjects() {
