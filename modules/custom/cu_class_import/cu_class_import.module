@@ -853,7 +853,7 @@ function cu_class_import_batch_process($course, &$context) {
   $subject = $course->subject;
   $course_id = $course->course_id;
 
-  cu_class_import($institution, $term, $subject, $course_id, 1);
+  cu_class_import($institution, $term, $subject, $course_id);
   // this is so we don't overwhelm the servers
   sleep(variable_get('cu_class_import_delay', '2'));
 }
@@ -1106,6 +1106,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           'course_id' => $course_id,
           'type' => 'class',
           'status' => $status,
+          'term_id' => $term,
+          'subject' => $subject,
+          'inst' => $institution,
         );
 
         $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
@@ -1165,7 +1168,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_instruction_mode'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE;
 
         // check to see if class already exists and when it was last updated
-        $last_updated = db_query('SELECT field_class_uuid_value FROM {field_data_field_class_uuid} WHERE entity_id = :class_id', array(':class_id' => $uuid))->fetchField();
+        $last_updated = db_query('SELECT field_class_uuid_value FROM {field_data_field_class_uuid} WHERE field_class_uuid_value = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 

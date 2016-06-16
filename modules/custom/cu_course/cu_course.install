@@ -10,10 +10,11 @@ function cu_course_schema() {
     'description' => 'The base table for Course.',
     'fields' => array(
       'course_id' => array(
-        'description' => 'Primary key for Course.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
+        'description' => 'Course ID',
+        'type' => 'int',
+        'unsigned' => FALSE,
         'not null' => TRUE,
+        'length' => 32,
       ),
       'catalog_nbr' => array(
         'description' => 'Catalog Number',
