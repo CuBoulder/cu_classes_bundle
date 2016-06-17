@@ -893,9 +893,6 @@ function cu_class_import_course_batch_update() {
   // get all courses
   //$results = db_query('SELECT * FROM {cu_course}');
   $subjects = _cu_class_import_subject_options();
-  $query = db_query("SELECT code FROM {cu_courses_subjects} WHERE id LIKE 'B%' ORDER BY updated ASC")->fetchCol();
-  print_r($query);
-  die();
   foreach ($subjects as $key => $subject) {
     $batch['operations'][] = array('cu_class_import_course_batch_process', array($key));
   }
