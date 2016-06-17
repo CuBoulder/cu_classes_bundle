@@ -853,7 +853,7 @@ function cu_class_import_batch_process($course, &$context) {
   $subject = $course->subject;
   $course_id = $course->course_id;
 
-  cu_class_import($institution, $term, $subject, $course_id, 1);
+  cu_class_import($institution, $term, $subject, $course_id);
   // this is so we don't overwhelm the servers
   sleep(variable_get('cu_class_import_delay', '2'));
 }
@@ -1105,6 +1105,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           'course_id' => $course_id,
           'type' => 'class',
           'status' => $status,
+          'term_id' => $term,
+          'subject' => $subject,
+          'inst' => $institution,
         );
 
         $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
@@ -1149,6 +1152,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE_LOVDescr;
         $values['field_class_ssr_component'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_COMPONENT;
 
+        // Combine values to make UUID field.
+        $uuid = (string) $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+        $values['field_class_uuid'][LANGUAGE_NONE][0]['value'] = $uuid;
 
         //SSR_COMPONENT Description?
 
@@ -1162,7 +1168,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
         // check to see if class already exists and when it was last updated
         //$last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
-        $last_updated = db_query('SELECT lu.field_class_last_updated_value FROM {field_data_field_class_last_updated} lu LEFT JOIN {field_data_field_class_uuid} id ON lu.entity_id = id.entity_id WHERE id.field_class_uuid_value = :class_id', array(':class_id' => 'CUDEN-ARCH-2164-124235'))->fetchField();
+        $last_updated = db_query('SELECT lu.field_class_last_updated_value FROM {field_data_field_class_last_updated} lu LEFT JOIN {field_data_field_class_uuid} id ON lu.entity_id = id.entity_id WHERE id.field_class_uuid_value = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 
@@ -1205,7 +1211,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
       // remove classes for this course that are no longer returned by API or Primer
       // $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
-      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
+      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_uuid} WHERE field_class_uuid_value = :id', array(':id' => $uuid));
 
       foreach ($all_classes as $class) {
         if (!in_array($class->class_id, $classes)) {
@@ -1282,17 +1288,17 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
           $catalog_number = (string) $course->CATALOG_NBR;
           $title = (string) $course->COURSE_TITLE_LONG;
 
-          // check to see if already exists...˝
-          // if doesn't exist, add it
-          $count = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->rowCount();
+          // Check to see if already exists. If doesn't exist, add it.
+          $course_uuid = $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+          $count = db_query('SELECT * FROM {cu_course} WHERE id = :id', array(':id' => $course_uuid))->rowCount();
 
-          if($count) {
+          if ($count) {
             if (variable_get('cu_class_import_debug', 0)) {
               drupal_set_message('Skipped - Course Already Existed: ' . $title);
             }
-          } else {
-            // temp check to see if title exists before importing
-            if ($title)
+          }
+          // temp check to see if title exists before importing
+          elseif ($title) {
               $result = db_insert('cu_course')
                 ->fields(array(
                   'course_id' => $course_id,
@@ -1303,6 +1309,7 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
                   'term_id' => $term,
                   'inst' => $institution,
                   'catalog_nbr' => $catalog_number,
+                  'id' => $course_uuid,
                 ))
                 ->execute();
 
