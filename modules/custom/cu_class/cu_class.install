@@ -87,7 +87,7 @@ function cu_class_update_7001() {
 /**
  * Add UUID field to classes.
  */
-function cu_class_update_7005() {
+function cu_class_update_7002() {
 
   db_add_field('cu_class', 'term_id',
     array(
