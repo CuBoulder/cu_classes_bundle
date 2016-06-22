@@ -340,7 +340,7 @@ function cu_class_views_options_subjects($parent = NULL) {
     dpm($available);
     foreach ($results as $key => $result) {
       if (isset($available[$key])) {
-        $options[$result->value] = $result->value;
+        $options[$result->value] = $result->readable_value;
       }
     }
     // Save to cache
