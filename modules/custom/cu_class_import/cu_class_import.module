@@ -1171,7 +1171,6 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
         // check to see if class already exists and when it was last updated
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
-        //$last_updated = db_query('SELECT lu.field_class_last_updated_value FROM {field_data_field_class_last_updated} lu LEFT JOIN {field_data_field_class_uuid} id ON lu.entity_id = id.entity_id WHERE id.field_class_uuid_value = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 
