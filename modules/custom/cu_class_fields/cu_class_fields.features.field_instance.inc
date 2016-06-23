@@ -1204,6 +1204,46 @@ function cu_class_fields_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'cu_class-class-field_class_subject_display'.
+  $field_instances['cu_class-class-field_class_subject_display'] = array(
+    'bundle' => 'class',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 39,
+      ),
+    ),
+    'entity_type' => 'cu_class',
+    'fences_wrapper' => 'div_div_div',
+    'field_name' => 'field_class_subject_display',
+    'label' => 'Subject Readable Value',
+    'required' => 0,
+    'settings' => array(
+      'linkit' => array(
+        'button_text' => 'Search',
+        'enable' => 0,
+        'profile' => '',
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 32,
+    ),
+  );
+
   // Exported field_instance: 'cu_class-class-field_class_subject_parent'.
   $field_instances['cu_class-class-field_class_subject_parent'] = array(
     'bundle' => 'class',
@@ -1435,6 +1475,7 @@ function cu_class_fields_field_default_field_instances() {
   t('START_DT');
   t('STRM');
   t('SUBJECT');
+  t('Subject Readable Value');
   t('The unique identifier for the class combing course id, institution, term, and subject. ');
   t('UNITS_ACAD_PROG');
   t('UUID');

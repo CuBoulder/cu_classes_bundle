@@ -143,3 +143,16 @@ function cu_class_update_7002() {
   db_drop_index('cu_class', 'class_id');
   db_add_primary_key('cu_class', array('class_id', 'subject', 'inst', 'term_id'));
 }
+
+/**
+ * Add subject readable value to classes.
+ */
+function cu_class_update_7003() {
+
+  // Revert field bases to add subject display field.
+  $f = features_get_features('cu_class_fields');
+  $components = array_keys($f->info['features']);
+  features_revert(array($f->name => $components));
+
+
+}
