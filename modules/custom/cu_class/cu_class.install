@@ -26,6 +26,23 @@ function cu_class_schema() {
         'type' => 'int',
         'not null' => FALSE,
       ),
+      'term_id' => array(
+        'description' => 'Term ID',
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'subject' => array(
+        'description' => 'Subject',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => FALSE,
+      ),
+      'inst' => array(
+        'description' => 'Code of Institution',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => FALSE,
+      ),
       'type' => array(
         'description' => 'The type (bundle) of this class',
         'type' => 'varchar',
@@ -39,24 +56,10 @@ function cu_class_schema() {
         'default' => '1',
       ),
     ),
-    'primary key' => array('class_id'),
+    'primary key' => array('class_id', 'subject', 'inst', 'term_id'),
   );
 
   return $schema;
-}
-
-/**
- * Add status to class entity
- */
-function cu_class_update_7001() {
-  db_add_field('cu_class', 'status',
-    array(
-        'description' => 'Status',
-        'type' => 'int',
-        'not null' => FALSE,
-        'default' => '1',
-      )
-  );
 }
 
 /**
@@ -65,4 +68,78 @@ function cu_class_update_7001() {
 function cu_class_uninstall() {
   // Delete field instances related to Class entity
   field_attach_delete_bundle('cu_class', 'cu_class');
+}
+
+/**
+ * Add status to class entity
+ */
+function cu_class_update_7001() {
+  db_add_field('cu_class', 'status',
+    array(
+      'description' => 'Status',
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => '1',
+    )
+  );
+}
+
+/**
+ * Add UUID field to classes.
+ */
+function cu_class_update_7002() {
+
+  db_add_field('cu_class', 'term_id',
+    array(
+      'description' => 'Term ID',
+      'type' => 'int',
+      'length' => 10,
+      'not null' => FALSE,
+    )
+  );
+  db_add_field('cu_class', 'subject',
+    array(
+      'description' => 'Subject',
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    )
+  );
+  db_add_field('cu_class', 'inst',
+    array(
+      'description' => 'Code of Institution',
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    )
+  );
+
+  // Revert field bases to add UUID field.
+  $f = features_get_features('cu_class_fields');
+  $components = array_keys($f->info['features']);
+  features_revert(array($f->name => $components));
+
+  // Save each class with new UUID field.
+  $classes = entity_load('cu_class');
+  foreach ($classes as $key => $class) {
+    $class->field_class_uuid[LANGUAGE_NONE][0]['value'] = $class->field_class_institution[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_subject[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_strm[LANGUAGE_NONE][0]['value'] . '-' . $class->field_class_crse_id[LANGUAGE_NONE][0]['value'];
+    $class->subject = $class->field_class_subject[LANGUAGE_NONE][0]['value'];
+    $class->term_id = $class->field_class_strm[LANGUAGE_NONE][0]['value'];
+    $class->inst = $class->field_class_institution[LANGUAGE_NONE][0]['value'];
+    entity_save('cu_class', $class);
+  }
+
+  // Change definition of course_id to allow id field to become primary key.
+  db_change_field('cu_class', 'class_id', 'class_id', array(
+    'description' => 'Course ID',
+    'type' => 'int',
+    'unsigned' => FALSE,
+    'not null' => TRUE,
+    'length' => 32,
+  ));
+
+  // Change primary keys.
+  db_drop_primary_key('cu_class');
+  db_drop_index('cu_class', 'class_id');
+  db_add_primary_key('cu_class', array('class_id', 'subject', 'inst', 'term_id'));
 }

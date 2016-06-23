@@ -229,10 +229,10 @@ function class_import_admin_settings($form, &$form_state) {
 
   //@TODO: Add configuration for active institutions, terms, and subjects
   $form['terms'] = array(
-     '#type' => 'fieldset',
-     '#title' => t('Active Terms'),
-     '#collapsible' => TRUE,
-     '#collapsed' => FALSE,
+    '#type' => 'fieldset',
+    '#title' => t('Active Terms'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
   );
 
   $terms = cu_class_import_get_terms();
@@ -246,10 +246,10 @@ function class_import_admin_settings($form, &$form_state) {
   );
 
   $form['prime'] = array(
-     '#type' => 'fieldset',
-     '#title' => t('Primer Settings'),
-     '#collapsible' => TRUE,
-     '#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Primer Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
 
   $form['prime']['cu_class_import_api_use_prime'] = array(
@@ -267,10 +267,10 @@ function class_import_admin_settings($form, &$form_state) {
   );
 
   $form['adv'] = array(
-     '#type' => 'fieldset',
-     '#title' => t('Advanced'),
-     '#collapsible' => TRUE,
-     '#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
 
   $form['adv']['cu_class_import_as_needs_review'] = array(
@@ -460,100 +460,100 @@ function cu_course_import_form($form, &$form_state) {
     );
   } else {
     $subjects =  array(
-  'ENVD' => 'ENVD',
-  'ARTF' => 'ARTF',
-  'ARTH' => 'ARTH',
-  'ARTS' => 'ARTS',
-  'JPNS' => 'JPNS',
-  'KREN' => 'KREN',
-  'ANTH' => 'ANTH',
-  'APPM' => 'APPM',
-  'ASIA' => 'ASIA',
-  'ASTR' => 'ASTR',
-  'ATOC' => 'ATOC',
-  'CHEM' => 'CHEM',
-  'CLAS' => 'CLAS',
-  'LATN' => 'LATN',
-  'COML' => 'COML',
-  'EBIO' => 'EBIO',
-  'ECON' => 'ECON',
-  'ENGL' => 'ENGL',
-  'ENVS' => 'ENVS',
-  'ETHN' => 'ETHN',
-  'FILM' => 'FILM',
-  'FREN' => 'FREN',
-  'ITAL' => 'ITAL',
-  'GEOG' => 'GEOG',
-  'GEOL' => 'GEOL',
-  'GRMN' => 'GRMN',
-  'RUSS' => 'RUSS',
-  'SCAN' => 'SCAN',
-  'HIST' => 'HIST',
-  'HONR' => 'HONR',
-  'HUMN' => 'HUMN',
-  'IAFS' => 'IAFS',
-  'IPHY' => 'IPHY',
-  'JWST' => 'JWST',
-  'LING' => 'LING',
-  'MATH' => 'MATH',
-  'MCDB' => 'MCDB',
-  'MUSM' => 'MUSM',
-  'PHIL' => 'PHIL',
-  'PHYS' => 'PHYS',
-  'PSCI' => 'PSCI',
-  'NRSC' => 'NRSC',
-  'PSYC' => 'PSYC',
-  'WRTG' => 'WRTG',
-  'RLST' => 'RLST',
-  'SLHS' => 'SLHS',
-  'SOCY' => 'SOCY',
-  'SPAN' => 'SPAN',
-  'DNCE' => 'DNCE',
-  'THTR' => 'THTR',
-  'WMST' => 'WMST',
-  'ACCT' => 'ACCT',
-  'BADM' => 'BADM',
-  'BCOR' => 'BCOR',
-  'BPOL' => 'BPOL',
-  'CESR' => 'CESR',
-  'ESBM' => 'ESBM',
-  'FNCE' => 'FNCE',
-  'INBU' => 'INBU',
-  'MGMT' => 'MGMT',
-  'MKTG' => 'MKTG',
-  'REAL' => 'REAL',
-  'APRD' => 'APRD',
-  'COMM' => 'COMM',
-  'CMDP' => 'CMDP',
-  'JRNL' => 'JRNL',
-  'MDST' => 'MDST',
-  'LDSP' => 'LDSP',
-  'PRLC' => 'PRLC',
-  'EDUC' => 'EDUC',
-  'LEAD' => 'LEAD',
-  'ASEN' => 'ASEN',
-  'ATLS' => 'ATLS',
-  'CHEN' => 'CHEN',
-  'CSCI' => 'CSCI',
-  'AREN' => 'AREN',
-  'CVEN' => 'CVEN',
-  'ECEN' => 'ECEN',
-  'EMEN' => 'EMEN',
-  'COEN' => 'COEN',
-  'GEEN' => 'GEEN',
-  'HUEN' => 'HUEN',
-  'MCEN' => 'MCEN',
-  'TLEN' => 'TLEN',
-  'LAWS' => 'LAWS',
-  'MUEL' => 'MUEL',
-  'MUSC' => 'MUSC',
-  'MSBX' => 'MSBX',
-  'MSBC' => 'MSBC',
-  'TMUS' => 'TMUS',
-  'HIND' => 'HIND',
-  );
+      'ENVD' => 'ENVD',
+      'ARTF' => 'ARTF',
+      'ARTH' => 'ARTH',
+      'ARTS' => 'ARTS',
+      'JPNS' => 'JPNS',
+      'KREN' => 'KREN',
+      'ANTH' => 'ANTH',
+      'APPM' => 'APPM',
+      'ASIA' => 'ASIA',
+      'ASTR' => 'ASTR',
+      'ATOC' => 'ATOC',
+      'CHEM' => 'CHEM',
+      'CLAS' => 'CLAS',
+      'LATN' => 'LATN',
+      'COML' => 'COML',
+      'EBIO' => 'EBIO',
+      'ECON' => 'ECON',
+      'ENGL' => 'ENGL',
+      'ENVS' => 'ENVS',
+      'ETHN' => 'ETHN',
+      'FILM' => 'FILM',
+      'FREN' => 'FREN',
+      'ITAL' => 'ITAL',
+      'GEOG' => 'GEOG',
+      'GEOL' => 'GEOL',
+      'GRMN' => 'GRMN',
+      'RUSS' => 'RUSS',
+      'SCAN' => 'SCAN',
+      'HIST' => 'HIST',
+      'HONR' => 'HONR',
+      'HUMN' => 'HUMN',
+      'IAFS' => 'IAFS',
+      'IPHY' => 'IPHY',
+      'JWST' => 'JWST',
+      'LING' => 'LING',
+      'MATH' => 'MATH',
+      'MCDB' => 'MCDB',
+      'MUSM' => 'MUSM',
+      'PHIL' => 'PHIL',
+      'PHYS' => 'PHYS',
+      'PSCI' => 'PSCI',
+      'NRSC' => 'NRSC',
+      'PSYC' => 'PSYC',
+      'WRTG' => 'WRTG',
+      'RLST' => 'RLST',
+      'SLHS' => 'SLHS',
+      'SOCY' => 'SOCY',
+      'SPAN' => 'SPAN',
+      'DNCE' => 'DNCE',
+      'THTR' => 'THTR',
+      'WMST' => 'WMST',
+      'ACCT' => 'ACCT',
+      'BADM' => 'BADM',
+      'BCOR' => 'BCOR',
+      'BPOL' => 'BPOL',
+      'CESR' => 'CESR',
+      'ESBM' => 'ESBM',
+      'FNCE' => 'FNCE',
+      'INBU' => 'INBU',
+      'MGMT' => 'MGMT',
+      'MKTG' => 'MKTG',
+      'REAL' => 'REAL',
+      'APRD' => 'APRD',
+      'COMM' => 'COMM',
+      'CMDP' => 'CMDP',
+      'JRNL' => 'JRNL',
+      'MDST' => 'MDST',
+      'LDSP' => 'LDSP',
+      'PRLC' => 'PRLC',
+      'EDUC' => 'EDUC',
+      'LEAD' => 'LEAD',
+      'ASEN' => 'ASEN',
+      'ATLS' => 'ATLS',
+      'CHEN' => 'CHEN',
+      'CSCI' => 'CSCI',
+      'AREN' => 'AREN',
+      'CVEN' => 'CVEN',
+      'ECEN' => 'ECEN',
+      'EMEN' => 'EMEN',
+      'COEN' => 'COEN',
+      'GEEN' => 'GEEN',
+      'HUEN' => 'HUEN',
+      'MCEN' => 'MCEN',
+      'TLEN' => 'TLEN',
+      'LAWS' => 'LAWS',
+      'MUEL' => 'MUEL',
+      'MUSC' => 'MUSC',
+      'MSBX' => 'MSBX',
+      'MSBC' => 'MSBC',
+      'TMUS' => 'TMUS',
+      'HIND' => 'HIND',
+    );
 
-  asort($subjects);
+    asort($subjects);
 
     $form['subject'] = array(
       '#type' => 'select',
@@ -765,7 +765,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
   // Return the transfer as a string of the values if the curl succeeds.
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-    // when priming courses and classes, we aren't using a post and don't require a username and password
+  // when priming courses and classes, we aren't using a post and don't require a username and password
   if (!variable_get('cu_class_import_api_use_prime', 0)) {
 
     $request_auth_string = variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '');
@@ -783,7 +783,7 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
     $curl_request_body .= '<CLASS_TYPE>E</CLASS_TYPE><CU_CLASS_STAT>AX</CU_CLASS_STAT><CRSE_ID>' . $course_id .'</CRSE_ID><INSTITUTION>' . $institution .'</INSTITUTION><STRM>' . $term .'</STRM><SUBJECT>' . $subject . '</SUBJECT>';
 
     //if ($instuctor_mode) {
-      //$curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
+    //$curl_request_body .= '<INSTRUCTION_MODE>' . $instuctor_mode .'</INSTRUCTION_MODE>';
     //}
 
     if (variable_get('cu_class_import_exclude_ce', 1)) {
@@ -853,7 +853,7 @@ function cu_class_import_batch_process($course, &$context) {
   $subject = $course->subject;
   $course_id = $course->course_id;
 
-  cu_class_import($institution, $term, $subject, $course_id, 1);
+  cu_class_import($institution, $term, $subject, $course_id);
   // this is so we don't overwhelm the servers
   sleep(variable_get('cu_class_import_delay', '2'));
 }
@@ -893,7 +893,6 @@ function cu_class_import_course_batch_update() {
   // get all courses
   //$results = db_query('SELECT * FROM {cu_course}');
   $subjects = _cu_class_import_subject_options();
-
   foreach ($subjects as $key => $subject) {
     $batch['operations'][] = array('cu_class_import_course_batch_process', array($key));
   }
@@ -1106,6 +1105,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
           'course_id' => $course_id,
           'type' => 'class',
           'status' => $status,
+          'term_id' => $term,
+          'subject' => $subject,
+          'inst' => $institution,
         );
 
         $values['field_class_crse_id'][LANGUAGE_NONE][0]['value'] = $course_id;
@@ -1150,6 +1152,9 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_instruction_mode_des'][LANGUAGE_NONE][0]['value'] = (string) $class->INSTRUCTION_MODE_LOVDescr;
         $values['field_class_ssr_component'][LANGUAGE_NONE][0]['value'] = (string) $class->SSR_COMPONENT;
 
+        // Combine values to make UUID field.
+        $uuid = (string) $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+        $values['field_class_uuid'][LANGUAGE_NONE][0]['value'] = $uuid;
 
         //SSR_COMPONENT Description?
 
@@ -1163,6 +1168,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
         // check to see if class already exists and when it was last updated
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
+        //$last_updated = db_query('SELECT lu.field_class_last_updated_value FROM {field_data_field_class_last_updated} lu LEFT JOIN {field_data_field_class_uuid} id ON lu.entity_id = id.entity_id WHERE id.field_class_uuid_value = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 
@@ -1205,7 +1211,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
       // remove classes for this course that are no longer returned by API or Primer
       // $all_classes = db_query('SELECT class_id FROM {cu_class} WHERE course_id = :course_id', array(':course_id' => $course_id));
-      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_crse_id} WHERE field_class_crse_id_value = :course_id', array(':course_id' => $course_id));
+      $all_classes = db_query('SELECT entity_id as class_id FROM {field_data_field_class_uuid} WHERE field_class_uuid_value = :id', array(':id' => $uuid));
 
       foreach ($all_classes as $class) {
         if (!in_array($class->class_id, $classes)) {
@@ -1247,12 +1253,15 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
   $subject_last_update = db_query('SELECT c.updated FROM {cu_courses_subjects} c WHERE c.code = :code AND c.parent_org LIKE :org', array(':code' => $subject, ':org' => db_like($institution_codes[$institution]) . '%'))->fetchCol();
   $cache_duration = variable_get('cu_class_import_cache_duration', '3600');
 
+  // Commenting out caching logic since this was causing course to not be imported.
+  /*
   if (REQUEST_TIME - $subject_last_update[0] <= $cache_duration && $subject_last_update[0] != NULL) {
     if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
       dsm('Subject still cached: ' . $subject);
     }
     return;
   }
+  */
 
   foreach($instructor_modes as $instructor_mode) {
     if (variable_get('cu_class_import_adv_debug', 0) && module_exists('devel')) {
@@ -1279,29 +1288,30 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
           $catalog_number = (string) $course->CATALOG_NBR;
           $title = (string) $course->COURSE_TITLE_LONG;
 
-          // check to see if already exists...˝
-          // if doesn't exist, add it
-          $count = db_query('SELECT * FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->rowCount();
+          // Check to see if already exists. If doesn't exist, add it.
+          $course_uuid = $institution . '-' . $subject . '-' . $term . '-' . $course_id;
+          $count = db_query('SELECT * FROM {cu_course} WHERE id = :id', array(':id' => $course_uuid))->rowCount();
 
-          if($count) {
+          if ($count) {
             if (variable_get('cu_class_import_debug', 0)) {
               drupal_set_message('Skipped - Course Already Existed: ' . $title);
             }
-          } else {
-            // temp check to see if title exists before importing
-            if ($title)
-            $result = db_insert('cu_course')
-              ->fields(array(
-                'course_id' => $course_id,
-                'title' => $title,
-                'type' => 'course',
-                'changed' => REQUEST_TIME,
-                'subject' => $subject,
-                'term_id' => $term,
-                'inst' => $institution,
-                'catalog_nbr' => $catalog_number,
-              ))
-              ->execute();
+          }
+          // temp check to see if title exists before importing
+          elseif ($title) {
+              $result = db_insert('cu_course')
+                ->fields(array(
+                  'course_id' => $course_id,
+                  'title' => $title,
+                  'type' => 'course',
+                  'changed' => REQUEST_TIME,
+                  'subject' => $subject,
+                  'term_id' => $term,
+                  'inst' => $institution,
+                  'catalog_nbr' => $catalog_number,
+                  'id' => $course_uuid,
+                ))
+                ->execute();
 
             // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
             //$course = entity_create('cu_course', $values);
@@ -1330,9 +1340,9 @@ function cu_class_import_purge_classes() {
 
   $classes = entity_load('cu_class');
   foreach ($classes as $key => $class) {
-   // Delete attached field values... shouldn't be necessary?
-   // field_attach_delete('cu_class', $key);
-   entity_delete('cu_class', $key);
+    // Delete attached field values... shouldn't be necessary?
+    // field_attach_delete('cu_class', $key);
+    entity_delete('cu_class', $key);
   }
   drupal_set_message('All Classes have been deleted.');
   return '';
@@ -1467,7 +1477,7 @@ function _cu_class_import_get_organizations($institution = 'C-CUBLD', $level = 0
       ->execute();
 
     // Chunk modules into groups.
-      $operations[] = array('_cu_class_import_get_organizations', array($subject['code'], $level));
+    $operations[] = array('_cu_class_import_get_organizations', array($subject['code'], $level));
     //_cu_class_import_get_organizations($subject['code'], $level);
   }
 
@@ -1740,4 +1750,3 @@ function cu_class_import_get_subject_top($org) {
 
   return $patent_org->code;
 }
-
