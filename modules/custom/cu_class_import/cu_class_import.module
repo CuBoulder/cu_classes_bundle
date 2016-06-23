@@ -689,15 +689,6 @@ function cu_course_import_curl($institution, $term, $subject, $instructor_mode =
 function cu_class_import_form() {
   // @TODO: Save imports a something... ctool exportable?
 
-  $response = cu_class_import_curl('CUDEN', 2167, 'CHBH', 202007);
-
-  //strip ser namespace for now
-  $response  = str_replace("ser:", "", $response);
-  $xml = simplexml_load_string($response);
-  $json = json_encode($xml);
-  $array = json_decode($json,TRUE);
-  dpm($array);
-
   // query courses?
   $course_options = array();
   $results = db_query('SELECT subject, catalog_nbr, title, course_id FROM {cu_course}');
