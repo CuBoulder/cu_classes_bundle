@@ -1709,7 +1709,7 @@ function cu_class_import_org_name_fix($name) {
   // These are a series of string replacements based on what we've seen
   // ideal this will eventaully be fixed at the API level by UIS
 
-  // use spaces and capitalization when possible to aviod false positives
+  // Use spaces and capitalization when possible to aviod false positives.
   $name = str_replace("Arch ", "Architecture ", $name);
   $name = str_replace("Sci ", "Science ", $name);
   $name = str_replace("Ed ", "Education ", $name);
@@ -1719,12 +1719,15 @@ function cu_class_import_org_name_fix($name) {
   $name = str_replace("Prof ", "Professional ", $name);
   $name = str_replace("Pgm ", "Program in ", $name);
 
-  // can't use space because this is at the end of the value
+  // Can't use space because this is at the end of the value.
   $name = str_replace("Dvlpmnt", "Development", $name);
   $name = str_replace("Admin", "Administration", $name);
   $name = str_replace("Applied Sci", "Applied Science", $name);
   $name = str_replace("Media,Commncation,Info", "Media, Communication and Information", $name);
   $name = str_replace("Liberal Arts & Sci", "Liberal Arts & Science", $name);
+
+  // Convert administration back if it didn't need corrected.
+  $name = str_replace("Administrationistration", "Administration", $name);
 
   return $name;
 }

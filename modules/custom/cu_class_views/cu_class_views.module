@@ -336,8 +336,7 @@ function cu_class_views_options_subjects($parent = NULL) {
       $query->condition('orgs.parent_org', $parent, '=');
     }
     $results = $query->execute()->fetchAllAssoc('value');
-    dpm($results);
-    dpm($available);
+
     foreach ($results as $key => $result) {
       if (isset($available[$key])) {
         $options[$result->value] = $result->readable_value;
