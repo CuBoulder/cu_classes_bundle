@@ -689,15 +689,6 @@ function cu_course_import_curl($institution, $term, $subject, $instructor_mode =
 function cu_class_import_form() {
   // @TODO: Save imports a something... ctool exportable?
 
-  $response = cu_class_import_curl('CUDEN', 2167, 'CHBH', 202007);
-
-  //strip ser namespace for now
-  $response  = str_replace("ser:", "", $response);
-  $xml = simplexml_load_string($response);
-  $json = json_encode($xml);
-  $array = json_decode($json,TRUE);
-  dpm($array);
-
   // query courses?
   $course_options = array();
   $results = db_query('SELECT subject, catalog_nbr, title, course_id FROM {cu_course}');
@@ -1180,7 +1171,6 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
 
         // check to see if class already exists and when it was last updated
         $last_updated = db_query('SELECT field_class_last_updated_value FROM {field_data_field_class_last_updated} WHERE entity_id = :class_id', array(':class_id' => $class_id))->fetchField();
-        //$last_updated = db_query('SELECT lu.field_class_last_updated_value FROM {field_data_field_class_last_updated} lu LEFT JOIN {field_data_field_class_uuid} id ON lu.entity_id = id.entity_id WHERE id.field_class_uuid_value = :class_id', array(':class_id' => $uuid))->fetchField();
 
         if (!$ignore && $last_updated) {
 
