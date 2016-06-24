@@ -365,6 +365,12 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value']['value'] = '1';
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Class: CANCEL_DT (field_class_cancel_dt) */
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['id'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['table'] = 'field_data_field_class_cancel_dt';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['field'] = 'field_class_cancel_dt_value';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['operator'] = 'empty';
+  $handler->display->display_options['filters']['field_class_cancel_dt_value']['group'] = 1;
   /* Filter criterion: Class: STRM (field_class_strm) */
   $handler->display->display_options['filters']['field_class_strm_value']['id'] = 'field_class_strm_value';
   $handler->display->display_options['filters']['field_class_strm_value']['table'] = 'field_data_field_class_strm';
@@ -432,7 +438,6 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_subject_value']['id'] = 'field_class_subject_value';
   $handler->display->display_options['filters']['field_class_subject_value']['table'] = 'field_data_field_class_subject';
   $handler->display->display_options['filters']['field_class_subject_value']['field'] = 'field_class_subject_value';
-  $handler->display->display_options['filters']['field_class_subject_value']['operator'] = 'regular_expression';
   $handler->display->display_options['filters']['field_class_subject_value']['group'] = 2;
   $handler->display->display_options['filters']['field_class_subject_value']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_class_subject_value']['expose']['operator_id'] = 'field_class_subject_value_op';
@@ -442,11 +447,13 @@ function cu_class_views_views_default_views() {
   $handler->display->display_options['filters']['field_class_subject_value']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
-    6 => 0,
-    4 => 0,
+    14 => 0,
     7 => 0,
-    3 => 0,
+    11 => 0,
     5 => 0,
+    9 => 0,
+    20 => 0,
+    22 => 0,
   );
   /* Filter criterion: Class: INSTRUCTION_MODE_LOVDescr (field_class_instruction_mode_des) */
   $handler->display->display_options['filters']['field_class_instruction_mode_des_value']['id'] = 'field_class_instruction_mode_des_value';
@@ -469,16 +476,11 @@ function cu_class_views_views_default_views() {
     8 => 0,
     9 => 0,
   );
-  /* Filter criterion: Class: CANCEL_DT (field_class_cancel_dt) */
-  $handler->display->display_options['filters']['field_class_cancel_dt_value']['id'] = 'field_class_cancel_dt_value';
-  $handler->display->display_options['filters']['field_class_cancel_dt_value']['table'] = 'field_data_field_class_cancel_dt';
-  $handler->display->display_options['filters']['field_class_cancel_dt_value']['field'] = 'field_class_cancel_dt_value';
-  $handler->display->display_options['filters']['field_class_cancel_dt_value']['operator'] = 'empty';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'courses/search';
-  $export['cu_classes'] = $view;
 
+  $export['cu_classes'] = $view;
   return $export;
 }

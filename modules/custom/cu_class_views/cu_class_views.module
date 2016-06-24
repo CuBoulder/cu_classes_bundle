@@ -324,10 +324,11 @@ function cu_class_views_options_subjects($parent = NULL) {
   }
   else {
     $options = array();
+    // Get subjects tied to classes to compare against all subjects.
     $available = cu_class_views_available_subjects();
     $query = db_select('cu_courses_subjects', 'subjects');
-    $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status'));
-    $query->orderBy('subjects.value', 'ASC');
+    $query->fields('subjects', array('code', 'value', 'readable_value', 'parent_org', 'status', 'id'));
+    $query->orderBy('subjects.readable_value', 'ASC');
     $query->condition('subjects.status', 1, '=');
 
     if ($parent && ($parent != '')) {
@@ -335,17 +336,43 @@ function cu_class_views_options_subjects($parent = NULL) {
       $query->fields('orgs', array('code', 'parent_org'));
       $query->condition('orgs.parent_org', $parent, '=');
     }
-    $results = $query->execute()->fetchAllAssoc('code');
+    $results = $query->execute()->fetchAllAssoc('id');
+
+    // Check to see if subject has active classes. If so, add it to the select list.
     foreach ($results as $key => $result) {
-      if (isset($available[$key])) {
-        $options[$result->value] = $result->value;
+      if (isset($available[$result->code])) {
+        // Subjects can have the same codes but different readable values.
+        // Check to a readable value exists for a code, and if so, add it to the front of value.
+        $readable_value = explode('-', $options[$result->code]);
+        if (isset($options[$result->code]) && trim($readable_value[0]) !== $result->readable_value) {
+          // Some subject codes have three or more different readable values.
+          // So, the check above doesn't capture this.
+          // Check for added slash and then see if values are the same to avoid duplicates.
+          if (strpos($options[$result->code], '/')) {
+            $readable_value = explode('/', $options[$result->code]);
+            // Add another readable value if it doesn't exists.
+            if (trim($readable_value[0]) !== $result->readable_value) {
+              $options[$result->code] = $result->readable_value . '/' . $options[$result->code];
+            }
+          }
+          else {
+            // Prepend additional readable value to subject code.
+            $options[$result->code] = $result->readable_value . '/' . $options[$result->code];
+          }
+        }
+        else {
+          // Add the readable value and subject code together.
+          // This is different subject codes with the same readable value don't appear to be duplicates.
+          $options[$result->code] = $result->readable_value . ' - (' . $result->code . ')';
+        }
       }
     }
+
     // Save to cache
     cache_set('cu_class_search_subjects', $options, 'cache', time() + 60 * 60 * 24);
   }
-  // Return unique values to avoid duplicates in display.
-  return array_unique($options);
+
+  return $options;
 }
 
 function cu_class_views_available_subjects() {
@@ -353,11 +380,12 @@ function cu_class_views_available_subjects() {
   $query = db_select('field_data_field_class_subject', 'subjects');
   $query->fields('subjects', array('field_class_subject_value'));
   $query->distinct();
-  $query->groupBy('subjects.field_class_subject_value');
+  //$query->groupBy('subjects.field_class_subject_value');
   $results = $query->execute()->fetchAllAssoc('field_class_subject_value');
   foreach ($results as $key => $result) {
     $options[$key] = $key;
   }
+  asort($options);
   return $options;
 }
 
