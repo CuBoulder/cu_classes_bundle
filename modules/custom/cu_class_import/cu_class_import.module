@@ -689,6 +689,58 @@ function cu_course_import_curl($institution, $term, $subject, $instructor_mode =
 function cu_class_import_form() {
   // @TODO: Save imports a something... ctool exportable?
 
+  $response = cu_class_import_curl('CUDEN', 2167, 'STME', 205686);
+  //strip ser namespace for now
+  $response  = str_replace("ser:", "", $response);
+  $xml = simplexml_load_string($response);
+  $json = json_encode($xml);
+  $array = json_decode($json,TRUE);
+  dpm($array);
+
+/*
+  $response = cu_course_import_curl($institution, $term, $subject, $instructor_mode);
+  $xml = simplexml_load_string($response);
+  $json = json_encode($xml);
+  $array = json_decode($json,TRUE);
+*/
+  $subjects = array();
+  $all_subjects = array();
+  $subjects_display = array();
+  $j = 0;
+  $h = 0;
+  $curl = curl_init('https://' . variable_get('cu_class_import_api_username', '') . ':' . variable_get('cu_class_import_api_password', '') . '@' . variable_get('cu_subject_import_api_url', 'esbprd.prod.cu.edu/All_Cs_Lov_Subject?root=') . 'D-EDUC');
+
+  // Return the transfer as a string of the values if the curl succeeds.
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+  // Get the data! Also check and see if the curl worked and log the error if it did not.
+  if (!$response = curl_exec($curl)) {
+    drupal_set_message('cURL to the College LoV Service failed.', 'error');
+  }
+  curl_close($curl);
+  $p = xml_parser_create();
+  xml_parse_into_struct($p, $response, $subjects, $index);
+  xml_parser_free($p);
+
+  // Loop through subjects and create array structure.
+  foreach ($subjects as $subject) {
+    if ($subject['tag'] == 'CODE') {
+
+      // Get list of subjects for Views display.
+      $subjects_display[$j]['code'] = $subject['value'];
+      $subjects_display[$j]['organization'] = $key;
+      $j++;
+    }
+
+    if ($subject['tag'] == 'DESC') {
+      $subjects_display[$h]['description'] = $subject['value'];
+      $h++;
+    }
+  }
+
+  dpm($subjects_display);
+
+
   // query courses?
   $course_options = array();
   $results = db_query('SELECT subject, catalog_nbr, title, course_id FROM {cu_course}');
@@ -1716,8 +1768,9 @@ function cu_class_import_org_name_fix($name) {
   $name = str_replace("Media,Commncation,Info", "Media, Communication and Information", $name);
   $name = str_replace("Liberal Arts & Sci", "Liberal Arts & Science", $name);
 
-  // Convert administration back if it didn't need corrected.
+  // Convert words back to original if they didn't need corrected.
   $name = str_replace("Administrationistration", "Administration", $name);
+  $name = str_replace("Scienceence", "Science", $name);
 
   return $name;
 }
