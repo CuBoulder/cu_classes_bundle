@@ -22,7 +22,7 @@ function cu_course_display($course) {
   $breadcrumb[] = l('Courses', 'courses/search');
   drupal_set_breadcrumb($breadcrumb);
   // If there is a class number in the url, highlight that class
-  if ($_GET['class_id'] && is_numeric($_GET['class_id'])) {
+  if (isset($_GET['class_id']) && is_numeric($_GET['class_id'])) {
     $class_number = $_GET['class_id'];
 
     // Query course id table
