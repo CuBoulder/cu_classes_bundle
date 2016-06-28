@@ -84,7 +84,7 @@ Additional values include:
 </CLASS_SEARCH_REQUEST>
 ```
 
-*INSTITUTION* - Allowed values are CUBLD, CUSPG, or CUDEV
+*INSTITUTION* - Allowed values are CUBLD, CUSPG, or CUDEN.
 
 *STRM* - The name and numberic code of these are available from an LOV Service as they are available, but they use the following pattern:
 
