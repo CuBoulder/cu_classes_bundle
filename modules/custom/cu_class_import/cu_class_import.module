@@ -724,9 +724,19 @@ function cu_class_import_form_submit($form, &$form_state) {
   variable_set('class_import_current_course', $course_id);
 
   //@TODO: Term and Institution could come from form.
-  $course = db_query('SELECT subject, inst, term_id FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id))->fetchObject();
+  $courses = db_query('SELECT subject, inst, term_id FROM {cu_course} WHERE course_id = :course_id', array(':course_id' => $course_id));
 
-  cu_class_import($course->inst, $course->term_id, $course->subject, $course_id);
+  $term_options = variable_get('cu_class_import_active_terms');
+
+  foreach ($term_options as $term) {
+    if ($term) {
+      foreach ($courses as $course) {
+        if ($course->term_id = $term) {
+          cu_class_import($course->inst, $term, $course->subject, $course_id);
+        }
+      }
+    }
+  }
 
   cache_clear_all('cu_class_search_subjects_available', 'cache');
   return '';
