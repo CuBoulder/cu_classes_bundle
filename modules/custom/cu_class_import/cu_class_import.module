@@ -1375,6 +1375,7 @@ function cu_class_import_purge_courses() {
  * NOTE! This is expensive so only use whie debugging
  */
 function xml2array_parse($xml){
+  $return = NULL;
   foreach ($xml->children() as $parent => $child){
     $return["$parent"] = xml2array_parse($child)?xml2array_parse($child):"$child";
   }
