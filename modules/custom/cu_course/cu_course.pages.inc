@@ -113,7 +113,7 @@ function cu_course_display($course) {
   }
 
   // Check to see if the requested class cancelled.
-  if ($highlighted_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value']) {
+  if (isset($highlighted_class->field_class_cancel_dt[LANGUAGE_NONE][0]['value'])) {
     if ($class_multiple) {
       drupal_set_message("This section of this course has been cancelled. Other sections listed bellow.", 'error');
     }
