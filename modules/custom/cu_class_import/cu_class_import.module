@@ -1126,7 +1126,17 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
 
         $values['field_class_session_code'][LANGUAGE_NONE][0]['value'] = (string) $class->SESSION_CODE;
-        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = (string) $class->UNITS_ACAD_PROG;
+
+        // Classes can have variable credit hours. Need to check if credit hours differ and add them if so.
+        $credit_hours = (string) $class->UNITS_ACAD_PROG;
+        $min_hours = (string) $class->UNITS_MIN;
+        $max_hours = (string) $class->UNITS_MAX;
+
+        if ($min_hours != $max_hours) {
+          $credit_hours = $min_hours . ' - ' . $max_hours;
+        }
+
+        $values['field_class_units_acad_prog'][LANGUAGE_NONE][0]['value'] = $credit_hours;
 
         $values['field_class_ssr_instr_long'][LANGUAGE_NONE][0]['value'] = $instructor;
 

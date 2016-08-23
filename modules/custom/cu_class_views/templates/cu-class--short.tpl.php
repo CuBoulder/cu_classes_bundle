@@ -11,7 +11,7 @@
 
           <?php endif; ?>
           <?php if (!empty($content['field_class_units_acad_prog'])): ?>
-            <p><?php print number_format($content['field_class_units_acad_prog'][0]['#markup'], 1, '.', '') ?> Credit Hours</p>
+            <p><?php print $content['field_class_units_acad_prog'][0]['#markup']; ?> Credit Hours</p>
           <?php endif; ?>
           </h3>
         </div>
