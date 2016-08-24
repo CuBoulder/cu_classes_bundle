@@ -12,6 +12,14 @@ function cu_class_import_menu() {
     'access arguments' => array('administer modules'),
   );
 
+  $items['admin/reports/class-import'] = array(
+    'title' => 'Class Import Report',
+    'description' =>  'Show the number of subjects, courses, classes, queues and cache data.',
+    'page callback' => 'cu_class_import_report',
+    'access arguments' => array('import classes'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   // COURSES MUST BE IMPORTED FIRST
   $items['course/import'] = array(
     'title' => 'Course Import',
@@ -386,9 +394,10 @@ function class_import_admin_settings_form_submit(&$form, &$form_state) {
     $instructor_modes = array(NULL);
   }
   else {
-    $instructor_modes = $form_state['values']['cu_class_import_course_instructor_modes'];
+    $instructor_modes = explode(',', $form_state['values']['cu_class_import_course_instructor_modes']);
   }
-  variable_set('cu_class_import_course_instructor_modes', explode(',', $instructor_modes));
+
+  variable_set('cu_class_import_course_instructor_modes', $instructor_modes);
 }
 
 /**
@@ -1686,11 +1695,15 @@ function cu_class_import_queue_process($course) {
 function cu_class_import_cron() {
   if (variable_get('cu_class_import_on_cron', 1)) {
 
-    $subject_queue = DrupalQueue::get('cu_subject_update');
-    // get all institutions
-    $institutions = variable_get('cu_class_import_institutions', array());
-    foreach ($institutions as $institution) {
-      $subject_queue->createItem($institution);
+    $cron_last = variable_get('cron_last', NULL);
+    // Run once a day.
+    if (date('ymd', $cron_last) != date('ymd', time())) {
+      $subject_queue = DrupalQueue::get('cu_subject_update');
+      // get all institutions
+      $institutions = variable_get('cu_class_import_institutions', array());
+      foreach ($institutions as $institution) {
+        $subject_queue->createItem($institution);
+      }
     }
 
     $course_queue = DrupalQueue::get('cu_course_update');
@@ -1776,4 +1789,66 @@ function cu_class_import_get_subject_top($org) {
   } while ($patent_org->level > 1 || $count == 5);
 
   return $patent_org->code;
+}
+
+/**
+ * how the number of subjects, courses, classes, queues and cache data
+ */
+function cu_class_import_report() {
+  //CRON
+  $output = 'Cron last ran ' . format_date(variable_get('cron_last'), 'short');
+
+  variable_get('cron_last');
+  //QUEUE
+  $queue_count = db_query('SELECT COUNT(item_id) FROM {queue} WHERE name = :name OR name = :name2', array(':name' => 'cu_course_update', ':name2' => 'cu_class_update'))->fetchField();
+
+  $output .= '<br />There are currently ' . $queue_count . ' courses in the queue to be updated';
+
+  if ($queue_count) {
+
+    $query = db_select("queue", "q");
+    $query->fields("q", array("created"));
+    $query->orderBy("q.created", "DESC");
+    $query->range(0, 1);
+    $queue_first = $query->execute()->fetchField();
+
+    $output .= '<br />The most recent item was queued on ' . format_date($queue_first, 'short');
+
+    $query->orderBy("q.created", "ASC");
+    $queue_last = $query->execute()->fetchField();
+
+    $output .= '<br /> The oldest item was queued on ' . format_date($queue_last, 'short');
+
+  }
+  // SUBJECTS
+  $subject_count = db_query('SELECT COUNT(id) FROM {cu_courses_subjects}')->fetchField();
+  $output .= '<br />We looking for courses in ' . $subject_count . ' subjects';
+
+  //COURSES
+  $course_count = db_query('SELECT COUNT(course_id) FROM {cu_course}')->fetchField();
+  $output .= '<br />We looking checking ' . $course_count . ' courses for classes/sections';
+
+    //Display the first and last updated in each active term
+  if ($course_count) {
+
+    $query = db_select("cu_course", "c");
+    $query->fields("c", array("id", "subject", "catalog_nbr", "title", "changed"));
+    $query->orderBy("c.changed", "DESC");
+    $query->range(0, 1);
+    $course_first = $query->execute()->fetchObject();
+
+    $output .= "<br />The course most recently updated was $course_first->subject $course_first->catalog_nbr - $course_first->title on " . format_date($course_first->changed, 'short');
+
+    $query->orderBy("c.changed", "ASC");
+    $course_last = $query->execute()->fetchObject();
+
+    $output .= "<br />The oldest course is $course_last->subject $course_last->catalog_nbr - $course_last->title which was last updated on " . format_date($course_last->changed, 'short');
+
+  }
+
+  //CLASSES
+  $class_count = db_query('SELECT COUNT(class_id) FROM {cu_class}')->fetchField();
+  $output .= '<br />This site is aware of ' . $class_count . ' classes/sections';
+
+  return $output;
 }
