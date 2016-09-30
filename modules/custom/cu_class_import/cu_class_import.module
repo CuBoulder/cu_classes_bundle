@@ -807,7 +807,12 @@ function cu_class_import_curl($institution, $term, $subject, $course_id, $instuc
 
     if (variable_get('cu_class_import_exclude_ce', 1)) {
       // @TODO: Add code to handle other institutions
-      $curl_request_body .= '<CAMPUS>BLDR</CAMPUS>';
+      if ($institution == 'CUDEN') {
+        $curl_request_body .= '<CAMPUS>DC</CAMPUS>';
+      }
+      elseif ($institution == 'CUBLD') {
+        $curl_request_body .= '<CAMPUS>BLDR</CAMPUS>';
+      }
     }
 
     $curl_request_body .= '</CLASS_SEARCH_REQUEST>';

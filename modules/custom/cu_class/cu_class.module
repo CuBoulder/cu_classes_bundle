@@ -808,7 +808,9 @@ function cu_class_subject_values() {
     $subjects = $cache->data;
   }
   else {
-    $subjects = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_subjects_display' => TRUE));
+    function cu_class_import_get_colleges($institution, $options) {
+      $subjects = cu_class_import_get_colleges($institution = 'B-CUBLD', $options = array('return_subjects_display' => TRUE));
+    }
   }
 
   // Cache available class subjects
