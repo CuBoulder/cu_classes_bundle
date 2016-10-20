@@ -1625,11 +1625,12 @@ function cu_class_import_entity_view_alter(&$build, $type) {
 function cu_class_import_get_terms(){
   // @TODO: Look these up
   return array(
-    '2154' => t('2015 Summer'),
-    '2157' => t('2015 Fall'),
     '2161' => t('2016 Spring'),
     '2164' => t('2016 Summer'),
     '2167' => t('2016 Fall'),
+    '2171' => t('2017 Spring'),
+    '2174' => t('2017 Summer'),
+    '2177' => t('2017 Fall'),
   );
 }
 
