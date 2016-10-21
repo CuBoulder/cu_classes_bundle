@@ -1734,7 +1734,25 @@ function cu_class_import_cron() {
     $queue = DrupalQueue::get('cu_class_update');
     // get all courses limited by cron batch size.
     $class_batch_size = (int) variable_get('cu_class_import_class_cron_batch_size', 50);
-    $courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $class_batch_size);
+
+    // Get active institutions.
+    $institutions = variable_get('cu_class_import_institutions');
+    $institutions_split = array();
+    foreach ($institutions as $institution) {
+      if ($institution) {
+        $institutions_split[] = substr($institution, 2);
+      }
+    }
+
+    // Get active terms.
+    $active_terms = variable_get('cu_class_import_active_terms');
+
+    $courses = db_query_range('SELECT * FROM {cu_course} WHERE inst IN (:institutions) AND term_id IN (:terms) ORDER BY changed ASC',
+      0,
+      $class_batch_size,
+      array(':institutions' => $institutions_split, ':terms' => $active_terms));
+
+    //$courses = db_query_range('SELECT * FROM {cu_course} ORDER BY changed ASC', 0, $class_batch_size);
     foreach ($courses as $course) {
       $queue->createItem($course);
     }
