@@ -844,12 +844,26 @@ function cu_class_import_batch_update() {
     'error_message' => t('Update has encountered an error.')
   );
 
-  // get all courses.
-  $results = db_query('SELECT * FROM {cu_course} ORDER BY changed ASC');
+  // get all courses from active institutions and terms.
+
+  // Get active institutions.
+  $institutions = variable_get('cu_class_import_institutions');
+  $institutions_split = array();
+  foreach ($institutions as $institution) {
+    if ($institution) {
+      $institutions_split[] = substr($institution, 2);
+    }
+  }
+
+  // Get active terms.
+  $active_terms = variable_get('cu_class_import_active_terms');
+
+  $results = db_query('SELECT * FROM {cu_course} WHERE inst IN (:institutions) AND term_id IN (:terms) ORDER BY changed ASC',
+    array(':institutions' => $institutions_split, ':terms' => $active_terms));
 
   // @TODO: Check to see when the last time this course was updated?
   // Currently the changed timestamp is only updated when the course
-  // is created
+  // is created.
 
   foreach ($results as $result) {
     $batch['operations'][] = array('cu_class_import_batch_process', array($result));
@@ -1139,7 +1153,7 @@ function cu_class_import($institution, $term, $subject, $course_id, $instructor_
         $values['field_class_class_nbr'][LANGUAGE_NONE][0]['value'] = $class_id;
         $values['field_class_ssr_descrlong'][LANGUAGE_NONE][0]['value'] = $descrlong;
 
-        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_CAP;
+        $values['field_class_enrl_cap'][LANGUAGE_NONE][0]['value'] = (int) $class->ENRL_CAP;
         $values['field_class_enrl_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_TOT;
         $values['field_class_wait_tot'][LANGUAGE_NONE][0]['value'] = (string) $class->WAIT_TOT;
         $values['field_class_enrl_stat'][LANGUAGE_NONE][0]['value'] = (string) $class->ENRL_STAT;
@@ -1330,19 +1344,19 @@ function cu_course_import($institution, $term, $subject, $instructor_modes) {
           }
           // temp check to see if title exists before importing
           elseif ($title) {
-              $result = db_insert('cu_course')
-                ->fields(array(
-                  'course_id' => $course_id,
-                  'title' => $title,
-                  'type' => 'course',
-                  'changed' => REQUEST_TIME,
-                  'subject' => $subject,
-                  'term_id' => $term,
-                  'inst' => $institution,
-                  'catalog_nbr' => $catalog_number,
-                  'id' => $course_uuid,
-                ))
-                ->execute();
+            $result = db_insert('cu_course')
+              ->fields(array(
+                'course_id' => $course_id,
+                'title' => $title,
+                'type' => 'course',
+                'changed' => REQUEST_TIME,
+                'subject' => $subject,
+                'term_id' => $term,
+                'inst' => $institution,
+                'catalog_nbr' => $catalog_number,
+                'id' => $course_uuid,
+              ))
+              ->execute();
 
             // NOT SURE WHY THE ENTITY SAVE ISN'T WORKING... come back to this
             //$course = entity_create('cu_course', $values);
@@ -1829,7 +1843,7 @@ function cu_class_import_report() {
   $course_count = db_query('SELECT COUNT(course_id) FROM {cu_course}')->fetchField();
   $output .= '<br />We looking checking ' . $course_count . ' courses for classes/sections';
 
-    //Display the first and last updated in each active term
+  //Display the first and last updated in each active term
   if ($course_count) {
 
     $query = db_select("cu_course", "c");
