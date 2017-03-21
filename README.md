@@ -1,4 +1,4 @@
-To update this repository's codebase, please follow: [Releasing Custom Bundle Code](https://github.com/CuBoulder/express_documentation/blob/master/docs/custom_bundle_releases.md#how-to-succesfully-update-a-custom-bundles-code). 
+NOTE: To update this repository's codebase, please follow: [Releasing Custom Bundle Code](https://github.com/CuBoulder/express_documentation/blob/master/docs/custom_bundle_releases.md#how-to-succesfully-update-a-custom-bundles-code). 
 
 Before opening an issue, please review and sign this project's <a href="https://www.clahub.com/agreements/CuBoulder/cu_classes_bundle">Contributor License Agreement</a>.
 
