@@ -3,6 +3,8 @@ description = This bundle includes class, class import and other advanced class 
 core = 7.x
 package = CU-Classes
 version = 1.7
+project = cu_classes_bundle
+project status url = https://github.com/CuBoulder/cu_classes_bundle
 
 dependencies[] = cu_course
 dependencies[] = cu_class
