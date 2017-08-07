@@ -1,8 +1,14 @@
+
+# This bundle has been deprecated and will not have any future code updates.
+
+
+
+
 **NOTE: To update this repository's codebase, please follow: [Releasing Custom Bundle Code](https://github.com/CuBoulder/express_documentation/blob/master/docs/custom_bundle_releases.md#how-to-succesfully-update-a-custom-bundles-code).**
 
 Before opening an issue, please review and sign this project's <a href="https://www.clahub.com/agreements/CuBoulder/cu_classes_bundle">Contributor License Agreement</a>.
 
-# CU Classes Bundle
+## CU Classes Bundle
 
 The Classes Bundle incldes a few different components:
 - cu_classes_bundle - Defines the secure_permissions and dependencies so the functionality can be added with https://www.drupal.org/project/profile_module_manager
@@ -13,7 +19,7 @@ The Classes Bundle incldes a few different components:
 - cu_class_views_admin - Provides "admin/content/classes"
 - cu_class_import - Provides UI to import class data from UIS or Primer
 
-# Getting Started
+## Getting Started
 
 Configure importer at admin/config/system/class-import
 
@@ -31,11 +37,11 @@ Once courses are populated, you can import classes for every course Drupal is aw
 
 Both class and course provide batch imports at courses/import/batch and class/import/batch.  
 
-# Published vs. Unpublished
+## Published vs. Unpublished
 
 [This documentation is avialable on Web Central](https://www.colorado.edu/webcentral/tutorials/managing-classes).
 
-# Cancelled Classes
+## Cancelled Classes
 
 By default both active and cancelled classes are imported. Cancelled classes include a date in the CANCEL_DT value. Cancelled classes are still returned in the search for 7 days and available via direct links for 14 days. This is to prevent confusion when looking at a specific class one day and is no longer there the next.  There is also an option in both the course search (courses/search) and course management (admin/content/classes) interfaces to include or exclude cancelled classes.
 
